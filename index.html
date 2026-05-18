@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real Estate Plan Approval Workflow</title>
+    
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- Babel for compiling JSX in the browser -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans pb-12 min-h-screen">
+    
+    <!-- The app will be injected here -->
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        const initialWorkflowData = [
+          {
+            id: 1,
+            title: "LAND IDENTIFICATION & INITIAL FEASIBILITY",
+            tasks: [
+              "Verify land ownership", "Check zoning regulations", "Review access roads",
+              "Check utilities availability", "Environmental & flood risk review", "Market & financial feasibility"
+            ],
+            outcome: "Feasible Decision",
+            status: "completed"
+          },
+          {
+            id: 2,
+            title: "CONCEPT DEVELOPMENT / PRELIMINARY LAYOUT",
+            tasks: [
+              "Prepare initial layout", "Road network", "Drainage concept",
+              "Open spaces", "Utility allocation", "Reservation areas"
+            ],
+            outcome: "Draft Layout",
+            status: "in-progress"
+          },
+          {
+            id: 3,
+            title: "PRE-CONSULTATION WITH AUTHORITIES",
+            tasks: [
+              "Discuss concept with key authorities", "Identify potential issues",
+              "Understand requirements", "Reduce rejection risk"
+            ],
+            outcome: "Guidance & Early Feedback",
+            status: "pending"
+          },
+          {
+            id: 4,
+            title: "DETAILED TECHNICAL PREPARATION",
+            tasks: [
+              "Survey & legal documents", "Planning drawings", "Engineering drawings",
+              "Environmental reports", "Supporting technical reports"
+            ],
+            outcome: "Complete Technical Documents",
+            status: "pending"
+          },
+          {
+            id: 5,
+            title: "FORMAL SUBMISSION OF APPLICATION",
+            tasks: [
+              "Submit application forms", "Technical drawings",
+              "Reports & documents", "Pay required fees"
+            ],
+            outcome: "Application Registered",
+            status: "pending"
+          },
+          {
+            id: 6,
+            title: "INITIAL TECHNICAL SCREENING",
+            tasks: [
+              "Check completeness", "Verify documents",
+              "Check drawing standards", "Verify payments"
+            ],
+            outcome: "Accepted for Review or Returned for Corrections",
+            status: "pending"
+          },
+          {
+            id: 7,
+            title: "CIRCULATION TO RELEVANT DEPARTMENTS",
+            tasks: [
+              "Planning: Zoning, land use, layout",
+              "Engineering: Roads, drainage, infrastructure",
+              "Water Board: Water supply requirements",
+              "Electricity Board: Power supply requirements",
+              "Environmental: Environmental impact",
+              "Fire Department: Fire safety requirements",
+              "RDA / Other: Road access & external links"
+            ],
+            outcome: "Technical Comments from Each Department",
+            status: "pending"
+          },
+          {
+            id: 8,
+            title: "TECHNICAL COMMITTEE MEETING",
+            tasks: [
+              "All stakeholders review the project", "Discuss technical aspects",
+              "Evaluate compliance & impacts", "Suggest modifications / conditions"
+            ],
+            outcome: "Decision of the Committee",
+            status: "pending"
+          },
+          {
+            id: 9,
+            title: "ISSUING COMMENTS",
+            tasks: [
+              "Official comments issued", "List of required revisions", "Additional studies if needed"
+            ],
+            outcome: "Comments to Developer",
+            status: "pending"
+          },
+          {
+            id: 10,
+            title: "REVISION & RESUBMISSION CYCLE",
+            tasks: [
+              "Revise plans & reports", "Address all comments",
+              "Provide clarifications", "Resubmit for review"
+            ],
+            outcome: "All Comments Resolved",
+            status: "pending"
+          },
+          {
+            id: 11,
+            title: "FINAL TECHNICAL CLEARANCE",
+            tasks: [
+              "All departments issue clearance", "Engineers sign off", "Technical committee recommendations finalized"
+            ],
+            outcome: "Technical Clearance Issued",
+            status: "pending"
+          },
+          {
+            id: 12,
+            title: "FINAL APPROVAL BY AUTHORITY",
+            tasks: [
+              "Review final recommendation", "Grant official approval", "Approval may include specific conditions"
+            ],
+            outcome: "Official Approval Granted",
+            status: "pending"
+          },
+          {
+            id: 13,
+            title: "PAYMENT OF APPROVAL CHARGES",
+            tasks: [
+              "Pay approval fees", "Development charges",
+              "Infrastructure levies", "Security deposits (if any)"
+            ],
+            outcome: "Payments Completed",
+            status: "pending"
+          },
+          {
+            id: 14,
+            title: "PERMIT ISSUANCE",
+            tasks: [
+              "Development / Building permit", "Subdivision permit", "Other required permits"
+            ],
+            outcome: "Permit Issued - Project Can Legally Commence",
+            status: "pending"
+          },
+          {
+            id: 15,
+            title: "CONSTRUCTION & COMPLIANCE MONITORING",
+            tasks: [
+              "Commence construction as per approved plans", "Inspections during construction",
+              "Monitor compliance with conditions", "Ensure quality & safety standards"
+            ],
+            outcome: "Work in Progress with Compliance",
+            status: "pending"
+          },
+          {
+            id: 16,
+            title: "COMPLETION CERTIFICATION",
+            tasks: [
+              "Inspect completed works", "Verify compliance with approved plans", "Issue Certificate of Conformity / Occupancy"
+            ],
+            outcome: "Project Completed & Certified",
+            status: "pending"
+          }
+        ];
+
+        const initialExtraInfo = {
+          delays: [
+            "Incomplete submissions", "Land ownership disputes", "Poor drainage design", 
+            "Missing utility approvals", "Road access issues", "Non-compliance with zoning", 
+            "Environmental concerns", "Slow inter-agency coordination"
+          ],
+          bestPractices: [
+            "Conduct pre-consultations with authorities", "Respond quickly to comments",
+            "Prepare accurate & complete documents", "Maintain comment tracking sheet",
+            "Use experienced consultants", "Coordinate all stakeholders effectively"
+          ]
+        };
+
+        function App() {
+          const [steps, setSteps] = useState(initialWorkflowData);
+          const [extraInfo, setExtraInfo] = useState(initialExtraInfo);
+          const [isEditing, setIsEditing] = useState(false);
+          const [progress, setProgress] = useState(0);
+
+          useEffect(() => {
+            const completed = steps.filter(s => s.status === 'completed').length;
+            setProgress(Math.round((completed / steps.length) * 100));
+          }, [steps]);
+
+          const toggleStatus = (id) => {
+            if (isEditing) return;
+            setSteps(steps.map(step => {
+              if (step.id === id) {
+                const nextStatus = step.status === 'pending' ? 'in-progress' : step.status === 'in-progress' ? 'completed' : 'pending';
+                return { ...step, status: nextStatus };
+              }
+              return step;
+            }));
+          };
+
+          const handleStepChange = (id, field, value) => {
+            setSteps(steps.map(step => step.id === id ? { ...step, [field]: value } : step));
+          };
+
+          const handleTaskChange = (stepId, taskIndex, value) => {
+            setSteps(steps.map(step => {
+              if (step.id === stepId) {
+                const newTasks = [...step.tasks];
+                newTasks[taskIndex] = value;
+                return { ...step, tasks: newTasks };
+              }
+              return step;
+            }));
+          };
+
+          const addTask = (stepId) => {
+            setSteps(steps.map(step => {
+              if (step.id === stepId) {
+                return { ...step, tasks: [...step.tasks, "New task"] };
+              }
+              return step;
+            }));
+          };
+
+          const removeTask = (stepId, taskIndex) => {
+            setSteps(steps.map(step => {
+              if (step.id === stepId) {
+                const newTasks = step.tasks.filter((_, i) => i !== taskIndex);
+                return { ...step, tasks: newTasks };
+              }
+              return step;
+            }));
+          };
+
+          const handleExtraInfoChange = (section, index, value) => {
+            setExtraInfo(prev => {
+              const newList = [...prev[section]];
+              newList[index] = value;
+              return { ...prev, [section]: newList };
+            });
+          };
+
+          const addExtraInfo = (section) => {
+            setExtraInfo(prev => ({
+              ...prev,
+              [section]: [...prev[section], "New item"]
+            }));
+          };
+
+          const removeExtraInfo = (section, index) => {
+            setExtraInfo(prev => ({
+              ...prev,
+              [section]: prev[section].filter((_, i) => i !== index)
+            }));
+          };
+
+          const getStatusIcon = (status) => {
+            switch (status) {
+              case 'completed': return <i className="fas fa-check-circle text-xl text-emerald-500"></i>;
+              case 'in-progress': return <i className="fas fa-play-circle text-xl text-blue-500"></i>;
+              default: return <i className="far fa-circle text-xl text-slate-300"></i>;
+            }
+          };
+
+          const getStatusColor = (status) => {
+            switch (status) {
+              case 'completed': return 'bg-emerald-50 border-emerald-200';
+              case 'in-progress': return 'bg-blue-50 border-blue-200';
+              default: return 'bg-white border-slate-200';
+            }
+          };
+
+          return (
+            <div>
+              {/* Header */}
+              <header className="bg-white border-b border-slate-200 sticky top-0 z-10 shadow-sm">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+                  <div>
+                    <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Real Estate Development</h1>
+                    <p className="text-sm text-slate-500">Full Plan Approval Workflow Dashboard</p>
+                  </div>
+                  
+                  <div className="flex items-center gap-6">
+                    <div className="flex flex-col items-end">
+                      <span className="text-sm font-medium text-slate-600 mb-1">Overall Progress: {progress}%</span>
+                      <div className="w-48 h-2.5 bg-slate-100 rounded-full overflow-hidden border border-slate-200">
+                        <div 
+                          className="h-full bg-emerald-500 transition-all duration-500 ease-out"
+                          style={{ width: `${progress}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                    
+                    <button
+                      onClick={() => setIsEditing(!isEditing)}
+                      className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
+                        isEditing 
+                          ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-md' 
+                          : 'bg-white text-slate-700 border border-slate-300 hover:bg-slate-50'
+                      }`}
+                    >
+                      {isEditing ? <><i className="fas fa-save"></i> Save Layout</> : <><i className="fas fa-edit"></i> Edit Mode</>}
+                    </button>
+                  </div>
+                </div>
+              </header>
+
+              {/* Main Content */}
+              <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  {steps.map((step) => (
+                    <div 
+                      key={step.id} 
+                      className={`rounded-xl border shadow-sm flex flex-col overflow-hidden transition-all duration-300 hover:shadow-md ${getStatusColor(step.status)}`}
+                    >
+                      {/* Card Header */}
+                      <div className="p-4 border-b border-slate-200/60 bg-white/50 flex justify-between items-start gap-3">
+                        <div className="flex items-start gap-3 flex-1">
+                          <div className="w-8 h-8 rounded-full bg-slate-800 text-white flex items-center justify-center font-bold text-sm shrink-0">
+                            {step.id}
+                          </div>
+                          {isEditing ? (
+                            <textarea 
+                              className="w-full text-sm font-bold text-slate-800 bg-white border border-blue-300 rounded p-1 focus:ring-2 focus:ring-blue-500 outline-none resize-none"
+                              value={step.title}
+                              onChange={(e) => handleStepChange(step.id, 'title', e.target.value)}
+                              rows="2"
+                            />
+                          ) : (
+                            <h3 className="font-bold text-slate-800 leading-tight text-sm pt-1">{step.title}</h3>
+                          )}
+                        </div>
+                        {!isEditing && (
+                          <button 
+                            onClick={() => toggleStatus(step.id)}
+                            className="shrink-0 p-1 rounded-full hover:bg-slate-200/50 transition-colors cursor-pointer"
+                            title="Click to toggle status"
+                          >
+                            {getStatusIcon(step.status)}
+                          </button>
+                        )}
+                      </div>
+
+                      {/* Tasks List */}
+                      <div className="p-4 flex-1">
+                        <ul className="space-y-2">
+                          {step.tasks.map((task, idx) => (
+                            <li key={idx} className="flex items-start gap-2 text-sm text-slate-600">
+                              <span className="text-slate-400 mt-1 shrink-0">•</span>
+                              {isEditing ? (
+                                <div className="flex-1 flex items-center gap-1">
+                                  <input 
+                                    type="text"
+                                    className="flex-1 bg-white border border-slate-300 rounded px-2 py-1 text-xs focus:ring-1 focus:ring-blue-500 outline-none"
+                                    value={task}
+                                    onChange={(e) => handleTaskChange(step.id, idx, e.target.value)}
+                                  />
+                                  <button onClick={() => removeTask(step.id, idx)} className="text-red-400 hover:text-red-600 p-1">
+                                    <i className="fas fa-trash text-xs"></i>
+                                  </button>
+                                </div>
+                              ) : (
+                                <span className="leading-snug">{task}</span>
+                              )}
+                            </li>
+                          ))}
+                        </ul>
+                        {isEditing && (
+                          <button 
+                            onClick={() => addTask(step.id)}
+                            className="mt-3 flex items-center gap-1 text-xs font-medium text-blue-600 hover:text-blue-800"
+                          >
+                            <i className="fas fa-plus text-xs"></i> Add Task
+                          </button>
+                        )}
+                      </div>
+
+                      {/* Outcome Footer */}
+                      <div className={`p-3 text-sm font-medium border-t flex flex-col gap-1 ${
+                        step.status === 'completed' ? 'bg-emerald-100/50 border-emerald-200' : 
+                        step.status === 'in-progress' ? 'bg-blue-100/50 border-blue-200' : 
+                        'bg-slate-100/50 border-slate-200'
+                      }`}>
+                        <span className="text-xs text-slate-500 uppercase tracking-wider font-bold">Outcome</span>
+                        {isEditing ? (
+                          <input 
+                            type="text"
+                            className="w-full bg-white border border-blue-300 rounded px-2 py-1 text-sm focus:ring-1 focus:ring-blue-500 outline-none"
+                            value={step.outcome}
+                            onChange={(e) => handleStepChange(step.id, 'outcome', e.target.value)}
+                          />
+                        ) : (
+                          <span className={
+                            step.status === 'completed' ? 'text-emerald-700' : 
+                            step.status === 'in-progress' ? 'text-blue-700' : 
+                            'text-slate-700'
+                          }>{step.outcome}</span>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Extra Information Section */}
+                <div className="mt-12 grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {/* Delays Card */}
+                  <div className="bg-white rounded-xl shadow-sm border border-orange-200 overflow-hidden">
+                    <div className="bg-orange-50 border-b border-orange-100 p-4 flex items-center gap-2">
+                      <i className="fas fa-exclamation-triangle text-xl text-orange-500"></i>
+                      <h3 className="font-bold text-orange-900">Common Reasons For Delays</h3>
+                    </div>
+                    <div className="p-5">
+                      <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        {extraInfo.delays.map((item, idx) => (
+                          <li key={idx} className="flex items-start gap-2 text-sm text-slate-700">
+                            <span className="text-orange-400 mt-1 shrink-0">•</span>
+                            {isEditing ? (
+                              <div className="flex-1 flex items-center gap-1">
+                                <input 
+                                  type="text"
+                                  className="flex-1 bg-white border border-slate-300 rounded px-2 py-1 text-xs outline-none"
+                                  value={item}
+                                  onChange={(e) => handleExtraInfoChange('delays', idx, e.target.value)}
+                                />
+                                <button onClick={() => removeExtraInfo('delays', idx)} className="text-red-400 hover:text-red-600">
+                                  <i className="fas fa-trash text-xs"></i>
+                                </button>
+                              </div>
+                            ) : (
+                              <span>{item}</span>
+                            )}
+                          </li>
+                        ))}
+                      </ul>
+                      {isEditing && (
+                        <button onClick={() => addExtraInfo('delays')} className="mt-4 flex items-center gap-1 text-xs font-medium text-orange-600 hover:text-orange-800">
+                          <i className="fas fa-plus text-xs"></i> Add Delay Reason
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Best Practices Card */}
+                  <div className="bg-white rounded-xl shadow-sm border border-emerald-200 overflow-hidden">
+                    <div className="bg-emerald-50 border-b border-emerald-100 p-4 flex items-center gap-2">
+                      <i className="fas fa-check-square text-xl text-emerald-600"></i>
+                      <h3 className="font-bold text-emerald-900">Best Practices For Faster Approval</h3>
+                    </div>
+                    <div className="p-5">
+                      <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        {extraInfo.bestPractices.map((item, idx) => (
+                          <li key={idx} className="flex items-start gap-2 text-sm text-slate-700">
+                            <i className="fas fa-check-circle text-emerald-400 mt-1 shrink-0"></i>
+                            {isEditing ? (
+                              <div className="flex-1 flex items-center gap-1">
+                                <input 
+                                  type="text"
+                                  className="flex-1 bg-white border border-slate-300 rounded px-2 py-1 text-xs outline-none"
+                                  value={item}
+                                  onChange={(e) => handleExtraInfoChange('bestPractices', idx, e.target.value)}
+                                />
+                                <button onClick={() => removeExtraInfo('bestPractices', idx)} className="text-red-400 hover:text-red-600">
+                                  <i className="fas fa-trash text-xs"></i>
+                                </button>
+                              </div>
+                            ) : (
+                              <span>{item}</span>
+                            )}
+                          </li>
+                        ))}
+                      </ul>
+                      {isEditing && (
+                        <button onClick={() => addExtraInfo('bestPractices')} className="mt-4 flex items-center gap-1 text-xs font-medium text-emerald-600 hover:text-emerald-800">
+                          <i className="fas fa-plus text-xs"></i> Add Best Practice
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </main>
+            </div>
+          );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
