@@ -1,1848 +1,389 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Planning Approval Workflow Dashboard</title>
-
-    <!-- Firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js">
-    </script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js">
-    </script>
-
-    <!-- SortableJS for Drag & Drop -->
-    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js">
-    </script>
-
-    <!-- Font Awesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-
-    <style>
-        :root {
-            --bg: #f0f4f8;
-            --surface: #ffffff;
-            --surface-alt: #f8fafb;
-            --text: #1a202c;
-            --text-secondary: #5a6577;
-            --border: #e2e8f0;
-            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
-            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.04);
-            --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.12), 0 4px 8px rgba(0, 0, 0, 0.06);
-            --radius: 14px;
-            --radius-sm: 8px;
-            --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            --accent: #4f6ef7;
-            --accent-hover: #3b54db;
-            --danger: #e53e3e;
-            --danger-hover: #c53030;
-            --success: #38a169;
-            --warning: #d69e2e;
-            --progress-bg: #e2e8f0;
-            --progress-fill: linear-gradient(90deg, #4f6ef7, #6c8cff, #38a169);
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', 'Inter', system-ui, -apple-system, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            line-height: 1.6;
-            min-height: 100vh;
-            -webkit-font-smoothing: antialiased;
-        }
-
-        /* ── HEADER ─────────────────────── */
-        .dashboard-header {
-            background: var(--surface);
-            border-bottom: 1px solid var(--border);
-            padding: 16px 28px;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            box-shadow: var(--shadow-sm);
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            gap: 16px;
-            justify-content: space-between;
-        }
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            flex-wrap: wrap;
-        }
-        .header-logo {
-            width: 44px;
-            height: 44px;
-            border-radius: 12px;
-            background: var(--accent);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #fff;
-            font-size: 20px;
-            flex-shrink: 0;
-        }
-        .project-name-display {
-            font-size: 1.25rem;
-            font-weight: 700;
-            color: var(--text);
-            letter-spacing: -0.3px;
-            cursor: default;
-        }
-        .project-name-input {
-            font-size: 1.25rem;
-            font-weight: 700;
-            color: var(--text);
-            letter-spacing: -0.3px;
-            border: 2px dashed var(--accent);
-            border-radius: var(--radius-sm);
-            padding: 4px 10px;
-            background: #fefefe;
-            outline: none;
-            width: 360px;
-            max-width: 100%;
-            transition: var(--transition);
-        }
-        .project-name-input:focus {
-            border-style: solid;
-            box-shadow: 0 0 0 3px rgba(79, 110, 247, 0.12);
-        }
-
-        /* Progress Section */
-        .progress-section {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            flex-shrink: 0;
-        }
-        .progress-label {
-            font-size: 0.82rem;
-            font-weight: 600;
-            color: var(--text-secondary);
-            white-space: nowrap;
-            text-transform: uppercase;
-            letter-spacing: 0.4px;
-        }
-        .progress-bar-wrap {
-            width: 180px;
-            height: 10px;
-            background: var(--progress-bg);
-            border-radius: 20px;
-            overflow: hidden;
-            position: relative;
-        }
-        .progress-bar-fill {
-            height: 100%;
-            background: var(--progress-fill);
-            border-radius: 20px;
-            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-        }
-        .progress-bar-fill::after {
-            content: '';
-            position: absolute;
-            right: 0;
-            top: 0;
-            width: 20px;
-            height: 100%;
-            background: rgba(255, 255, 255, 0.35);
-            border-radius: 20px;
-        }
-        .progress-percent {
-            font-weight: 700;
-            font-size: 0.9rem;
-            color: var(--accent);
-            min-width: 38px;
-            text-align: center;
-        }
-        .progress-slider {
-            width: 100px;
-            cursor: pointer;
-            accent-color: var(--accent);
-        }
-
-        /* Buttons */
-        .btn {
-            padding: 9px 18px;
-            border-radius: 25px;
-            border: none;
-            font-weight: 600;
-            font-size: 0.85rem;
-            cursor: pointer;
-            transition: var(--transition);
-            display: inline-flex;
-            align-items: center;
-            gap: 7px;
-            letter-spacing: 0.2px;
-            white-space: nowrap;
-            font-family: inherit;
-        }
-        .btn-admin {
-            background: var(--accent);
-            color: #fff;
-            box-shadow: 0 2px 8px rgba(79, 110, 247, 0.3);
-        }
-        .btn-admin:hover {
-            background: var(--accent-hover);
-            box-shadow: 0 4px 14px rgba(79, 110, 247, 0.4);
-            transform: translateY(-1px);
-        }
-        .btn-admin.active {
-            background: #1a202c;
-            box-shadow: 0 2px 8px rgba(26, 32, 44, 0.35);
-        }
-        .btn-outline {
-            background: transparent;
-            border: 2px solid var(--border);
-            color: var(--text);
-        }
-        .btn-outline:hover {
-            border-color: var(--accent);
-            color: var(--accent);
-            background: #f7f8ff;
-        }
-        .btn-sm {
-            padding: 5px 12px;
-            font-size: 0.75rem;
-            border-radius: 18px;
-        }
-        .btn-danger-sm {
-            background: transparent;
-            border: 1.5px solid #fed7d7;
-            color: var(--danger);
-            padding: 4px 10px;
-            font-size: 0.7rem;
-            border-radius: 14px;
-            cursor: pointer;
-            transition: var(--transition);
-            font-weight: 600;
-            font-family: inherit;
-        }
-        .btn-danger-sm:hover {
-            background: #fff5f5;
-            border-color: var(--danger);
-        }
-        .btn-icon {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            border: 1.5px solid var(--border);
-            background: var(--surface);
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 13px;
-            transition: var(--transition);
-            color: var(--text-secondary);
-            font-family: inherit;
-        }
-        .btn-icon:hover {
-            background: #f7f8ff;
-            border-color: var(--accent);
-            color: var(--accent);
-        }
-        .btn-add-panel {
-            background: #fff;
-            border: 2px dashed #cbd5e0;
-            color: #718096;
-            padding: 10px 20px;
-            border-radius: 25px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 0.85rem;
-            transition: var(--transition);
-            font-family: inherit;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .btn-add-panel:hover {
-            border-color: var(--accent);
-            color: var(--accent);
-            background: #fafbff;
-        }
-
-        /* ── MAIN GRID ─────────────────── */
-        .main-container {
-            max-width: 1500px;
-            margin: 0 auto;
-            padding: 24px 20px 60px;
-        }
-        .panels-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 18px;
-            align-items: start;
-        }
-        @media (max-width: 1400px) {
-            .panels-grid {
-                grid-template-columns: repeat(3, 1fr);
-            }
-        }
-        @media (max-width: 1050px) {
-            .panels-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-        @media (max-width: 650px) {
-            .panels-grid {
-                grid-template-columns: 1fr;
-            }
-            .dashboard-header {
-                padding: 12px 14px;
-                gap: 10px;
-            }
-            .project-name-input {
-                width: 200px;
-            }
-            .progress-bar-wrap {
-                width: 100px;
-            }
-        }
-
-        /* ── PANEL CARD ────────────────── */
-        .panel-card {
-            background: var(--surface);
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
-            border: 1.5px solid var(--border);
-            transition: var(--transition);
-            position: relative;
-            overflow: hidden;
-            cursor: default;
-            display: flex;
-            flex-direction: column;
-        }
-        .panel-card:hover {
-            box-shadow: var(--shadow-lg);
-            transform: translateY(-2px);
-        }
-        .panel-card.drag-over {
-            border-color: var(--accent) !important;
-            box-shadow: 0 0 0 4px rgba(79, 110, 247, 0.15) !important;
-        }
-        .panel-card.sortable-ghost {
-            opacity: 0.4;
-            background: #e8ecf8;
-            border-style: dashed;
-        }
-        .panel-card.sortable-chosen {
-            box-shadow: var(--shadow-lg);
-            transform: scale(1.02);
-            z-index: 50;
-        }
-        .panel-color-strip {
-            height: 6px;
-            width: 100%;
-            flex-shrink: 0;
-        }
-        .panel-card-header {
-            padding: 14px 16px 10px;
-            display: flex;
-            align-items: flex-start;
-            gap: 10px;
-        }
-        .panel-number {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            font-size: 0.8rem;
-            color: #fff;
-            flex-shrink: 0;
-            margin-top: 1px;
-        }
-        .panel-title-wrap {
-            flex: 1;
-            min-width: 0;
-        }
-        .panel-title-display {
-            font-weight: 700;
-            font-size: 0.9rem;
-            color: var(--text);
-            line-height: 1.35;
-            word-break: break-word;
-        }
-        .panel-title-input {
-            font-weight: 700;
-            font-size: 0.9rem;
-            color: var(--text);
-            border: 2px dashed var(--accent);
-            border-radius: 6px;
-            padding: 3px 8px;
-            background: #fefefe;
-            outline: none;
-            width: 100%;
-            font-family: inherit;
-            line-height: 1.35;
-            transition: var(--transition);
-        }
-        .panel-title-input:focus {
-            border-style: solid;
-            box-shadow: 0 0 0 3px rgba(79, 110, 247, 0.1);
-        }
-        .panel-drag-handle {
-            cursor: grab;
-            color: #cbd5e0;
-            font-size: 1rem;
-            padding: 4px 2px;
-            transition: var(--transition);
-            flex-shrink: 0;
-            user-select: none;
-        }
-        .panel-drag-handle:active {
-            cursor: grabbing;
-            color: var(--accent);
-        }
-        .panel-card-body {
-            padding: 4px 16px 14px;
-            flex: 1;
-        }
-        .subtopic-list {
-            list-style: none;
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-        .subtopic-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-            padding: 5px 8px;
-            border-radius: 6px;
-            transition: var(--transition);
-            background: var(--surface-alt);
-            border: 1px solid transparent;
-        }
-        .subtopic-item:hover {
-            background: #f7faff;
-            border-color: #e8ecf8;
-        }
-        .subtopic-checkbox {
-            width: 16px;
-            height: 16px;
-            accent-color: var(--accent);
-            cursor: pointer;
-            flex-shrink: 0;
-        }
-        .subtopic-text {
-            flex: 1;
-            word-break: break-word;
-        }
-        .subtopic-input {
-            flex: 1;
-            font-size: 0.8rem;
-            border: 1.5px dashed #cbd5e0;
-            border-radius: 5px;
-            padding: 3px 7px;
-            background: #fff;
-            outline: none;
-            font-family: inherit;
-            transition: var(--transition);
-        }
-        .subtopic-input:focus {
-            border-style: solid;
-            border-color: var(--accent);
-            box-shadow: 0 0 0 2px rgba(79, 110, 247, 0.08);
-        }
-        .subtopic-delete-btn {
-            width: 22px;
-            height: 22px;
-            border-radius: 50%;
-            border: none;
-            background: transparent;
-            color: #cbd5e0;
-            cursor: pointer;
-            font-size: 11px;
-            transition: var(--transition);
-            flex-shrink: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .subtopic-delete-btn:hover {
-            color: var(--danger);
-            background: #fff5f5;
-        }
-        .add-subtopic-btn {
-            margin-top: 6px;
-            font-size: 0.72rem;
-            color: var(--accent);
-            cursor: pointer;
-            background: none;
-            border: 1.5px dashed #d0d7f0;
-            border-radius: 16px;
-            padding: 5px 12px;
-            font-weight: 600;
-            transition: var(--transition);
-            font-family: inherit;
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-        }
-        .add-subtopic-btn:hover {
-            background: #f7f8ff;
-            border-color: var(--accent);
-        }
-        .panel-card-footer {
-            padding: 8px 16px 12px;
-            display: flex;
-            gap: 6px;
-            flex-wrap: wrap;
-            border-top: 1px solid #f7fafc;
-        }
-        .insert-btn {
-            font-size: 0.68rem;
-            background: transparent;
-            border: 1px solid #e8ecf8;
-            color: #718096;
-            cursor: pointer;
-            padding: 4px 10px;
-            border-radius: 12px;
-            transition: var(--transition);
-            font-weight: 500;
-            font-family: inherit;
-            display: inline-flex;
-            align-items: center;
-            gap: 3px;
-        }
-        .insert-btn:hover {
-            border-color: var(--accent);
-            color: var(--accent);
-            background: #fafbff;
-        }
-        .delete-panel-btn {
-            font-size: 0.68rem;
-            background: transparent;
-            border: 1px solid #fed7d7;
-            color: #c53030;
-            cursor: pointer;
-            padding: 4px 10px;
-            border-radius: 12px;
-            transition: var(--transition);
-            font-weight: 500;
-            font-family: inherit;
-            display: inline-flex;
-            align-items: center;
-            gap: 3px;
-            margin-left: auto;
-        }
-        .delete-panel-btn:hover {
-            background: #fff5f5;
-            border-color: #e53e3e;
-        }
-
-        /* Admin-only visibility */
-        .admin-only {
-            display: none;
-        }
-        body.is-admin .admin-only {
-            display: flex;
-        }
-        body.is-admin .admin-only-inline {
-            display: inline-flex;
-        }
-        body.is-admin .admin-only-block {
-            display: block;
-        }
-        .admin-only-inline {
-            display: none;
-        }
-        .admin-only-block {
-            display: none;
-        }
-        body.is-admin .panel-drag-handle {
-            display: block;
-        }
-        .panel-drag-handle {
-            display: none;
-        }
-        body.is-admin .panel-card {
-            cursor: default;
-        }
-        body.is-admin .subtopic-item {
-            cursor: default;
-        }
-
-        /* ── MODAL ─────────────────────── */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(15, 20, 30, 0.55);
-            z-index: 999;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            backdrop-filter: blur(3px);
-            animation: fadeIn 0.2s ease;
-        }
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-            to {
-                opacity: 1;
-            }
-        }
-        .modal-dialog {
-            background: #fff;
-            border-radius: var(--radius);
-            padding: 28px 24px;
-            width: 400px;
-            max-width: 92vw;
-            box-shadow: var(--shadow-lg);
-            animation: slideUp 0.25s ease;
-        }
-        @keyframes slideUp {
-            from {
-                transform: translateY(30px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-        .modal-dialog h3 {
-            margin-bottom: 6px;
-            font-size: 1.15rem;
-            letter-spacing: -0.2px;
-        }
-        .modal-dialog p {
-            font-size: 0.82rem;
-            color: var(--text-secondary);
-            margin-bottom: 16px;
-        }
-        .modal-input {
-            width: 100%;
-            padding: 11px 14px;
-            border: 2px solid var(--border);
-            border-radius: var(--radius-sm);
-            font-size: 0.9rem;
-            outline: none;
-            transition: var(--transition);
-            font-family: inherit;
-        }
-        .modal-input:focus {
-            border-color: var(--accent);
-            box-shadow: 0 0 0 3px rgba(79, 110, 247, 0.1);
-        }
-        .modal-actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 18px;
-            justify-content: flex-end;
-        }
-        .modal-error {
-            color: var(--danger);
-            font-size: 0.78rem;
-            margin-top: 6px;
-            font-weight: 500;
-        }
-
-        /* ── TOAST ─────────────────────── */
-        .toast-container {
-            position: fixed;
-            bottom: 24px;
-            right: 24px;
-            z-index: 1000;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            pointer-events: none;
-        }
-        .toast {
-            background: #1a202c;
-            color: #fff;
-            padding: 12px 20px;
-            border-radius: 25px;
-            font-size: 0.82rem;
-            font-weight: 500;
-            box-shadow: var(--shadow-lg);
-            animation: toastIn 0.35s ease, toastOut 0.35s ease 2.5s forwards;
-            pointer-events: auto;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .toast.success {
-            border-left: 4px solid var(--success);
-        }
-        .toast.error {
-            border-left: 4px solid var(--danger);
-        }
-        @keyframes toastIn {
-            from {
-                transform: translateX(120px);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-        @keyframes toastOut {
-            from {
-                opacity: 1;
-            }
-            to {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-        }
-
-        /* ── STATUS BADGE ──────────────── */
-        .status-badge {
-            display: inline-block;
-            padding: 3px 10px;
-            border-radius: 12px;
-            font-size: 0.68rem;
-            font-weight: 600;
-            letter-spacing: 0.3px;
-            text-transform: uppercase;
-        }
-        .status-pending {
-            background: #fefcbf;
-            color: #975a16;
-        }
-        .status-in-progress {
-            background: #bee3f8;
-            color: #2a4365;
-        }
-        .status-completed {
-            background: #c6f6d5;
-            color: #22543d;
-        }
-
-        /* ── UTILITY ───────────────────── */
-        .text-center {
-            text-align: center;
-        }
-        .mb-16 {
-            margin-bottom: 16px;
-        }
-        .gap-8 {
-            gap: 8px;
-        }
-        .flex-wrap {
-            display: flex;
-            flex-wrap: wrap;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Planning Approval Dashboard · Pro</title>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    :root {
+      --bg:#f0f4f8; --surface:#fff; --surface-alt:#f8fafb; --text:#1a202c;
+      --text-secondary:#5a6577; --border:#e2e8f0; --shadow:0 4px 12px rgba(0,0,0,0.08);
+      --radius:14px; --accent:#4f6ef7; --accent-hover:#3b54db; --danger:#e53e3e;
+    }
+    body { font-family:'Segoe UI',Inter,system-ui,sans-serif; background:var(--bg); color:var(--text); }
+    .dashboard-header {
+      background:var(--surface); border-bottom:1px solid var(--border);
+      padding:16px 28px; position:sticky; top:0; z-index:100; display:flex;
+      align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;
+    }
+    .header-logo { width:44px; height:44px; border-radius:12px; background:var(--accent); display:flex; align-items:center; justify-content:center; color:#fff; font-size:20px; }
+    .project-name-input { font-size:1.25rem; font-weight:700; border:2px dashed var(--accent); border-radius:8px; padding:4px 10px; outline:none; width:360px; }
+    .progress-bar-wrap { width:180px; height:10px; background:#e2e8f0; border-radius:20px; overflow:hidden; }
+    .progress-bar-fill { height:100%; background:linear-gradient(90deg,#4f6ef7,#38a169); border-radius:20px; }
+    .btn { padding:9px 18px; border-radius:25px; border:none; font-weight:600; cursor:pointer; }
+    .btn-admin { background:var(--accent); color:#fff; }
+    .btn-outline { background:transparent; border:2px solid var(--border); }
+    .btn-sm { padding:5px 12px; font-size:0.75rem; }
+    .main-container { max-width:1600px; margin:0 auto; padding:24px; }
+    .section-container { margin-bottom:32px; }
+    .section-header { display:flex; align-items:center; gap:12px; margin-bottom:12px; }
+    .section-header h2 { font-size:1.2rem; font-weight:700; color:var(--text); }
+    .section-header .section-color { width:20px; height:20px; border-radius:6px; }
+    .panels-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(320px,1fr)); gap:18px; }
+    .panel-card {
+      background:var(--surface); border-radius:var(--radius); box-shadow:var(--shadow);
+      border:1.5px solid var(--border); position:relative; display:flex; flex-direction:column;
+    }
+    .panel-color-strip { height:6px; }
+    .panel-card-header { padding:12px 16px 8px; display:flex; gap:10px; align-items:flex-start; }
+    .panel-number { width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700; color:#fff; flex-shrink:0; }
+    .panel-title-wrap { flex:1; }
+    .panel-title-display { font-weight:700; font-size:0.9rem; }
+    .panel-title-input { font-weight:700; font-size:0.9rem; border:2px dashed var(--accent); border-radius:6px; padding:3px 8px; width:100%; display:none; }
+    .panel-drag-handle { cursor:grab; color:#cbd5e0; display:none; }
+    .panel-card-body { padding:4px 16px 14px; }
+    .subtopic-list { list-style:none; display:flex; flex-direction:column; gap:5px; }
+    .subtopic-item { display:flex; align-items:center; gap:8px; font-size:0.8rem; color:var(--text-secondary); padding:4px 8px; border-radius:6px; background:var(--surface-alt); }
+    .subtopic-checkbox { accent-color:var(--accent); }
+    .comment-box { width:100%; margin-top:8px; border:1px solid var(--border); border-radius:8px; padding:8px; font-size:0.75rem; resize:vertical; font-family:inherit; }
+    .admin-only, .admin-only-inline { display:none; }
+    body.is-admin .admin-only { display:flex; }  body.is-admin .admin-only-inline { display:inline-flex; }
+    body.is-admin .panel-drag-handle { display:block; }
+    body.is-admin .panel-title-input { display:block; } body.is-admin .panel-title-display { display:none; }
+    .btn-icon { width:30px; height:30px; border-radius:50%; border:1.5px solid var(--border); background:var(--surface); cursor:pointer; }
+    .arrow-svg { position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:10; }
+    .connection-select { font-size:0.7rem; padding:2px 6px; border-radius:6px; border:1px solid var(--border); }
+    .modal-overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:999; display:flex; align-items:center; justify-content:center; }
+    .modal-dialog { background:#fff; border-radius:var(--radius); padding:24px; width:400px; max-width:90vw; }
+    .toast-container { position:fixed; bottom:24px; right:24px; z-index:1000; }
+    .toast { background:#1a202c; color:#fff; padding:12px 20px; border-radius:25px; margin-top:8px; }
+  </style>
 </head>
 <body>
-
-    <!-- ═══════════════ HEADER ═══════════════ -->
-    <header class="dashboard-header" id="dashboardHeader">
-        <div class="header-left">
-            <div class="header-logo">
-                <i class="fa-solid fa-building-columns"></i>
-            </div>
-            <div>
-                <span class="project-name-display" id="projectNameDisplay">PLANNING APPROVAL WORKFLOW</span>
-                <input type="text" class="project-name-input admin-only-block" id="projectNameInput"
-                placeholder="Enter project name..." value="PLANNING APPROVAL WORKFLOW">
-            </div>
-        </div>
-        <div class="progress-section">
-            <span class="progress-label">📊 Overall Progress</span>
-            <div class="progress-bar-wrap" title="Drag slider in admin mode to adjust progress">
-                <div class="progress-bar-fill" id="progressBarFill" style="width: 0%;"></div>
-            </div>
-            <span class="progress-percent" id="progressPercent">0%</span>
-            <input type="range" class="progress-slider admin-only-inline" id="progressSlider"
-            min="0" max="100" value="0" title="Adjust overall project progress">
-        </div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;">
-            <button class="btn btn-outline btn-sm" id="btnResetAll" title="Reset all data to defaults">
-                <i class="fa-solid fa-rotate-left"></i> Reset
-            </button>
-            <button class="btn btn-admin" id="btnAdminToggle">
-                <i class="fa-solid fa-lock"></i> <span id="btnAdminText">Admin Mode</span>
-            </button>
-        </div>
-    </header>
-
-    <!-- ═══════════════ MAIN CONTENT ═══════════════ -->
-    <div class="main-container">
-        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:18px;">
-            <h2 style="font-size:1.05rem;font-weight:600;color:var(--text-secondary);letter-spacing:-0.2px;">
-                <i class="fa-solid fa-diagram-project"></i> Workflow Stages
-                <span style="font-weight:400;font-size:0.78rem;color:#a0aec0;" id="panelCount">(16 Panels)</span>
-            </h2>
-            <button class="btn-add-panel admin-only-inline" id="btnAddPanelTop">
-                <i class="fa-solid fa-plus"></i> Add New Panel
-            </button>
-        </div>
-
-        <!-- Panels Grid -->
-        <div class="panels-grid" id="panelsGrid">
-            <!-- Dynamically rendered -->
-        </div>
-
-        <div style="text-align:center;margin-top:24px;">
-            <button class="btn-add-panel admin-only-inline" id="btnAddPanelBottom">
-                <i class="fa-solid fa-plus"></i> Add New Panel at End
-            </button>
-        </div>
+  <header class="dashboard-header">
+    <div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap;">
+      <div class="header-logo"><i class="fa-solid fa-building-columns"></i></div>
+      <input type="text" class="project-name-input" id="projectNameInput" value="PLANNING APPROVAL WORKFLOW">
     </div>
-
-    <!-- ═══════════════ ADMIN LOGIN MODAL ═══════════════ -->
-    <div class="modal-overlay" id="adminModal" style="display:none;">
-        <div class="modal-dialog">
-            <h3><i class="fa-solid fa-shield-halved"></i> Admin Authentication</h3>
-            <p>Enter the admin password to enable editing capabilities.</p>
-            <input type="password" class="modal-input" id="adminPasswordInput"
-            placeholder="Enter admin password..." autocomplete="off">
-            <div class="modal-error" id="adminModalError" style="display:none;"></div>
-            <div class="modal-actions">
-                <button class="btn btn-outline btn-sm" id="btnCancelAdmin">Cancel</button>
-                <button class="btn btn-admin btn-sm" id="btnConfirmAdmin">
-                    <i class="fa-solid fa-right-to-bracket"></i> Unlock
-                </button>
-            </div>
+    <div style="display:flex; align-items:center; gap:16px; flex-wrap:wrap;">
+      <div style="display:flex; align-items:center; gap:8px;">
+        <span style="font-weight:600;">📊 Overall</span>
+        <div class="progress-bar-wrap" id="progressBarWrap">
+          <div class="progress-bar-fill" id="progressBarFill" style="width:0%;"></div>
         </div>
+        <span id="progressPercent">0%</span>
+        <input type="range" id="progressSlider" min="0" max="100" value="0" style="width:100px;" class="admin-only-inline">
+      </div>
+      <button class="btn btn-outline btn-sm" id="btnReset">Reset</button>
+      <button class="btn btn-admin" id="btnAdminToggle"><i class="fa-solid fa-lock"></i> <span id="adminLabel">Admin Mode</span></button>
     </div>
+  </header>
 
-    <!-- ═══════════════ NEW PANEL MODAL ═══════════════ -->
-    <div class="modal-overlay" id="newPanelModal" style="display:none;">
-        <div class="modal-dialog">
-            <h3><i class="fa-solid fa-folder-plus"></i> Add New Panel</h3>
-            <p>Enter the title for the new workflow panel.</p>
-            <input type="text" class="modal-input" id="newPanelTitleInput"
-            placeholder="e.g., LEGAL REVIEW & COMPLIANCE" maxlength="80">
-            <label style="display:block;margin-top:10px;font-size:0.78rem;font-weight:600;color:var(--text-secondary);">
-                Insert Position:
-            </label>
-            <select class="modal-input" id="newPanelPosition" style="margin-top:4px;">
-                <option value="end">At the End</option>
-                <option value="start">At the Beginning</option>
-            </select>
-            <div class="modal-actions">
-                <button class="btn btn-outline btn-sm" id="btnCancelNewPanel">Cancel</button>
-                <button class="btn btn-admin btn-sm" id="btnConfirmNewPanel">
-                    <i class="fa-solid fa-plus"></i> Add Panel
-                </button>
+  <div class="main-container" id="mainContainer">
+    <!-- Sections rendered dynamically -->
+  </div>
+
+  <!-- SVG overlay for arrows -->
+  <svg class="arrow-svg" id="arrowSvg"><defs><marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#4f6ef7"/></marker></defs></svg>
+
+  <!-- Modals -->
+  <div class="modal-overlay" id="adminModal" style="display:none;">
+    <div class="modal-dialog">
+      <h3>Admin Authentication</h3>
+      <input type="password" id="adminPassword" placeholder="Password" style="width:100%; padding:10px; margin:12px 0;">
+      <div style="display:flex; gap:8px; justify-content:flex-end;">
+        <button class="btn btn-outline btn-sm" id="cancelAdmin">Cancel</button>
+        <button class="btn btn-admin btn-sm" id="confirmAdmin">Unlock</button>
+      </div>
+    </div>
+  </div>
+  <div class="modal-overlay" id="sectionModal" style="display:none;">
+    <div class="modal-dialog">
+      <h3>Manage Sections</h3>
+      <div id="sectionList" style="max-height:300px; overflow-y:auto;"></div>
+      <div style="display:flex; gap:8px; margin-top:12px;">
+        <input type="text" id="newSectionTitle" placeholder="New section name" style="flex:1; padding:8px; border:1px solid var(--border); border-radius:6px;">
+        <button class="btn btn-admin btn-sm" id="addSectionBtn">Add</button>
+      </div>
+      <button class="btn btn-outline btn-sm" style="margin-top:12px;" id="closeSectionModal">Close</button>
+    </div>
+  </div>
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script>
+    (() => {
+      const ADMIN_PASS = "Dlns@4512#";
+      const firebaseConfig = { apiKey:"YOUR_KEY", authDomain:"YOUR.firebaseapp.com", projectId:"YOUR_ID", storageBucket:"YOUR.appspot.com", messagingSenderId:"YOUR_SENDER", appId:"YOUR_APP" };
+      let db = null, fireReady = false;
+      try { if(firebaseConfig.apiKey!=='YOUR_KEY'){ firebase.initializeApp(firebaseConfig); db=firebase.firestore(); fireReady=true; } } catch(e){}
+
+      const defaultSections = [
+        { id:'sec1', title:'Pre-Approval Phase', color:'#4f6ef7', order:0 },
+        { id:'sec2', title:'Approval & Clearance', color:'#38a169', order:1 },
+        { id:'sec3', title:'Post-Approval', color:'#d69e2e', order:2 }
+      ];
+      const defaultPanels = [
+        { id:'p1', title:'Land Identification', sectionId:'sec1', color:'#4A90D9', subtopics:[{id:'s1',text:'Verify ownership',completed:false},{id:'s2',text:'Zoning check',completed:false}], connections:[], comments:'' },
+        { id:'p2', title:'Concept Layout', sectionId:'sec1', color:'#5BA0D0', subtopics:[{id:'s3',text:'Initial layout',completed:false}], connections:[], comments:'' },
+        { id:'p3', title:'Technical Preparation', sectionId:'sec1', color:'#6CB4A1', subtopics:[{id:'s4',text:'Survey docs',completed:false}], connections:[], comments:'' },
+        { id:'p4', title:'Formal Submission', sectionId:'sec2', color:'#F5A623', subtopics:[{id:'s5',text:'Submit forms',completed:false}], connections:[], comments:'' },
+        { id:'p5', title:'Department Circulation', sectionId:'sec2', color:'#E8833A', subtopics:[], connections:[], comments:'' },
+        { id:'p6', title:'Technical Committee', sectionId:'sec2', color:'#D97471', subtopics:[], connections:[], comments:'' },
+        { id:'p7', title:'Final Approval', sectionId:'sec3', color:'#2ECC71', subtopics:[], connections:[], comments:'' },
+        { id:'p8', title:'Permit Issuance', sectionId:'sec3', color:'#1ABC9C', subtopics:[], connections:[], comments:'' }
+      ];
+
+      let appData = {
+        projectName:'PLANNING APPROVAL WORKFLOW',
+        progress:0,
+        sections: JSON.parse(JSON.stringify(defaultSections)),
+        panels: JSON.parse(JSON.stringify(defaultPanels))
+      };
+      let isAdmin = false;
+      let panelIdCounter = 9, subtopicIdCounter = 100, sectionIdCounter = 4;
+
+      const $main = document.getElementById('mainContainer');
+      const $projInput = document.getElementById('projectNameInput');
+      const $progFill = document.getElementById('progressBarFill');
+      const $progPct = document.getElementById('progressPercent');
+      const $progSlider = document.getElementById('progressSlider');
+      const $arrowSvg = document.getElementById('arrowSvg');
+      const $toast = document.getElementById('toastContainer');
+
+      // Persistence
+      async function loadData() {
+        if(fireReady && db) {
+          try {
+            const snap = await db.collection('dashboards').doc('planning_pro').get();
+            if(snap.exists) { const d=snap.data(); appData = d; restoreCounters(); return; }
+          } catch(e){}
+        }
+        const stored = localStorage.getItem('planning_pro_data');
+        if(stored) { try { appData = JSON.parse(stored); restoreCounters(); } catch(e){} }
+      }
+      function saveData() {
+        localStorage.setItem('planning_pro_data', JSON.stringify(appData));
+        if(fireReady && db) db.collection('dashboards').doc('planning_pro').set(appData).catch(()=>{});
+        showToast('Saved');
+      }
+      function restoreCounters() {
+        let maxP=8, maxS=100, maxSec=3;
+        appData.panels.forEach(p=>{ let n=parseInt(p.id.replace('p','')); if(n>maxP) maxP=n; p.subtopics.forEach(s=>{ let sn=parseInt(s.id.replace('s','')); if(sn>maxS) maxS=sn; }); });
+        appData.sections.forEach(s=>{ let n=parseInt(s.id.replace('sec','')); if(n>maxSec) maxSec=n; });
+        panelIdCounter=maxP+1; subtopicIdCounter=maxS+1; sectionIdCounter=maxSec+1;
+      }
+
+      function showToast(msg) { const t=document.createElement('div'); t.className='toast'; t.textContent=msg; $toast.appendChild(t); setTimeout(()=>t.remove(),2500); }
+
+      function renderAll() {
+        $projInput.value = appData.projectName;
+        $progFill.style.width = appData.progress+'%';
+        $progPct.textContent = appData.progress+'%';
+        $progSlider.value = appData.progress;
+        // Build sections
+        $main.innerHTML = '';
+        const sortedSections = [...appData.sections].sort((a,b)=>a.order-b.order);
+        sortedSections.forEach(sec => {
+          const secDiv = document.createElement('div'); secDiv.className='section-container';
+          secDiv.innerHTML = `<div class="section-header">
+            <span class="section-color" style="background:${sec.color}"></span>
+            <h2 contenteditable="${isAdmin}" class="sec-title" data-secid="${sec.id}">${sec.title}</h2>
+            ${isAdmin ? `<button class="btn-icon admin-only-inline delete-section-btn" data-secid="${sec.id}"><i class="fa-solid fa-trash"></i></button>` : ''}
+          </div>`;
+          const grid = document.createElement('div'); grid.className='panels-grid'; grid.dataset.section = sec.id;
+          const panelsInSec = appData.panels.filter(p=>p.sectionId===sec.id).sort((a,b)=>a.order-b.order);
+          panelsInSec.forEach(p => grid.appendChild(createPanelCard(p)));
+          secDiv.appendChild(grid);
+          $main.appendChild(secDiv);
+        });
+        // Admin buttons for sections
+        if(isAdmin) {
+          const addSecBtn = document.createElement('button'); addSecBtn.className='btn btn-outline btn-sm'; addSecBtn.textContent='+ Add Section'; addSecBtn.onclick=openSectionModal;
+          $main.appendChild(addSecBtn);
+        }
+        initSortable();
+        drawArrows();
+      }
+
+      function createPanelCard(panel) {
+        const card = document.createElement('div'); card.className='panel-card'; card.dataset.panelId=panel.id;
+        card.style.borderLeft = `4px solid ${panel.color}`;
+        card.innerHTML = `
+          <div class="panel-color-strip" style="background:${panel.color}"></div>
+          <div class="panel-card-header">
+            <div class="panel-number" style="background:${panel.color}">${panel.order+1}</div>
+            <div class="panel-title-wrap">
+              <span class="panel-title-display">${panel.title}</span>
+              <input class="panel-title-input admin-only" value="${panel.title}">
             </div>
-        </div>
-    </div>
+            <span class="panel-drag-handle"><i class="fa-solid fa-grip-vertical"></i></span>
+          </div>
+          <div class="panel-card-body">
+            <ul class="subtopic-list">${panel.subtopics.map(s=>`
+              <li class="subtopic-item" data-subid="${s.id}">
+                <input type="checkbox" class="subtopic-checkbox" ${s.completed?'checked':''}>
+                <span>${s.text}</span>
+                ${isAdmin?`<button class="btn-icon admin-only-inline delete-sub"><i class="fa-solid fa-xmark"></i></button>`:''}
+              </li>`).join('')}
+            </ul>
+            ${isAdmin?`<button class="btn-sm admin-only-inline add-sub-btn">+ Sub-item</button>`:''}
+            <textarea class="comment-box" placeholder="Add a comment...">${panel.comments||''}</textarea>
+            ${isAdmin?`
+              <div style="margin-top:6px;">
+                <label style="font-size:0.7rem;">Connect to:</label>
+                <select class="connection-select" multiple size="2">${appData.panels.filter(p=>p.id!==panel.id).map(p=>`<option value="${p.id}" ${panel.connections.includes(p.id)?'selected':''}>${p.title}</option>`).join('')}</select>
+              </div>`:''}
+          </div>`;
+        // event bindings
+        const titleInput = card.querySelector('.panel-title-input');
+        const titleDisplay = card.querySelector('.panel-title-display');
+        titleInput.addEventListener('input', ()=>{ panel.title=titleInput.value; titleDisplay.textContent=panel.title; saveData(); });
+        card.querySelector('.comment-box').addEventListener('input', (e)=>{ panel.comments=e.target.value; saveData(); });
+        card.querySelectorAll('.subtopic-checkbox').forEach((cb,i)=>{
+          cb.addEventListener('change', ()=>{ panel.subtopics[i].completed=cb.checked; saveData(); });
+        });
+        if(isAdmin){
+          card.querySelector('.add-sub-btn')?.addEventListener('click', ()=>{
+            const newSub = { id:'s'+(subtopicIdCounter++), text:'New item', completed:false };
+            panel.subtopics.push(newSub); renderAll(); saveData();
+          });
+          card.querySelector('.connection-select')?.addEventListener('change', function(){
+            panel.connections = Array.from(this.selectedOptions).map(o=>o.value);
+            saveData(); drawArrows();
+          });
+          card.querySelectorAll('.delete-sub').forEach((btn,i)=>{
+            btn.addEventListener('click', ()=>{ panel.subtopics.splice(i,1); renderAll(); saveData(); });
+          });
+        }
+        return card;
+      }
 
-    <!-- ═══════════════ TOAST CONTAINER ═══════════════ -->
-    <div class="toast-container" id="toastContainer"></div>
-
-    <!-- ═══════════════ SCRIPTS ═══════════════ -->
-    <script>
-        (function() {
-            // ─────────────────────────────────────
-            // FIREBASE CONFIGURATION
-            // ⚠️ REPLACE THESE WITH YOUR FIREBASE PROJECT CREDENTIALS
-            // ─────────────────────────────────────
-            const firebaseConfig = {
-                apiKey: "YOUR_API_KEY",
-                authDomain: "YOUR_PROJECT.firebaseapp.com",
-                projectId: "YOUR_PROJECT_ID",
-                storageBucket: "YOUR_PROJECT.appspot.com",
-                messagingSenderId: "YOUR_SENDER_ID",
-                appId: "YOUR_APP_ID"
-            };
-
-            let firestoreDB = null;
-            let firebaseReady = false;
-
-            // Try to initialize Firebase
-            try {
-                if (firebaseConfig.apiKey && firebaseConfig.apiKey !== "YOUR_API_KEY") {
-                    firebase.initializeApp(firebaseConfig);
-                    firestoreDB = firebase.firestore();
-                    firebaseReady = true;
-                    console.log("✅ Firebase Firestore initialized.");
-                } else {
-                    console.warn("⚠️ Firebase not configured. Using localStorage fallback.");
-                }
-            } catch (e) {
-                console.warn("⚠️ Firebase init error. Using localStorage fallback.", e.message);
+      function initSortable() {
+        document.querySelectorAll('.panels-grid').forEach(grid => {
+          new Sortable(grid, {
+            group:'panels',
+            animation:200,
+            handle:'.panel-drag-handle',
+            onEnd: function(evt) {
+              const panelId = evt.item.dataset.panelId;
+              const newSection = evt.to.dataset.section;
+              const panel = appData.panels.find(p=>p.id===panelId);
+              if(panel) {
+                panel.sectionId = newSection;
+                // reorder within section
+                const panelEls = [...evt.to.children];
+                panelEls.forEach((el,idx)=>{ const p=appData.panels.find(p=>p.id===el.dataset.panelId); if(p) p.order=idx; });
+                saveData(); drawArrows();
+              }
             }
-
-            // ─────────────────────────────────────
-            // CONSTANTS
-            // ─────────────────────────────────────
-            const ADMIN_PASSWORD = "Dlns@4512#";
-            const STORAGE_KEY = "planning_approval_dashboard_data";
-            const FIRESTORE_COLLECTION = "dashboards";
-            const FIRESTORE_DOC_ID = "planning_approval_workflow";
-
-            // ─────────────────────────────────────
-            // DEFAULT PANEL DATA (16 Panels)
-            // ─────────────────────────────────────
-            const defaultPanels = [{
-                id: 'panel_1',
-                title: 'LAND IDENTIFICATION & INITIAL FEASIBILITY',
-                color: '#4A90D9',
-                subtopics: [
-                    { id: 'sub_1_1', text: 'Verify land ownership', completed: false },
-                    { id: 'sub_1_2', text: 'Check zoning regulations', completed: false },
-                    { id: 'sub_1_3', text: 'Review access roads', completed: false },
-                    { id: 'sub_1_4', text: 'Check utilities availability', completed: false },
-                    { id: 'sub_1_5', text: 'Environmental & flood risk review', completed: false },
-                    { id: 'sub_1_6', text: 'Market & financial feasibility', completed: false },
-                    { id: 'sub_1_7', text: 'Outcome: Feasible Decision', completed: false },
-                ],
-                order: 0
-            }, {
-                id: 'panel_2',
-                title: 'CONCEPT DEVELOPMENT / PRELIMINARY LAYOUT',
-                color: '#5BA0D0',
-                subtopics: [
-                    { id: 'sub_2_1', text: 'Prepare initial layout', completed: false },
-                    { id: 'sub_2_2', text: 'Road network planning', completed: false },
-                    { id: 'sub_2_3', text: 'Drainage concept', completed: false },
-                    { id: 'sub_2_4', text: 'Open spaces allocation', completed: false },
-                    { id: 'sub_2_5', text: 'Utility allocation', completed: false },
-                    { id: 'sub_2_6', text: 'Reservation areas', completed: false },
-                    { id: 'sub_2_7', text: 'Outcome: Draft Layout', completed: false },
-                ],
-                order: 1
-            }, {
-                id: 'panel_3',
-                title: 'PRE-CONSULTATION WITH AUTHORITIES',
-                color: '#6CB4A1',
-                subtopics: [
-                    { id: 'sub_3_1', text: 'Discuss concept with key authorities', completed: false },
-                    { id: 'sub_3_2', text: 'Identify potential issues', completed: false },
-                    { id: 'sub_3_3', text: 'Understand requirements', completed: false },
-                    { id: 'sub_3_4', text: 'Reduce rejection risk', completed: false },
-                    { id: 'sub_3_5', text: 'Outcome: Guidance & Early Feedback', completed: false },
-                ],
-                order: 2
-            }, {
-                id: 'panel_4',
-                title: 'DETAILED TECHNICAL PREPARATION',
-                color: '#7BC8A4',
-                subtopics: [
-                    { id: 'sub_4_1', text: 'Survey & legal documents', completed: false },
-                    { id: 'sub_4_2', text: 'Planning drawings', completed: false },
-                    { id: 'sub_4_3', text: 'Engineering drawings', completed: false },
-                    { id: 'sub_4_4', text: 'Environmental reports', completed: false },
-                    { id: 'sub_4_5', text: 'Supporting technical reports', completed: false },
-                    { id: 'sub_4_6', text: 'Outcome: Complete Technical Documents', completed: false },
-                ],
-                order: 3
-            }, {
-                id: 'panel_5',
-                title: 'FORMAL SUBMISSION OF APPLICATION',
-                color: '#F5A623',
-                subtopics: [
-                    { id: 'sub_5_1', text: 'Submit application forms', completed: false },
-                    { id: 'sub_5_2', text: 'Submit technical drawings', completed: false },
-                    { id: 'sub_5_3', text: 'Submit reports & documents', completed: false },
-                    { id: 'sub_5_4', text: 'Pay required fees', completed: false },
-                    { id: 'sub_5_5', text: 'Outcome: Application Registered', completed: false },
-                ],
-                order: 4
-            }, {
-                id: 'panel_6',
-                title: 'INITIAL TECHNICAL SCREENING',
-                color: '#F7B84E',
-                subtopics: [
-                    { id: 'sub_6_1', text: 'Check completeness', completed: false },
-                    { id: 'sub_6_2', text: 'Verify documents', completed: false },
-                    { id: 'sub_6_3', text: 'Check drawing standards', completed: false },
-                    { id: 'sub_6_4', text: 'Verify payments', completed: false },
-                    { id: 'sub_6_5', text: 'Outcome: Accepted for Review or Returned', completed: false },
-                ],
-                order: 5
-            }, {
-                id: 'panel_7',
-                title: 'CIRCULATION TO RELEVANT DEPARTMENTS',
-                color: '#E8833A',
-                subtopics: [
-                    { id: 'sub_7_1', text: 'Planning: Zoning, land use, layout', completed: false },
-                    { id: 'sub_7_2', text: 'Engineering: Roads, drainage, infrastructure', completed: false },
-                    { id: 'sub_7_3', text: 'Water Board: Water supply requirements', completed: false },
-                    { id: 'sub_7_4', text: 'Electricity Board: Power supply', completed: false },
-                    { id: 'sub_7_5', text: 'Environmental: Impact assessment', completed: false },
-                    { id: 'sub_7_6', text: 'Fire Department: Fire safety', completed: false },
-                    { id: 'sub_7_7', text: 'RDA / Other: Road access & links', completed: false },
-                    { id: 'sub_7_8', text: 'Outcome: Technical Comments from Each Dept', completed: false },
-                ],
-                order: 6
-            }, {
-                id: 'panel_8',
-                title: 'TECHNICAL COMMITTEE MEETING',
-                color: '#D97471',
-                subtopics: [
-                    { id: 'sub_8_1', text: 'All stakeholders review the project', completed: false },
-                    { id: 'sub_8_2', text: 'Discuss technical aspects', completed: false },
-                    { id: 'sub_8_3', text: 'Evaluate compliance & impacts', completed: false },
-                    { id: 'sub_8_4', text: 'Suggest modifications / conditions', completed: false },
-                    { id: 'sub_8_5', text: 'Outcome A: APPROVED', completed: false },
-                    { id: 'sub_8_6', text: 'Outcome B: APPROVED WITH CONDITIONS', completed: false },
-                    { id: 'sub_8_7', text: 'Outcome C: DEFERRED', completed: false },
-                    { id: 'sub_8_8', text: 'Outcome D: REJECTED', completed: false },
-                ],
-                order: 7
-            }, {
-                id: 'panel_9',
-                title: 'ISSUING COMMENTS',
-                color: '#9B59B6',
-                subtopics: [
-                    { id: 'sub_9_1', text: 'Official comments issued', completed: false },
-                    { id: 'sub_9_2', text: 'List of required revisions', completed: false },
-                    { id: 'sub_9_3', text: 'Additional studies if needed', completed: false },
-                    { id: 'sub_9_4', text: 'Outcome: Comments to Developer', completed: false },
-                ],
-                order: 8
-            }, {
-                id: 'panel_10',
-                title: 'REVISION & RESUBMISSION CYCLE',
-                color: '#8E6BB8',
-                subtopics: [
-                    { id: 'sub_10_1', text: 'Revise plans & reports', completed: false },
-                    { id: 'sub_10_2', text: 'Address all comments', completed: false },
-                    { id: 'sub_10_3', text: 'Provide clarifications', completed: false },
-                    { id: 'sub_10_4', text: 'Resubmit for review (repeat if needed)', completed: false },
-                    { id: 'sub_10_5', text: 'Outcome: All Comments Resolved', completed: false },
-                ],
-                order: 9
-            }, {
-                id: 'panel_11',
-                title: 'FINAL TECHNICAL CLEARANCE',
-                color: '#4ECDC4',
-                subtopics: [
-                    { id: 'sub_11_1', text: 'All departments issue clearance', completed: false },
-                    { id: 'sub_11_2', text: 'Engineers sign off', completed: false },
-                    { id: 'sub_11_3', text: 'Technical committee recommendations finalized', completed: false },
-                    { id: 'sub_11_4', text: 'Outcome: Technical Clearance Issued', completed: false },
-                ],
-                order: 10
-            }, {
-                id: 'panel_12',
-                title: 'FINAL APPROVAL BY AUTHORITY',
-                color: '#2ECC71',
-                subtopics: [
-                    { id: 'sub_12_1', text: 'Review final recommendation', completed: false },
-                    { id: 'sub_12_2', text: 'Grant official approval', completed: false },
-                    { id: 'sub_12_3', text: 'Approval may include specific conditions', completed: false },
-                    { id: 'sub_12_4', text: 'Outcome: Official Approval Granted', completed: false },
-                ],
-                order: 11
-            }, {
-                id: 'panel_13',
-                title: 'PAYMENT OF APPROVAL CHARGES',
-                color: '#3498DB',
-                subtopics: [
-                    { id: 'sub_13_1', text: 'Pay approval fees', completed: false },
-                    { id: 'sub_13_2', text: 'Development charges', completed: false },
-                    { id: 'sub_13_3', text: 'Infrastructure levies', completed: false },
-                    { id: 'sub_13_4', text: 'Security deposits (if any)', completed: false },
-                    { id: 'sub_13_5', text: 'Outcome: Payments Completed', completed: false },
-                ],
-                order: 12
-            }, {
-                id: 'panel_14',
-                title: 'PERMIT ISSUANCE',
-                color: '#1ABC9C',
-                subtopics: [
-                    { id: 'sub_14_1', text: 'Development / Building permit', completed: false },
-                    { id: 'sub_14_2', text: 'Subdivision permit', completed: false },
-                    { id: 'sub_14_3', text: 'Other required permits', completed: false },
-                    { id: 'sub_14_4', text: 'Outcome: Permit Issued - Project Can Commence', completed: false },
-                ],
-                order: 13
-            }, {
-                id: 'panel_15',
-                title: 'CONSTRUCTION & COMPLIANCE MONITORING',
-                color: '#E67E22',
-                subtopics: [
-                    { id: 'sub_15_1', text: 'Commence construction as per approved plans', completed: false },
-                    { id: 'sub_15_2', text: 'Inspections during construction', completed: false },
-                    { id: 'sub_15_3', text: 'Monitor compliance with conditions', completed: false },
-                    { id: 'sub_15_4', text: 'Ensure quality & safety standards', completed: false },
-                    { id: 'sub_15_5', text: 'Outcome: Work in Progress with Compliance', completed: false },
-                ],
-                order: 14
-            }, {
-                id: 'panel_16',
-                title: 'COMPLETION CERTIFICATION',
-                color: '#27AE60',
-                subtopics: [
-                    { id: 'sub_16_1', text: 'Inspect completed works', completed: false },
-                    { id: 'sub_16_2', text: 'Verify compliance with approved plans', completed: false },
-                    { id: 'sub_16_3', text: 'Issue Certificate of Conformity', completed: false },
-                    { id: 'sub_16_4',
-                        text: 'Issue Completion Certificate / Occupancy Certificate',
-                        completed: false },
-                    { id: 'sub_16_5', text: 'Outcome: Project Completed & Certified', completed: false },
-                    { id: 'sub_16_6', text: 'FINAL STATUS: LEGALLY APPROVED & COMPLETE ✅', completed: false },
-                ],
-                order: 15
-            }];
-
-            // ─────────────────────────────────────
-            // STATE
-            // ─────────────────────────────────────
-            let appData = {
-                projectName: 'PLANNING APPROVAL WORKFLOW',
-                progress: 0,
-                panels: JSON.parse(JSON.stringify(defaultPanels)),
-                lastUpdated: null,
-            };
-            let isAdmin = false;
-            let panelIdCounter = 17;
-            let subtopicIdCounter = 1000;
-            let saveTimeout = null;
-            let isSaving = false;
-
-            // ─────────────────────────────────────
-            // DOM REFERENCES
-            // ─────────────────────────────────────
-            const $panelsGrid = document.getElementById('panelsGrid');
-            const $projectNameDisplay = document.getElementById('projectNameDisplay');
-            const $projectNameInput = document.getElementById('projectNameInput');
-            const $progressBarFill = document.getElementById('progressBarFill');
-            const $progressPercent = document.getElementById('progressPercent');
-            const $progressSlider = document.getElementById('progressSlider');
-            const $btnAdminToggle = document.getElementById('btnAdminToggle');
-            const $btnAdminText = document.getElementById('btnAdminText');
-            const $adminModal = document.getElementById('adminModal');
-            const $adminPasswordInput = document.getElementById('adminPasswordInput');
-            const $adminModalError = document.getElementById('adminModalError');
-            const $panelCount = document.getElementById('panelCount');
-            const $newPanelModal = document.getElementById('newPanelModal');
-            const $newPanelTitleInput = document.getElementById('newPanelTitleInput');
-            const $newPanelPosition = document.getElementById('newPanelPosition');
-            const $toastContainer = document.getElementById('toastContainer');
-
-            let sortableInstance = null;
-
-            // ─────────────────────────────────────
-            // PERSISTENCE: Load & Save
-            // ─────────────────────────────────────
-            async function loadData() {
-                // Try Firestore first
-                if (firebaseReady && firestoreDB) {
-                    try {
-                        const docRef = firestoreDB.collection(FIRESTORE_COLLECTION).doc(FIRESTORE_DOC_ID);
-                        const docSnap = await docRef.get();
-                        if (docSnap.exists) {
-                            const data = docSnap.data();
-                            appData.projectName = data.projectName || 'PLANNING APPROVAL WORKFLOW';
-                            appData.progress = data.progress || 0;
-                            appData.panels = data.panels || JSON.parse(JSON.stringify(defaultPanels));
-                            appData.lastUpdated = data.lastUpdated || null;
-                            // Restore counters
-                            restoreCounters();
-                            console.log('✅ Data loaded from Firestore.');
-                            return;
-                        } else {
-                            console.log('ℹ️ No Firestore document found. Using defaults.');
-                        }
-                    } catch (e) {
-                        console.warn('⚠️ Firestore load error. Trying localStorage...', e.message);
-                    }
-                }
-                // Fallback: localStorage
-                const stored = localStorage.getItem(STORAGE_KEY);
-                if (stored) {
-                    try {
-                        const parsed = JSON.parse(stored);
-                        appData.projectName = parsed.projectName || 'PLANNING APPROVAL WORKFLOW';
-                        appData.progress = parsed.progress || 0;
-                        appData.panels = parsed.panels || JSON.parse(JSON.stringify(defaultPanels));
-                        appData.lastUpdated = parsed.lastUpdated || null;
-                        restoreCounters();
-                        console.log('✅ Data loaded from localStorage.');
-                        return;
-                    } catch (e) {
-                        console.warn('⚠️ localStorage parse error.', e.message);
-                    }
-                }
-                // Ultimate fallback
-                appData.panels = JSON.parse(JSON.stringify(defaultPanels));
-                appData.progress = 0;
-                appData.projectName = 'PLANNING APPROVAL WORKFLOW';
-                restoreCounters();
-                console.log('ℹ️ Loaded default data.');
-            }
-
-            function restoreCounters() {
-                let maxPanelNum = 16;
-                let maxSubNum = 0;
-                appData.panels.forEach(p => {
-                    const match = p.id.match(/panel_(\d+)/);
-                    if (match && parseInt(match[1]) > maxPanelNum) maxPanelNum = parseInt(match[1]);
-                    p.subtopics.forEach(s => {
-                        const smatch = s.id.match(/sub_\d+_(\d+)/);
-                        if (smatch && parseInt(smatch[1]) > maxSubNum) maxSubNum = parseInt(smatch[1]);
-                    });
-                });
-                panelIdCounter = maxPanelNum + 1;
-                subtopicIdCounter = maxSubNum + 1;
-            }
-
-            async function saveData(showToast = true) {
-                if (isSaving) return;
-                isSaving = true;
-
-                // Update order fields
-                appData.panels.forEach((p, i) => { p.order = i; });
-                appData.lastUpdated = new Date().toISOString();
-
-                const dataToSave = {
-                    projectName: appData.projectName,
-                    progress: appData.progress,
-                    panels: appData.panels,
-                    lastUpdated: appData.lastUpdated,
-                };
-
-                // Save to localStorage always
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
-
-                // Save to Firestore if available
-                if (firebaseReady && firestoreDB) {
-                    try {
-                        const docRef = firestoreDB.collection(FIRESTORE_COLLECTION).doc(FIRESTORE_DOC_ID);
-                        await docRef.set(dataToSave, { merge: true });
-                        console.log('✅ Saved to Firestore.');
-                    } catch (e) {
-                        console.warn('⚠️ Firestore save error. Saved to localStorage only.', e.message);
-                    }
-                }
-
-                isSaving = false;
-                if (showToast) showToastMessage('Changes saved successfully! 💾', 'success');
-            }
-
-            function debounceSave(delay = 600) {
-                if (saveTimeout) clearTimeout(saveTimeout);
-                saveTimeout = setTimeout(() => saveData(true), delay);
-            }
-
-            // ─────────────────────────────────────
-            // TOAST
-            // ─────────────────────────────────────
-            function showToastMessage(message, type = 'success') {
-                const toast = document.createElement('div');
-                toast.className = `toast ${type}`;
-                toast.innerHTML =
-                    `<i class="fa-solid fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i> ${message}`;
-                $toastContainer.appendChild(toast);
-                setTimeout(() => {
-                    if (toast.parentNode) toast.parentNode.removeChild(toast);
-                }, 3000);
-            }
-
-            // ─────────────────────────────────────
-            // RENDER
-            // ─────────────────────────────────────
-            function renderAll() {
-                renderHeader();
-                renderPanels();
-                updatePanelCount();
-                updateAdminUI();
-                initSortable();
-            }
-
-            function renderHeader() {
-                $projectNameDisplay.textContent = appData.projectName;
-                $projectNameInput.value = appData.projectName;
-                $progressBarFill.style.width = appData.progress + '%';
-                $progressPercent.textContent = appData.progress + '%';
-                $progressSlider.value = appData.progress;
-                // Update display visibility
-                if (isAdmin) {
-                    $projectNameDisplay.style.display = 'none';
-                    $projectNameInput.style.display = 'inline-block';
-                } else {
-                    $projectNameDisplay.style.display = 'inline';
-                    $projectNameInput.style.display = 'none';
-                }
-            }
-
-            function renderPanels() {
-                $panelsGrid.innerHTML = '';
-                appData.panels.forEach((panel, index) => {
-                    const card = createPanelCard(panel, index);
-                    $panelsGrid.appendChild(card);
-                });
-            }
-
-            function createPanelCard(panel, index) {
-                const card = document.createElement('div');
-                card.className = 'panel-card';
-                card.setAttribute('data-panel-id', panel.id);
-                card.setAttribute('data-order', index);
-                card.style.borderLeft = `4px solid ${panel.color}`;
-
-                // Color strip
-                const strip = document.createElement('div');
-                strip.className = 'panel-color-strip';
-                strip.style.background = panel.color;
-                card.appendChild(strip);
-
-                // Header
-                const header = document.createElement('div');
-                header.className = 'panel-card-header';
-
-                const numberBadge = document.createElement('div');
-                numberBadge.className = 'panel-number';
-                numberBadge.style.background = panel.color;
-                numberBadge.textContent = index + 1;
-
-                const titleWrap = document.createElement('div');
-                titleWrap.className = 'panel-title-wrap';
-
-                const titleDisplay = document.createElement('span');
-                titleDisplay.className = 'panel-title-display';
-                titleDisplay.textContent = panel.title;
-
-                const titleInput = document.createElement('input');
-                titleInput.type = 'text';
-                titleInput.className = 'panel-title-input admin-only-block';
-                titleInput.value = panel.title;
-                titleInput.addEventListener('input', () => {
-                    panel.title = titleInput.value;
-                    titleDisplay.textContent = panel.title || '(Untitled Panel)';
-                    debounceSave();
-                });
-                titleInput.addEventListener('blur', () => {
-                    if (!panel.title.trim()) {
-                        panel.title = '(Untitled Panel)';
-                        titleInput.value = panel.title;
-                        titleDisplay.textContent = panel.title;
-                        debounceSave();
-                    }
-                });
-
-                titleWrap.appendChild(titleDisplay);
-                titleWrap.appendChild(titleInput);
-
-                const dragHandle = document.createElement('span');
-                dragHandle.className = 'panel-drag-handle';
-                dragHandle.innerHTML = '<i class="fa-solid fa-grip-vertical"></i>';
-                dragHandle.title = 'Drag to reorder';
-
-                header.appendChild(numberBadge);
-                header.appendChild(titleWrap);
-                header.appendChild(dragHandle);
-                card.appendChild(header);
-
-                // Body - Subtopic list
-                const body = document.createElement('div');
-                body.className = 'panel-card-body';
-                const subtopicList = document.createElement('ul');
-                subtopicList.className = 'subtopic-list';
-                subtopicList.setAttribute('data-panel-id', panel.id);
-
-                panel.subtopics.forEach(sub => {
-                    const li = createSubtopicItem(panel, sub);
-                    subtopicList.appendChild(li);
-                });
-
-                body.appendChild(subtopicList);
-
-                // Add subtopic button (admin only)
-                const addSubBtn = document.createElement('button');
-                addSubBtn.className = 'add-subtopic-btn admin-only-inline';
-                addSubBtn.innerHTML = '<i class="fa-solid fa-plus-circle"></i> Add Sub-item';
-                addSubBtn.addEventListener('click', () => {
-                    const newSub = {
-                        id: `sub_${panel.id.split('_')[1]}_${subtopicIdCounter++}`,
-                        text: 'New sub-item',
-                        completed: false,
-                    };
-                    panel.subtopics.push(newSub);
-                    const newLi = createSubtopicItem(panel, newSub);
-                    subtopicList.appendChild(newLi);
-                    // Focus the new input
-                    setTimeout(() => {
-                        const input = newLi.querySelector('.subtopic-input');
-                        if (input) { input.focus();
-                            input.select(); }
-                    }, 100);
-                    debounceSave();
-                });
-                body.appendChild(addSubBtn);
-                card.appendChild(body);
-
-                // Footer with insert/delete buttons (admin only)
-                const footer = document.createElement('div');
-                footer.className = 'panel-card-footer admin-only';
-
-                const insertBeforeBtn = document.createElement('button');
-                insertBeforeBtn.className = 'insert-btn';
-                insertBeforeBtn.innerHTML = '<i class="fa-solid fa-arrow-up"></i> Insert Before';
-                insertBeforeBtn.title = 'Add new panel before this one';
-                insertBeforeBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    openNewPanelModalAt(index);
-                });
-
-                const insertAfterBtn = document.createElement('button');
-                insertAfterBtn.className = 'insert-btn';
-                insertAfterBtn.innerHTML = '<i class="fa-solid fa-arrow-down"></i> Insert After';
-                insertAfterBtn.title = 'Add new panel after this one';
-                insertAfterBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    openNewPanelModalAt(index + 1);
-                });
-
-                const deletePanelBtn = document.createElement('button');
-                deletePanelBtn.className = 'delete-panel-btn';
-                deletePanelBtn.innerHTML = '<i class="fa-solid fa-trash-can"></i> Delete';
-                deletePanelBtn.title = 'Delete this panel';
-                deletePanelBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    if (appData.panels.length <= 1) {
-                        showToastMessage('Cannot delete the last panel! ❌', 'error');
-                        return;
-                    }
-                    if (confirm(
-                            `Are you sure you want to delete "${panel.title}"? This action cannot be undone.`
-                            )) {
-                        appData.panels = appData.panels.filter(p => p.id !== panel.id);
-                        saveData(true);
-                        renderAll();
-                        showToastMessage('Panel deleted successfully.', 'success');
-                    }
-                });
-
-                footer.appendChild(insertBeforeBtn);
-                footer.appendChild(insertAfterBtn);
-                footer.appendChild(deletePanelBtn);
-                card.appendChild(footer);
-
-                return card;
-            }
-
-            function createSubtopicItem(panel, sub) {
-                const li = document.createElement('li');
-                li.className = 'subtopic-item';
-                li.setAttribute('data-subtopic-id', sub.id);
-
-                const checkbox = document.createElement('input');
-                checkbox.type = 'checkbox';
-                checkbox.className = 'subtopic-checkbox';
-                checkbox.checked = sub.completed;
-                checkbox.addEventListener('change', () => {
-                    sub.completed = checkbox.checked;
-                    debounceSave();
-                });
-
-                const textSpan = document.createElement('span');
-                textSpan.className = 'subtopic-text';
-                textSpan.textContent = sub.text;
-                if (sub.completed) {
-                    textSpan.style.textDecoration = 'line-through';
-                    textSpan.style.opacity = '0.6';
-                }
-
-                const inputEl = document.createElement('input');
-                inputEl.type = 'text';
-                inputEl.className = 'subtopic-input admin-only-block';
-                inputEl.value = sub.text;
-                inputEl.addEventListener('input', () => {
-                    sub.text = inputEl.value;
-                    textSpan.textContent = sub.text || '(empty)';
-                    debounceSave();
-                });
-                inputEl.addEventListener('blur', () => {
-                    if (!sub.text.trim()) {
-                        sub.text = '(empty)';
-                        inputEl.value = sub.text;
-                        textSpan.textContent = sub.text;
-                        debounceSave();
-                    }
-                });
-
-                const deleteBtn = document.createElement('button');
-                deleteBtn.className = 'subtopic-delete-btn admin-only-inline';
-                deleteBtn.innerHTML = '<i class="fa-solid fa-xmark"></i>';
-                deleteBtn.title = 'Remove this sub-item';
-                deleteBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    panel.subtopics = panel.subtopics.filter(s => s.id !== sub.id);
-                    li.remove();
-                    debounceSave();
-                });
-
-                li.appendChild(checkbox);
-                li.appendChild(textSpan);
-                li.appendChild(inputEl);
-                li.appendChild(deleteBtn);
-
-                // Click on text to edit in admin mode
-                textSpan.addEventListener('dblclick', () => {
-                    if (isAdmin) {
-                        textSpan.style.display = 'none';
-                        inputEl.style.display = 'block';
-                        inputEl.focus();
-                        inputEl.select();
-                    }
-                });
-                inputEl.addEventListener('blur', () => {
-                    textSpan.style.display = 'inline';
-                    inputEl.style.display = 'none';
-                });
-                inputEl.addEventListener('keydown', (e) => {
-                    if (e.key === 'Enter') {
-                        inputEl.blur();
-                    }
-                });
-
-                return li;
-            }
-
-            function updatePanelCount() {
-                $panelCount.textContent = `(${appData.panels.length} Panels)`;
-            }
-
-            function updateAdminUI() {
-                if (isAdmin) {
-                    document.body.classList.add('is-admin');
-                    $btnAdminText.textContent = 'Exit Admin';
-                    $btnAdminToggle.classList.add('active');
-                    $projectNameDisplay.style.display = 'none';
-                    $projectNameInput.style.display = 'inline-block';
-                } else {
-                    document.body.classList.remove('is-admin');
-                    $btnAdminText.textContent = 'Admin Mode';
-                    $btnAdminToggle.classList.remove('active');
-                    $projectNameDisplay.style.display = 'inline';
-                    $projectNameInput.style.display = 'none';
-                    // Hide all subtopic inputs
-                    document.querySelectorAll('.subtopic-input').forEach(el => el.style.display = 'none');
-                    document.querySelectorAll('.subtopic-text').forEach(el => el.style.display = 'inline');
-                }
-                // Re-init sortable when admin state changes
-                initSortable();
-            }
-
-            // ─────────────────────────────────────
-            // SORTABLE (Drag & Drop)
-            // ─────────────────────────────────────
-            function initSortable() {
-                if (sortableInstance) {
-                    sortableInstance.destroy();
-                    sortableInstance = null;
-                }
-                if (!isAdmin) return; // Only sortable in admin mode
-
-                const grid = document.getElementById('panelsGrid');
-                if (!grid || appData.panels.length === 0) return;
-
-                sortableInstance = new Sortable(grid, {
-                    animation: 200,
-                    easing: 'cubic-bezier(0.4, 0, 0.2, 1)',
-                    ghostClass: 'sortable-ghost',
-                    chosenClass: 'sortable-chosen',
-                    dragClass: 'sortable-drag',
-                    handle: '.panel-drag-handle',
-                    onEnd: function(evt) {
-                        const oldIndex = evt.oldIndex;
-                        const newIndex = evt.newIndex;
-                        if (oldIndex !== newIndex && oldIndex !== undefined && newIndex !== undefined) {
-                            const movedPanel = appData.panels.splice(oldIndex, 1)[0];
-                            appData.panels.splice(newIndex, 0, movedPanel);
-                            appData.panels.forEach((p, i) => { p.order = i; });
-                            saveData(true);
-                            renderAll();
-                            showToastMessage('Panel order updated! 🔄', 'success');
-                        }
-                    },
-                });
-            }
-
-            // ─────────────────────────────────────
-            // ADMIN AUTH
-            // ─────────────────────────────────────
-            function openAdminModal() {
-                $adminModal.style.display = 'flex';
-                $adminPasswordInput.value = '';
-                $adminModalError.style.display = 'none';
-                setTimeout(() => $adminPasswordInput.focus(), 150);
-            }
-
-            function closeAdminModal() {
-                $adminModal.style.display = 'none';
-                $adminPasswordInput.value = '';
-                $adminModalError.style.display = 'none';
-            }
-
-            function handleAdminLogin() {
-                const enteredPassword = $adminPasswordInput.value;
-                if (enteredPassword === ADMIN_PASSWORD) {
-                    isAdmin = true;
-                    updateAdminUI();
-                    renderAll();
-                    closeAdminModal();
-                    showToastMessage('Admin mode activated! 🔓 All editing features unlocked.', 'success');
-                } else {
-                    $adminModalError.textContent = '❌ Incorrect password. Please try again.';
-                    $adminModalError.style.display = 'block';
-                    $adminPasswordInput.value = '';
-                    $adminPasswordInput.focus();
-                    // Shake effect
-                    $adminPasswordInput.style.animation = 'none';
-                    $adminPasswordInput.offsetHeight;
-                    $adminPasswordInput.style.animation = 'shake 0.4s ease';
-                }
-            }
-
-            function exitAdminMode() {
-                isAdmin = false;
-                updateAdminUI();
-                renderAll();
-                showToastMessage('Admin mode deactivated. 🔒 Changes are still saved.', 'success');
-            }
-
-            // ─────────────────────────────────────
-            // NEW PANEL MODAL
-            // ─────────────────────────────────────
-            let pendingInsertIndex = null;
-
-            function openNewPanelModalAt(insertIndex) {
-                if (!isAdmin) {
-                    showToastMessage('Please enable Admin mode first.', 'error');
-                    return;
-                }
-                pendingInsertIndex = insertIndex;
-                $newPanelTitleInput.value = '';
-                $newPanelPosition.value = (insertIndex === 0) ? 'start' : 'end';
-                $newPanelModal.style.display = 'flex';
-                setTimeout(() => $newPanelTitleInput.focus(), 150);
-            }
-
-            function openNewPanelModalGeneric(defaultPosition = 'end') {
-                if (!isAdmin) {
-                    showToastMessage('Please enable Admin mode first.', 'error');
-                    return;
-                }
-                pendingInsertIndex = (defaultPosition === 'start') ? 0 : appData.panels.length;
-                $newPanelTitleInput.value = '';
-                $newPanelPosition.value = defaultPosition;
-                $newPanelModal.style.display = 'flex';
-                setTimeout(() => $newPanelTitleInput.focus(), 150);
-            }
-
-            function closeNewPanelModal() {
-                $newPanelModal.style.display = 'none';
-                $newPanelTitleInput.value = '';
-                pendingInsertIndex = null;
-            }
-
-            function confirmNewPanel() {
-                const title = $newPanelTitleInput.value.trim();
-                if (!title) {
-                    $newPanelTitleInput.focus();
-                    $newPanelTitleInput.style.borderColor = '#e53e3e';
-                    setTimeout(() => { $newPanelTitleInput.style.borderColor = ''; }, 1500);
-                    return;
-                }
-                const position = $newPanelPosition.value;
-                let insertAt;
-                if (pendingInsertIndex !== null && pendingInsertIndex !== undefined) {
-                    insertAt = pendingInsertIndex;
-                } else {
-                    insertAt = (position === 'start') ? 0 : appData.panels.length;
-                }
-                // Clamp
-                insertAt = Math.max(0, Math.min(insertAt, appData.panels.length));
-
-                const colors = [
-                    '#4A90D9', '#5BA0D0', '#6CB4A1', '#7BC8A4', '#F5A623', '#F7B84E',
-                    '#E8833A', '#D97471', '#9B59B6', '#8E6BB8', '#4ECDC4', '#2ECC71',
-                    '#3498DB', '#1ABC9C', '#E67E22', '#27AE60', '#6366f1', '#8b5cf6',
-                    '#ec4899', '#f43f5e', '#14b8a6', '#f97316', '#84cc16', '#06b6d4',
-                ];
-                const randomColor = colors[Math.floor(Math.random() * colors.length)];
-
-                const newPanel = {
-                    id: `panel_${panelIdCounter++}`,
-                    title: title,
-                    color: randomColor,
-                    subtopics: [
-                        { id: `sub_new_${subtopicIdCounter++}`, text: 'New sub-item 1', completed: false },
-                    ],
-                    order: insertAt,
-                };
-
-                appData.panels.splice(insertAt, 0, newPanel);
-                appData.panels.forEach((p, i) => { p.order = i; });
-                closeNewPanelModal();
-                pendingInsertIndex = null;
-                saveData(true);
-                renderAll();
-                showToastMessage(`Panel "${title}" added successfully! ✅`, 'success');
-                // Scroll to new panel
-                setTimeout(() => {
-                    const card = document.querySelector(`[data-panel-id="${newPanel.id}"]`);
-                    if (card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }, 300);
-            }
-
-            // ─────────────────────────────────────
-            // RESET
-            // ─────────────────────────────────────
-            function resetAllData() {
-                if (!isAdmin) {
-                    showToastMessage('Please enable Admin mode first to reset data.', 'error');
-                    return;
-                }
-                if (confirm(
-                        '⚠️ Are you sure you want to reset ALL data to the default 16-panel workflow? All custom changes will be lost. This cannot be undone.'
-                        )) {
-                    appData.panels = JSON.parse(JSON.stringify(defaultPanels));
-                    appData.progress = 0;
-                    appData.projectName = 'PLANNING APPROVAL WORKFLOW';
-                    panelIdCounter = 17;
-                    subtopicIdCounter = 1000;
-                    restoreCounters();
-                    saveData(true);
-                    renderAll();
-                    showToastMessage('Dashboard reset to default workflow. 🔄', 'success');
-                }
-            }
-
-            // ─────────────────────────────────────
-            // EVENT LISTENERS
-            // ─────────────────────────────────────
-            $btnAdminToggle.addEventListener('click', () => {
-                if (isAdmin) {
-                    exitAdminMode();
-                } else {
-                    openAdminModal();
-                }
-            });
-
-            document.getElementById('btnCancelAdmin').addEventListener('click', closeAdminModal);
-            document.getElementById('btnConfirmAdmin').addEventListener('click', handleAdminLogin);
-            $adminPasswordInput.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') handleAdminLogin();
-                if (e.key === 'Escape') closeAdminModal();
-            });
-
-            // New panel modal
-            document.getElementById('btnAddPanelTop').addEventListener('click', () => openNewPanelModalGeneric(
-            'start'));
-            document.getElementById('btnAddPanelBottom').addEventListener('click', () => openNewPanelModalGeneric(
-            'end'));
-            document.getElementById('btnCancelNewPanel').addEventListener('click', closeNewPanelModal);
-            document.getElementById('btnConfirmNewPanel').addEventListener('click', confirmNewPanel);
-            $newPanelTitleInput.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') confirmNewPanel();
-                if (e.key === 'Escape') closeNewPanelModal();
-            });
-            $newPanelPosition.addEventListener('change', () => {
-                if ($newPanelPosition.value === 'start') pendingInsertIndex = 0;
-                else pendingInsertIndex = appData.panels.length;
-            });
-
-            // Reset button
-            document.getElementById('btnResetAll').addEventListener('click', resetAllData);
-
-            // Progress slider
-            $progressSlider.addEventListener('input', () => {
-                if (!isAdmin) {
-                    showToastMessage('Enable Admin mode to adjust progress.', 'error');
-                    $progressSlider.value = appData.progress;
-                    return;
-                }
-                appData.progress = parseInt($progressSlider.value);
-                $progressBarFill.style.width = appData.progress + '%';
-                $progressPercent.textContent = appData.progress + '%';
-                debounceSave(400);
-            });
-
-            // Project name input
-            $projectNameInput.addEventListener('input', () => {
-                appData.projectName = $projectNameInput.value;
-                $projectNameDisplay.textContent = appData.projectName || 'PLANNING APPROVAL WORKFLOW';
-                debounceSave();
-            });
-
-            // Close modals on overlay click
-            $adminModal.addEventListener('click', (e) => {
-                if (e.target === $adminModal) closeAdminModal();
-            });
-            $newPanelModal.addEventListener('click', (e) => {
-                if (e.target === $newPanelModal) closeNewPanelModal();
-            });
-
-            // Keyboard shortcuts
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape') {
-                    if ($adminModal.style.display === 'flex') closeAdminModal();
-                    if ($newPanelModal.style.display === 'flex') closeNewPanelModal();
-                }
-                // Ctrl+Shift+A to toggle admin
-                if (e.ctrlKey && e.shiftKey && e.key === 'A') {
-                    e.preventDefault();
-                    if (isAdmin) exitAdminMode();
-                    else openAdminModal();
-                }
-            });
-
-            // ─────────────────────────────────────
-            // INITIALIZATION
-            // ─────────────────────────────────────
-            async function init() {
-                await loadData();
-                // Ensure panels have order
-                appData.panels.forEach((p, i) => { if (p.order === undefined) p.order = i; });
-                appData.panels.sort((a, b) => (a.order || 0) - (b.order || 0));
-                renderAll();
-                updateAdminUI();
-                console.log('🚀 Planning Approval Dashboard initialized.');
-                console.log('   💡 Tip: Press Ctrl+Shift+A to toggle Admin mode.');
-                console.log('   🔑 Admin Password: Dlns@4512#');
-                console.log('   📦 Storage:', firebaseReady ? 'Firebase Firestore + localStorage' :
-                    'localStorage (Firebase not configured)');
-            }
-
-            // Add shake animation keyframes
-            const shakeStyle = document.createElement('style');
-            shakeStyle.textContent = `
-            @keyframes shake {
-              0%, 100% { transform: translateX(0); }
-              25% { transform: translateX(-8px); }
-              50% { transform: translateX(8px); }
-              75% { transform: translateX(-5px); }
-            }
-          `;
-            document.head.appendChild(shakeStyle);
-
-            // Start the app
-            init().catch(err => {
-                console.error('Initialization error:', err);
-                // Emergency fallback
-                appData.panels = JSON.parse(JSON.stringify(defaultPanels));
-                renderAll();
-            });
-
-            console.log('%c🏗️ Planning Approval Workflow Dashboard %cReady',
-                'font-size:1.2em;font-weight:bold;color:#4f6ef7;',
-                'font-size:0.9em;color:#38a169;');
-            console.log('%cFeatures: Drag & Drop | Firebase Sync | Admin Mode | Auto-Save | Full CRUD',
-                'color:#718096;');
-        })();
-    </script>
+          });
+        });
+      }
+
+      function drawArrows() {
+        $arrowSvg.innerHTML = '<defs><marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#4f6ef7"/></marker></defs>';
+        const svg = $arrowSvg;
+        const containerRect = document.getElementById('mainContainer').getBoundingClientRect();
+        svg.style.width = containerRect.width+'px';
+        svg.style.height = containerRect.height+'px';
+        svg.style.left = containerRect.left+'px';
+        svg.style.top = containerRect.top+'px';
+        appData.panels.forEach(panel => {
+          panel.connections.forEach(targetId => {
+            const fromEl = document.querySelector(`.panel-card[data-panel-id="${panel.id}"]`);
+            const toEl = document.querySelector(`.panel-card[data-panel-id="${targetId}"]`);
+            if(!fromEl || !toEl) return;
+            const fromRect = fromEl.getBoundingClientRect();
+            const toRect = toEl.getBoundingClientRect();
+            const startX = fromRect.left + fromRect.width/2 - containerRect.left;
+            const startY = fromRect.top + fromRect.height/2 - containerRect.top;
+            const endX = toRect.left + toRect.width/2 - containerRect.left;
+            const endY = toRect.top + toRect.height/2 - containerRect.top;
+            const path = document.createElementNS("http://www.w3.org/2000/svg","path");
+            const dx = endX - startX, dy = endY - startY;
+            const cx1 = startX + dx*0.4, cy1 = startY;
+            const cx2 = endX - dx*0.4, cy2 = endY;
+            path.setAttribute('d', `M${startX},${startY} C${cx1},${cy1} ${cx2},${cy2} ${endX},${endY}`);
+            path.setAttribute('stroke','#4f6ef7');
+            path.setAttribute('stroke-width','2');
+            path.setAttribute('fill','none');
+            path.setAttribute('marker-end','url(#arrowhead)');
+            svg.appendChild(path);
+          });
+        });
+      }
+      window.addEventListener('resize', drawArrows);
+
+      // Admin toggle
+      document.getElementById('btnAdminToggle').addEventListener('click', ()=>{
+        if(isAdmin) { isAdmin=false; document.body.classList.remove('is-admin'); renderAll(); }
+        else document.getElementById('adminModal').style.display='flex';
+      });
+      document.getElementById('cancelAdmin').onclick = ()=> document.getElementById('adminModal').style.display='none';
+      document.getElementById('confirmAdmin').onclick = ()=>{
+        if(document.getElementById('adminPassword').value===ADMIN_PASS) { isAdmin=true; document.body.classList.add('is-admin'); document.getElementById('adminModal').style.display='none'; renderAll(); }
+        else alert('Wrong password');
+      };
+      document.getElementById('progressSlider').addEventListener('input', function(){
+        if(!isAdmin) return;
+        appData.progress = +this.value;
+        $progFill.style.width = appData.progress+'%';
+        $progPct.textContent = appData.progress+'%';
+        saveData();
+      });
+      $projInput.addEventListener('input', ()=>{ appData.projectName=$projInput.value; saveData(); });
+      document.getElementById('btnReset').addEventListener('click', ()=>{
+        if(!isAdmin) return;
+        if(confirm('Reset all data?')) { appData.sections=JSON.parse(JSON.stringify(defaultSections)); appData.panels=JSON.parse(JSON.stringify(defaultPanels)); appData.progress=0; restoreCounters(); renderAll(); saveData(); }
+      });
+
+      function openSectionModal() {
+        const modal = document.getElementById('sectionModal');
+        modal.style.display='flex';
+        const list = document.getElementById('sectionList');
+        list.innerHTML = appData.sections.map(s=>`
+          <div style="display:flex; gap:8px; margin-bottom:6px;">
+            <input value="${s.title}" data-secid="${s.id}" class="sec-edit-input" style="flex:1;">
+            <button class="btn-icon delete-sec-btn" data-secid="${s.id}"><i class="fa-solid fa-trash"></i></button>
+          </div>`).join('');
+      }
+      document.getElementById('closeSectionModal').onclick = ()=> document.getElementById('sectionModal').style.display='none';
+      document.getElementById('addSectionBtn').onclick = ()=>{
+        const title = document.getElementById('newSectionTitle').value.trim();
+        if(!title) return;
+        appData.sections.push({ id:'sec'+(sectionIdCounter++), title, color:'#'+Math.floor(Math.random()*16777215).toString(16), order:appData.sections.length });
+        renderAll(); saveData(); document.getElementById('sectionModal').style.display='none';
+      };
+      document.getElementById('sectionList').addEventListener('input', (e)=>{
+        if(e.target.classList.contains('sec-edit-input')){
+          const sec = appData.sections.find(s=>s.id===e.target.datasecid);
+          if(sec) sec.title=e.target.value;
+          saveData();
+        }
+      });
+      document.getElementById('sectionList').addEventListener('click', (e)=>{
+        if(e.target.closest('.delete-sec-btn')){
+          const id = e.target.closest('.delete-sec-btn').dataset.secid;
+          if(appData.sections.length<=1) return;
+          appData.sections = appData.sections.filter(s=>s.id!==id);
+          appData.panels.forEach(p=>{ if(p.sectionId===id) p.sectionId=appData.sections[0].id; });
+          renderAll(); saveData();
+        }
+      });
+
+      (async ()=>{
+        await loadData();
+        if(!appData.sections.length) appData.sections=JSON.parse(JSON.stringify(defaultSections));
+        if(!appData.panels.length) appData.panels=JSON.parse(JSON.stringify(defaultPanels));
+        renderAll();
+        document.body.classList.toggle('is-admin', isAdmin);
+      })();
+    })();
+  </script>
 </body>
 </html>
