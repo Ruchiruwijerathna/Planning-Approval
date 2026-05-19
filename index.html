@@ -13,94 +13,97 @@
     
     <style>
         :root {
-            /* Sleek Dark Mode Palette */
-            --bg-base: #050608; /* Deep Black/Blue */
-            --surface-glass: rgba(18, 22, 31, 0.7); /* Glass Cube Effect */
-            --surface-hover: rgba(28, 33, 45, 0.85);
-            --text-main: #f0f4f8; /* Crisp White Text */
-            --text-muted: #a0aec0; /* Soft Grey Text */
-            --accent-gold: #fcc827; /* Bhoomi Golden Yellow */
-            --accent-gold-dim: rgba(252, 200, 39, 0.15);
-            --border-glass: rgba(255, 255, 255, 0.08); 
-            --border-gold: rgba(252, 200, 39, 0.3);
-            
-            --success-green: #38a169;
-            --danger-red: #e53e3e;
-            --shadow-glass: 0 8px 32px 0 rgba(0, 0, 0, 0.6);
-            --radius-md: 14px;
-            --radius-sm: 8px;
+            --bg-primary: #ffffff;
+            --bg-secondary: rgba(255, 255, 255, 0.85);
+            --text-dark: #1a1a1a; 
+            --accent-yellow: #fcc827; /* Bhoomi Yellow */
+            --accent-grey: #2d2f33; /* Bhoomi Dark Grey */
+            --border-light: #e2e8f0; 
+            --accent-blue: #007bff; 
+            --success-green: #28a745; 
+            --danger-red: #dc3545; 
+
+            --shadow-subtle: 0 4px 12px rgba(0,0,0,0.05);
+            --radius-md: 12px;
+            --radius-sm: 6px;
         }
 
         * { margin:0; padding:0; box-sizing:border-box; }
 
         body {
             font-family: 'Segoe UI', system-ui, sans-serif;
-            color: var(--text-main);
+            color: var(--text-dark);
             line-height: 1.6;
             min-height: 100vh;
             overflow-x: hidden;
-            background-color: var(--bg-base);
+            background-color: #ffffff;
         }
 
-        /* 2. Diagonal Golden Line & Moving Dot Background */
-        .bg-base {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -3;
-            background: radial-gradient(circle at 15% 50%, rgba(252, 200, 39, 0.07), transparent 45%),
-                        radial-gradient(circle at 85% 30%, rgba(252, 200, 39, 0.04), transparent 50%);
-            background-color: var(--bg-base);
+        /* --- NEW PROFESSIONAL BACKGROUND --- */
+        .bg-gradient {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -2;
+            /* Yellow, White, and Transparent White gradient */
+            background: linear-gradient(135deg, rgba(255,255,255,1) 0%, rgba(252,200,39,0.15) 50%, rgba(255,255,255,0.8) 100%);
+            background-size: 200% 200%;
+            animation: gradientShift 12s ease-in-out infinite alternate;
         }
-        .bg-lines {
-            position: fixed; top: -50%; left: -50%; width: 200vw; height: 200vh; z-index: -2;
-            background-image: 
-                repeating-linear-gradient(45deg, transparent, transparent 100px, rgba(252, 200, 39, 0.06) 100px, rgba(252, 200, 39, 0.06) 101.5px),
-                repeating-linear-gradient(-45deg, transparent, transparent 100px, rgba(255, 255, 255, 0.02) 100px, rgba(255, 255, 255, 0.02) 101px);
-            animation: slideGrid 40s linear infinite;
+        .bg-arrows {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1;
+            /* Subtle Yellow Arrows moving diagonally */
+            background-image: url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 20l20 20-20 20M40 20l20 20-20 20' stroke='rgba(252, 200, 39, 0.2)' stroke-width='2.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+            animation: arrowPan 30s linear infinite;
+            pointer-events: none;
         }
-        .bg-dots {
-            position: fixed; top: -50%; left: -50%; width: 200vw; height: 200vh; z-index: -1;
-            background-image: radial-gradient(circle, rgba(252, 200, 39, 0.7) 1.5px, transparent 2.5px);
-            background-size: 141.42px 141.42px; /* Diagonal hypotenuse of 100px */
-            background-position: 0 0;
-            animation: slideGrid 40s linear infinite;
+
+        @keyframes gradientShift { 
+            0% { background-position: 0% 50%; } 
+            100% { background-position: 100% 50%; } 
         }
-        @keyframes slideGrid {
-            0% { transform: translate(0, 0); }
-            100% { transform: translate(141.42px, 141.42px); }
+        @keyframes arrowPan { 
+            0% { background-position: 0px 0px; } 
+            100% { background-position: 80px 80px; } 
         }
 
         /* Header */
         .dashboard-header {
-            background: rgba(10, 12, 18, 0.85);
-            backdrop-filter: blur(15px);
-            border-bottom: 2px solid var(--accent-gold);
+            background: var(--bg-primary);
+            border-bottom: 3px solid var(--accent-yellow);
             padding: 12px 28px;
             position: sticky; top: 0; z-index: 100;
             display: flex; flex-wrap: wrap; align-items: center; gap: 20px;
             justify-content: space-between;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+            box-shadow: var(--shadow-subtle);
         }
 
         .header-left { display:flex; align-items:center; gap:15px; }
         
-        .header-logo { height: 48px; display:flex; align-items:center; justify-content:center; border-radius: 6px; overflow: hidden;}
-        .header-logo img { height: 100%; width: auto; object-fit: contain; }
+        /* Fixed Logo Container */
+        .header-logo {
+            height: 45px; 
+            display:flex; align-items:center; justify-content:center;
+        }
+        .header-logo img {
+            height: 100%; 
+            width: auto; 
+            object-fit: contain; 
+        }
 
-        .project-name-display { font-size:1.3rem; font-weight:800; color:var(--text-main); text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+        .project-name-display { font-size:1.3rem; font-weight:800; color:var(--accent-grey); }
         .project-name-input {
-            font-size:1.3rem; font-weight:800; color:var(--text-main); background: rgba(0,0,0,0.5);
-            border:2px dashed var(--accent-gold); border-radius:var(--radius-sm);
+            font-size:1.3rem; font-weight:800; color:var(--accent-grey);
+            border:2px dashed var(--accent-yellow); border-radius:var(--radius-sm);
             padding:4px 10px; width:360px; display:none;
         }
         body.is-admin .project-name-input { display:inline-block; }
         body.is-admin .project-name-display { display:none; }
 
         .progress-section { display:flex; align-items:center; gap:15px; }
-        .progress-label { font-size:0.9rem; font-weight:700; color:var(--text-muted); }
-        .progress-bar-wrap { width:200px; height:10px; background:rgba(255,255,255,0.1); border-radius:25px; overflow:hidden; box-shadow: inset 0 1px 3px rgba(0,0,0,0.5);}
-        .progress-bar-fill { height:100%; background:var(--accent-gold); border-radius:25px; transition:width 0.5s; box-shadow: 0 0 10px rgba(252,200,39,0.5);}
-        .progress-percent { font-weight:800; font-size:1rem; color:var(--accent-gold); min-width:45px; text-align:center; }
+        .progress-label { font-size:0.9rem; font-weight:700; color:var(--accent-grey); }
+        .progress-bar-wrap { width:200px; height:12px; background:#e9ecef; border-radius:25px; overflow:hidden; }
+        .progress-bar-fill { height:100%; background:var(--accent-yellow); border-radius:25px; transition:width 0.5s; }
+        .progress-percent { font-weight:800; font-size:1rem; color:var(--accent-grey); min-width:45px; text-align:center; }
         
-        .progress-slider { width:100px; accent-color:var(--accent-gold); display:none; }
+        .progress-slider { width:100px; accent-color:var(--accent-yellow); display:none; }
         body.is-admin .progress-slider { display:inline-block; }
 
         /* Buttons */
@@ -110,65 +113,62 @@
             display:inline-flex; align-items:center; gap:7px;
             transition:0.2s; font-family:inherit;
         }
-        .btn-admin { background:rgba(255,255,255,0.1); color:var(--text-main); border: 1px solid var(--border-glass); }
-        .btn-admin:hover { background: rgba(255,255,255,0.2); }
-        .btn-admin.active { background:var(--accent-gold); color:#000; box-shadow: 0 0 15px rgba(252,200,39,0.4); border-color: var(--accent-gold); }
-        .btn-outline { background:transparent; border:1px solid var(--border-glass); color:var(--text-muted); }
-        .btn-outline:hover { border-color:var(--accent-gold); color:var(--accent-gold); }
+        .btn-admin { background:var(--accent-grey); color:#fff; }
+        .btn-admin:hover { background: #1a1b1d; }
+        .btn-admin.active { background:var(--accent-yellow); color:var(--accent-grey); box-shadow: 0 2px 10px rgba(252,200,39,0.3); }
+        .btn-outline { background:transparent; border:2px solid var(--border-light); color:var(--text-dark); }
+        .btn-outline:hover { border-color:var(--accent-yellow); color:var(--accent-grey); }
         .btn-sm { padding:5px 12px; font-size:0.75rem; border-radius:18px; }
         
         .btn-add-panel {
-            background:var(--surface-glass); backdrop-filter: blur(10px); border:1px dashed var(--accent-gold); color:var(--accent-gold);
+            background:#fff; border:2px dashed #cbd5e0; color:#4a5568;
             padding:10px 20px; border-radius:25px; font-weight:700;
-            cursor:pointer; display:inline-flex; align-items:center; gap:6px; transition: 0.2s;
+            cursor:pointer; display:inline-flex; align-items:center; gap:6px;
         }
-        .btn-add-panel:hover { background:var(--accent-gold-dim); color:var(--accent-gold); box-shadow: 0 0 15px rgba(252,200,39,0.2); }
+        .btn-add-panel:hover { border-color:var(--accent-yellow); color:var(--accent-grey); background:#fffef5; }
 
         .main-container { max-width:1600px; margin:0 auto; padding:30px 20px 70px; }
         .panels-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:25px; align-items:start; }
 
-        /* Glass Cube Panel Card */
+        /* Panel Card */
         .panel-card {
-            background: var(--surface-glass);
-            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-            border-radius: var(--radius-md);
-            box-shadow: var(--shadow-glass); 
-            border: 1px solid var(--border-glass);
-            overflow: hidden; display: flex; flex-direction: column;
-            transition: opacity 0.3s ease, filter 0.3s ease, box-shadow 0.2s, transform 0.2s;
+            background:var(--bg-primary); border-radius:var(--radius-md);
+            box-shadow: var(--shadow-subtle); border:1px solid var(--border-light);
+            overflow:hidden; display:flex; flex-direction:column;
+            transition: opacity 0.3s ease, filter 0.3s ease, box-shadow 0.2s;
         }
-        .panel-card:hover { transform: translateY(-2px); border-color: var(--border-gold); }
+        .panel-card:hover { box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
 
-        /* 3. Completed Task Transparency to 65% */
+        /* 75% Transparency for completed panels */
         .panel-card.panel-completed {
-            opacity: 0.65; filter: grayscale(40%); 
+            opacity: 0.75; filter: grayscale(15%); 
         }
         .panel-card.panel-completed:hover { opacity: 1; filter: none; }
 
-        .panel-color-strip { height:4px; }
-        .panel-card-header { padding:15px 20px 10px; display:flex; align-items:center; gap:12px; border-bottom:1px solid var(--border-glass); }
+        .panel-color-strip { height:6px; }
+        .panel-card-header { padding:15px 20px 10px; display:flex; align-items:center; gap:12px; background:#fafafa; border-bottom:1px solid #eee; }
         .panel-number {
-            width:30px; height:30px; border-radius:6px;
+            width:35px; height:35px; border-radius:50%;
             display:flex; align-items:center; justify-content:center;
-            font-weight:800; font-size:0.85rem; color:#000; flex-shrink:0; box-shadow: 0 0 8px rgba(0,0,0,0.5);
+            font-weight:800; font-size:0.9rem; color:#fff; flex-shrink:0;
         }
         .panel-title-wrap { flex:1; min-width:0; }
-        .panel-title-display { font-weight:800; font-size:1.05rem; color:var(--text-main); text-transform: uppercase; letter-spacing: 0.5px;}
+        .panel-title-display { font-weight:800; font-size:1.05rem; color:var(--accent-grey); }
         .panel-title-input {
-            font-weight:800; font-size:1.05rem; border:1px dashed var(--accent-gold); background: rgba(0,0,0,0.4);
-            border-radius:6px; padding:4px 8px; width:100%; display:none; color:var(--text-main);
+            font-weight:800; font-size:1.05rem; border:2px dashed var(--accent-yellow);
+            border-radius:6px; padding:3px 8px; width:100%; display:none; color:var(--accent-grey);
         }
         body.is-admin .panel-title-input { display:block; }
         body.is-admin .panel-title-display { display:none; }
         
-        .panel-drag-handle { cursor:grab; color:var(--text-muted); padding:4px 2px; display:none; }
+        .panel-drag-handle { cursor:grab; color:#cbd5e0; padding:4px 2px; display:none; }
         body.is-admin .panel-drag-handle { display:block; }
 
         /* Panel Expand/Collapse Control */
         .panel-accordion-toggle {
-            font-size:1.2rem; color:var(--accent-gold); cursor:pointer; padding:5px; transition:color 0.2s; display: block;
+            font-size:1.2rem; color:#888; cursor:pointer; padding:5px; transition:color 0.2s; display: none;
         }
-        .panel-accordion-toggle:hover { text-shadow: 0 0 8px var(--accent-gold); }
+        .panel-accordion-toggle:hover { color:var(--accent-yellow); }
         .panel-card.panel-collapsed .panel-accordion-toggle i::before { content: "\f107"; } 
         .panel-card:not(.panel-collapsed) .panel-accordion-toggle i::before { content: "\f106"; }
 
@@ -179,113 +179,108 @@
         .panel-card.panel-collapsed .panel-card-footer { display: none !important; }
 
         /* Subtopics */
-        .subtopic-list { list-style:none; display:flex; flex-direction:column; gap:10px; }
+        .subtopic-list { list-style:none; display:flex; flex-direction:column; gap:8px; }
         .subtopic-item {
             display:flex; flex-wrap: wrap; align-items:center; gap:10px; font-size:0.9rem;
-            color:var(--text-main); padding:10px 12px; border-radius:var(--radius-sm);
-            background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.05); 
-            transition: background 0.2s, opacity 0.3s, filter 0.3s;
+            color:var(--text-dark); padding:8px 12px; border-radius:var(--radius-sm);
+            background:#f8f9fa; border:1px solid #eee; transition: background 0.15s, opacity 0.3s, filter 0.3s;
         }
-        .subtopic-item:hover { background:rgba(255,255,255,0.08); border-color: var(--border-gold); }
+        .subtopic-item:hover { background:#f2f2f2; }
         
-        /* 3. Completed item Transparency to 65% */
-        .subtopic-item.completed { opacity: 0.65; filter: grayscale(30%); }
         body.unblur-on-hover .subtopic-item.completed:hover { filter: none !important; opacity: 1 !important; }
 
-        .subtopic-item-top { display: flex; width: 100%; align-items: center; gap: 10px; }
+        .subtopic-item-top { display: flex; width: 100%; align-items: center; gap: 8px; }
+        .subtopic-checkbox { width:18px; height:18px; accent-color:var(--success-green); cursor:pointer; flex-shrink:0; }
         
-        /* Viewer Control Visibility FIX */
-        .subtopic-checkbox { width:18px; height:18px; accent-color:var(--accent-gold); cursor:pointer; flex-shrink:0; }
         .subtopic-text { flex:1; word-break:break-word; font-weight: 600; }
-        .item-number { font-weight:800; margin-right:8px; color:var(--accent-gold); background: var(--accent-gold-dim); padding: 2px 6px; border-radius: 4px; font-size: 0.75rem;}
+        .item-number { font-weight:800; margin-right:6px; color:var(--accent-grey); background: #e2e8f0; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem;}
 
         .subtopic-input {
-            flex:1; font-size:0.9rem; font-weight:600; border:1px dashed var(--accent-gold);
-            border-radius:5px; padding:4px 8px; background:rgba(0,0,0,0.5); display:none; color:var(--text-main);
+            flex:1; font-size:0.9rem; font-weight:600; border:1.5px dashed var(--accent-yellow);
+            border-radius:5px; padding:3px 7px; background:#fff; display:none; color:var(--text-dark);
         }
         body.is-admin .subtopic-input { display:none; }
         
-        /* 1. Item Expand/Collapse Control FIX - Always visible */
+        /* Item Expand/Collapse Control */
         .item-accordion-toggle {
-            font-size:1.1rem; color:var(--accent-gold); cursor:pointer; padding:5px; transition:0.2s; 
-            display: block; /* Force visibility for all users */
+            font-size:1.1rem; color:#888; cursor:pointer; padding:3px; transition:color 0.2s; visibility: hidden;
         }
-        .item-accordion-toggle:hover { text-shadow: 0 0 8px var(--accent-gold); }
+        .subtopic-item:hover .item-accordion-toggle { visibility: visible; }
+        .item-accordion-toggle:hover { color:var(--accent-yellow); }
         .item-accordion-toggle .fa-chevron-down { display: block; }
         .item-accordion-toggle .fa-chevron-up { display: none; }
         .subtopic-item.item-collapsed .item-accordion-toggle .fa-chevron-down { display: none; }
         .subtopic-item.item-collapsed .item-accordion-toggle .fa-chevron-up { display: block; }
 
         .subtopic-delete-btn {
-            width:24px; height:24px; border-radius:50%; border:none;
-            background:transparent; color:var(--text-muted); cursor:pointer; font-size:12px;
+            width:22px; height:22px; border-radius:50%; border:none;
+            background:transparent; color:#cbd5e0; cursor:pointer; font-size:12px;
             display:none; align-items:center; justify-content:center;
         }
         body.is-admin .subtopic-delete-btn { display:flex; }
-        .subtopic-delete-btn:hover { color:var(--danger-red); background:rgba(229, 62, 62, 0.1); }
+        .subtopic-delete-btn:hover { color:var(--danger-red); background:#fff5f5; }
 
         /* Sub-items (expanded section) */
-        .sub-sub-wrapper { width: 100%; display: none; margin-top: 8px; padding-left: 38px; }
+        .sub-sub-wrapper { width: 100%; display: none; margin-top: 5px; padding-left: 32px; }
         .subtopic-item:not(.item-collapsed) .sub-sub-wrapper { display: block; }
         
-        .sub-sub-list { list-style:none; display:flex; flex-direction:column; gap:6px; padding-right: 5px;}
+        .sub-sub-list { list-style:none; display:flex; flex-direction:column; gap:4px; padding-right: 10px;}
         .sub-sub-item {
             display:flex; align-items:center; gap:8px; font-size:0.85rem;
-            color:var(--text-muted); padding:6px 10px; border-radius:6px;
-            background:rgba(0,0,0,0.2); border:1px solid rgba(255,255,255,0.03);
+            color:#444; padding:6px 10px; border-radius:5px;
+            background:#ffffff; border:1px solid #e9ecef;
         }
-        .sub-sub-item.completed { opacity: 0.65; }
-        .sub-sub-checkbox { width:16px; height:16px; accent-color:var(--accent-gold); cursor:pointer; flex-shrink:0; }
+        .sub-sub-item.completed { opacity: 0.6; filter: grayscale(50%); }
+        .sub-sub-checkbox { width:16px; height:16px; accent-color:var(--success-green); cursor:pointer; flex-shrink:0; }
         
-        .sub-sub-drag { cursor:grab; color:var(--text-muted); display:none; }
+        .sub-sub-drag { cursor:grab; color:#cbd5e0; display:none; }
         body.is-admin .sub-sub-drag { display:flex; }
         .sub-sub-select { width:14px; height:14px; accent-color:var(--danger-red); display:none; }
         body.is-admin .sub-sub-select { display:inline-block; }
         
-        .sub-sub-text { flex:1; word-break:break-word; font-weight: 500; }
+        .sub-sub-text { flex:1; word-break:break-word; font-weight: 600; }
         .sub-sub-input {
-            flex:1; font-size:0.85rem; font-weight:500; border:1px dashed var(--accent-gold);
-            border-radius:5px; padding:3px 6px; background:rgba(0,0,0,0.5); display:none; color:var(--text-main);
+            flex:1; font-size:0.85rem; font-weight:600; border:1.5px dashed var(--accent-yellow);
+            border-radius:5px; padding:2px 6px; background:#fff; display:none; color:var(--text-dark);
         }
 
-        .sub-sub-delete { background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:12px; display:none; }
+        .sub-sub-delete { background:none; border:none; color:#cbd5e0; cursor:pointer; font-size:12px; display:none; }
         body.is-admin .sub-sub-delete { display:inline-block; }
         .sub-sub-delete:hover { color:var(--danger-red); }
 
         .add-subtopic-btn, .add-subsub-btn {
-            margin-top:8px; font-size:0.8rem; color:var(--text-muted);
-            background:rgba(255,255,255,0.02); border:1px dashed var(--border-glass); border-radius:16px;
-            padding:6px 14px; font-weight:600; cursor:pointer; display:none; transition: 0.2s;
+            margin-top:6px; font-size:0.8rem; color:var(--accent-grey);
+            background:none; border:1.5px dashed var(--border-light); border-radius:16px;
+            padding:6px 14px; font-weight:700; cursor:pointer; display:none;
         }
         body.is-admin .add-subtopic-btn, body.is-admin .add-subsub-btn { display:inline-flex; align-items:center; gap:4px; }
-        .add-subtopic-btn:hover, .add-subsub-btn:hover { border-color: var(--accent-gold); color: var(--accent-gold); background: var(--accent-gold-dim); }
+        .add-subtopic-btn:hover, .add-subsub-btn:hover { border-color: var(--accent-yellow); }
 
-        .panel-card-footer { padding:10px 20px 15px; display:none; gap:8px; flex-wrap:wrap; border-top:1px solid var(--border-glass); }
+        .panel-card-footer { padding:10px 20px 15px; display:none; gap:8px; flex-wrap:wrap; border-top:1px solid #eee; }
         body.is-admin .panel-card-footer { display:flex; }
         .insert-btn, .delete-panel-btn, .delete-selected-btn {
-            font-size:0.75rem; background:rgba(0,0,0,0.3); border:1px solid var(--border-glass);
-            color:var(--text-muted); cursor:pointer; padding:6px 14px; border-radius:12px;
-            transition:0.2s; font-weight:600; font-family:inherit;
+            font-size:0.75rem; background:transparent; border:1px solid #e8ecf8;
+            color:#4a5568; cursor:pointer; padding:6px 14px; border-radius:12px;
+            transition:0.2s; font-weight:700; font-family:inherit;
         }
-        .insert-btn:hover { color:var(--accent-gold); border-color: var(--accent-gold); }
-        .delete-panel-btn, .delete-selected-btn { border-color:rgba(229, 62, 62, 0.3); color:#fc8181; }
-        .delete-panel-btn:hover, .delete-selected-btn:hover { background:rgba(229, 62, 62, 0.1); border-color: var(--danger-red); }
+        .delete-panel-btn, .delete-selected-btn { border-color:#fed7d7; color:#c53030; }
+        .delete-panel-btn:hover, .delete-selected-btn:hover { background:#fff5f5; }
 
-        .panel-progress-wrap { display:flex; align-items:center; gap:10px; padding:10px 20px 12px; font-size:0.8rem; color:var(--text-muted); border-top:1px solid var(--border-glass);}
-        .panel-progress-bar { flex:1; height:6px; background:rgba(0,0,0,0.5); border-radius:10px; overflow:hidden; box-shadow: inset 0 1px 2px rgba(0,0,0,0.8); }
-        .panel-progress-fill { height:100%; background:var(--accent-gold); border-radius:10px; box-shadow: 0 0 8px rgba(252,200,39,0.5); }
-        .panel-progress-slider { width:60px; accent-color:var(--accent-gold); display:none; }
+        .panel-progress-wrap { display:flex; align-items:center; gap:10px; padding:6px 20px 10px; font-size:0.8rem; color:#777; background:#fafafa; border-top:1px solid #eee;}
+        .panel-progress-bar { flex:1; height:6px; background:var(--progress-bg); border-radius:10px; overflow:hidden; }
+        .panel-progress-fill { height:100%; background:var(--accent-yellow); border-radius:10px; }
+        .panel-progress-slider { width:60px; accent-color:var(--accent-yellow); display:none; }
         body.is-admin .panel-progress-slider { display:inline-block; }
-        .panel-progress-percent { font-weight:800; min-width:35px; text-align:right; color: var(--accent-gold); }
+        .panel-progress-percent { font-weight:800; min-width:35px; text-align:right; color: var(--accent-grey); }
         
-        .panel-comment-wrap { padding:10px 20px 15px; }
-        .panel-comment-label { font-size:0.85rem; font-weight:700; color:var(--text-muted); margin-bottom:6px; }
+        .panel-comment-wrap { padding:10px 20px 15px; background:var(--bg-primary); }
+        .panel-comment-label { font-size:0.85rem; font-weight:700; color:var(--accent-grey); margin-bottom:5px; }
         .panel-comment-textarea {
-            width:100%; min-height:50px; resize:vertical; font-size:0.85rem; font-weight: 500;
-            border:1px solid var(--border-glass); border-radius:var(--radius-sm); padding:10px;
-            font-family:inherit; color:var(--text-main); background: rgba(0,0,0,0.3); transition: 0.2s;
+            width:100%; min-height:45px; resize:vertical; font-size:0.85rem; font-weight: 600;
+            border:2px solid var(--border-light); border-radius:var(--radius-sm); padding:8px 10px;
+            font-family:inherit; color:var(--text-dark); background: #fafbff;
         }
-        .panel-comment-textarea:focus { outline: none; border-color: var(--accent-gold); background: rgba(0,0,0,0.5); box-shadow: 0 0 8px rgba(252,200,39,0.2);}
+        .panel-comment-textarea:focus { outline: none; border-color: var(--accent-yellow); }
 
         .admin-only { display:none; }
         body.is-admin .admin-only { display:flex; }
@@ -299,33 +294,31 @@
         /* Modals and Toasts */
         .modal-overlay {
             position:fixed; top:0; left:0; width:100%; height:100%;
-            background:rgba(5, 6, 8, 0.85); z-index:999; display:none;
-            align-items:center; justify-content:center; backdrop-filter:blur(8px);
+            background:rgba(45, 47, 51, 0.8); z-index:999; display:none;
+            align-items:center; justify-content:center; backdrop-filter:blur(4px);
         }
         .modal-dialog {
-            background:var(--surface-hover); border-radius:var(--radius-md); padding:30px;
-            width:450px; max-width:92vw; box-shadow:var(--shadow-glass);
-            max-height:80vh; overflow-y:auto; border: 1px solid var(--accent-gold);
+            background:#fff; border-radius:var(--radius-md); padding:25px;
+            width:450px; max-width:92vw; box-shadow:var(--shadow-lg);
+            max-height:80vh; overflow-y:auto; border-top: 5px solid var(--accent-yellow);
         }
-        .modal-dialog h3 { margin-bottom:10px; font-size:1.3rem; font-weight: 800; color:var(--accent-gold); }
+        .modal-dialog h3 { margin-bottom:10px; font-size:1.2rem; font-weight: 800; color:var(--accent-grey); }
         .modal-input {
-            width:100%; padding:12px 15px; border:1px solid var(--border-glass); background: rgba(0,0,0,0.5); color: #fff;
-            border-radius:var(--radius-sm); font-size:1rem; outline:none; font-family:inherit; font-weight: 500; transition: 0.2s;
+            width:100%; padding:12px 15px; border:2px solid var(--border-light);
+            border-radius:var(--radius-sm); font-size:0.95rem; outline:none; font-family:inherit; font-weight: 600;
         }
-        .modal-input:focus { border-color:var(--accent-gold); box-shadow: 0 0 8px rgba(252,200,39,0.2); }
-        .modal-actions { display:flex; gap:12px; margin-top:24px; justify-content:flex-end; }
-        
-        .toast-container { position:fixed; bottom:24px; right:24px; z-index:1000; display:flex; flex-direction:column; gap:10px; }
+        .modal-input:focus { border-color:var(--accent-yellow); }
+        .modal-actions { display:flex; gap:10px; margin-top:20px; justify-content:flex-end; }
+        .toast-container { position:fixed; bottom:24px; right:24px; z-index:1000; display:flex; flex-direction:column; gap:8px; }
         .toast {
-            background:rgba(20,24,34,0.95); backdrop-filter: blur(5px); color:var(--text-main); padding:14px 24px; border-radius:25px;
-            font-size:0.9rem; font-weight: 600; box-shadow: 0 4px 15px rgba(0,0,0,0.5); border: 1px solid var(--border-gold);
+            background:var(--accent-grey); color:#fff; padding:12px 20px; border-radius:25px;
+            font-size:0.9rem; font-weight: 600; box-shadow:var(--shadow-lg); border-left: 4px solid var(--accent-yellow);
         }
     </style>
 </head>
 <body class="unblur-on-hover">
-    <div class="bg-base"></div>
-    <div class="bg-lines"></div>
-    <div class="bg-dots"></div>
+    <div class="bg-gradient"></div>
+    <div class="bg-arrows"></div>
 
     <header class="dashboard-header">
         <div class="header-left">
@@ -343,7 +336,7 @@
             <span class="progress-percent" id="progressPercent">0%</span>
             <input type="range" class="progress-slider" id="progressSlider" min="0" max="100" value="0">
         </div>
-        <div style="display:flex;gap:12px;">
+        <div style="display:flex;gap:8px;">
             <button class="btn btn-outline btn-sm" id="btnResetAll"><i class="fa-solid fa-rotate-left"></i> Reset</button>
             <button class="btn btn-admin" id="btnAdminToggle"><i class="fa-solid fa-lock"></i> <span id="btnAdminText">Admin Login</span></button>
         </div>
@@ -351,11 +344,11 @@
 
     <div class="main-container">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
-            <h2 style="font-size:1.3rem;color:var(--text-main);font-weight:800; text-shadow: 0 2px 4px rgba(0,0,0,0.5);"><i class="fa-solid fa-diagram-project" style="color:var(--accent-gold);"></i> Workflow Stages <span id="panelCount" style="color:var(--text-muted); font-size:1rem; margin-left: 8px;">(16 Panels)</span></h2>
+            <h2 style="font-size:1.2rem;color:var(--accent-grey);font-weight:800;"><i class="fa-solid fa-diagram-project"></i> Workflow Stages <span id="panelCount">(16 Panels)</span></h2>
             <button class="btn-add-panel admin-only-inline" id="btnAddPanelTop"><i class="fa-solid fa-plus"></i> Add New Panel</button>
         </div>
         <div class="panels-grid" id="panelsGrid"></div>
-        <div style="text-align:center;margin-top:40px;">
+        <div style="text-align:center;margin-top:30px;">
             <button class="btn-add-panel admin-only-inline" id="btnAddPanelBottom"><i class="fa-solid fa-plus"></i> Add New Panel at End</button>
         </div>
     </div>
@@ -363,12 +356,12 @@
     <div class="modal-overlay" id="adminModal">
         <div class="modal-dialog">
             <h3><i class="fa-solid fa-shield-halved"></i> Admin Authentication</h3>
-            <p style="font-weight:500; font-size:0.95rem; margin-bottom:15px; color:var(--text-muted);">Enter the admin password to enable structural editing.</p>
+            <p style="font-weight:600; font-size:0.9rem; margin-bottom:12px; color:#555;">Enter the admin password to enable editing.</p>
             <input type="password" class="modal-input" id="adminPasswordInput" placeholder="Password..." autocomplete="off">
             <div class="modal-error" id="adminModalError" style="display:none;color:var(--danger-red);margin-top:8px;font-weight:bold;">Incorrect Password.</div>
             <div class="modal-actions">
                 <button class="btn btn-outline btn-sm" id="btnCancelAdmin">Cancel</button>
-                <button class="btn btn-admin btn-sm" id="btnConfirmAdmin" style="background:var(--accent-gold); color:#000;">Login</button>
+                <button class="btn btn-admin btn-sm" id="btnConfirmAdmin">Login</button>
             </div>
         </div>
     </div>
@@ -376,16 +369,16 @@
     <div class="modal-overlay" id="newPanelModal">
         <div class="modal-dialog">
             <h3><i class="fa-solid fa-folder-plus"></i> Add New Panel</h3>
-            <p style="font-weight:500; font-size:0.95rem; margin-bottom:15px; color:var(--text-muted);">Enter the title for the new workflow panel.</p>
+            <p style="font-weight:600; font-size:0.9rem; margin-bottom:12px; color:#555;">Enter the title for the new workflow panel.</p>
             <input type="text" class="modal-input" id="newPanelTitleInput" placeholder="e.g., LEGAL REVIEW">
-            <label style="display:block;margin-top:15px;font-size:0.95rem;font-weight:bold;color:var(--text-main);">Insert Position:</label>
-            <select class="modal-input" id="newPanelPosition" style="margin-top:8px;">
+            <label style="display:block;margin-top:15px;font-size:0.9rem;font-weight:bold;color:var(--accent-grey);">Insert Position:</label>
+            <select class="modal-input" id="newPanelPosition" style="margin-top:6px;">
                 <option value="end">At the End</option>
                 <option value="start">At the Beginning</option>
             </select>
             <div class="modal-actions">
                 <button class="btn btn-outline btn-sm" id="btnCancelNewPanel">Cancel</button>
-                <button class="btn btn-admin btn-sm" id="btnConfirmNewPanel" style="background:var(--accent-gold); color:#000;">Add Panel</button>
+                <button class="btn btn-admin btn-sm" id="btnConfirmNewPanel">Add Panel</button>
             </div>
         </div>
     </div>
@@ -417,7 +410,7 @@
             const FIRESTORE_DOC_ID = "planning_approval_workflow";
             
             const defaultPanels = [
-                { id:'panel_1', title:'LAND IDENTIFICATION & INITIAL FEASIBILITY', color:'#fcc827', progress:0, comment:'', subtopics:[
+                { id:'panel_1', title:'LAND IDENTIFICATION & INITIAL FEASIBILITY', color:'#2d2f33', progress:0, comment:'', subtopics:[
                     { id:'sub_1_1', text:'Verify land ownership', completed:false, items:[] },
                     { id:'sub_1_2', text:'Check zoning regulations', completed:false, items:[] },
                     { id:'sub_1_3', text:'Review access roads', completed:false, items:[] },
@@ -426,7 +419,7 @@
                     { id:'sub_1_6', text:'Market & financial feasibility', completed:false, items:[] },
                     { id:'sub_1_7', text:'Outcome: Feasible Decision', completed:false, items:[] }
                 ], order:0 },
-                { id:'panel_2', title:'CONCEPT DEVELOPMENT / PRELIMINARY LAYOUT', color:'#e5b31e', progress:0, comment:'', subtopics:[
+                { id:'panel_2', title:'CONCEPT DEVELOPMENT / PRELIMINARY LAYOUT', color:'#45484f', progress:0, comment:'', subtopics:[
                     { id:'sub_2_1', text:'Prepare initial layout', completed:false, items:[] },
                     { id:'sub_2_2', text:'Road network planning', completed:false, items:[] },
                     { id:'sub_2_3', text:'Drainage concept', completed:false, items:[] },
@@ -435,14 +428,14 @@
                     { id:'sub_2_6', text:'Reservation areas', completed:false, items:[] },
                     { id:'sub_2_7', text:'Outcome: Draft Layout', completed:false, items:[] }
                 ], order:1 },
-                { id:'panel_3', title:'PRE-CONSULTATION WITH AUTHORITIES', color:'#cc9e16', progress:0, comment:'', subtopics:[
+                { id:'panel_3', title:'PRE-CONSULTATION WITH AUTHORITIES', color:'#595d66', progress:0, comment:'', subtopics:[
                     { id:'sub_3_1', text:'Discuss concept with key authorities', completed:false, items:[] },
                     { id:'sub_3_2', text:'Identify potential issues', completed:false, items:[] },
                     { id:'sub_3_3', text:'Understand requirements', completed:false, items:[] },
                     { id:'sub_3_4', text:'Reduce rejection risk', completed:false, items:[] },
                     { id:'sub_3_5', text:'Outcome: Guidance & Early Feedback', completed:false, items:[] }
                 ], order:2 },
-                { id:'panel_4', title:'DETAILED TECHNICAL PREPARATION', color:'#b3880e', progress:0, comment:'', subtopics:[
+                { id:'panel_4', title:'DETAILED TECHNICAL PREPARATION', color:'#707580', progress:0, comment:'', subtopics:[
                     { id:'sub_4_1', text:'Survey & legal documents', completed:false, items:[] },
                     { id:'sub_4_2', text:'Planning drawings', completed:false, items:[] },
                     { id:'sub_4_3', text:'Engineering drawings', completed:false, items:[] },
@@ -484,26 +477,26 @@
                     { id:'sub_8_7', text:'Outcome C: DEFERRED', completed:false, items:[] },
                     { id:'sub_8_8', text:'Outcome D: REJECTED', completed:false, items:[] }
                 ], order:7 },
-                { id:'panel_9', title:'ISSUING COMMENTS', color:'#fcc827', progress:0, comment:'', subtopics:[
+                { id:'panel_9', title:'ISSUING COMMENTS', color:'#2d2f33', progress:0, comment:'', subtopics:[
                     { id:'sub_9_1', text:'Official comments issued', completed:false, items:[] },
                     { id:'sub_9_2', text:'List of required revisions', completed:false, items:[] },
                     { id:'sub_9_3', text:'Additional studies if needed', completed:false, items:[] },
                     { id:'sub_9_4', text:'Outcome: Comments to Developer', completed:false, items:[] }
                 ], order:8 },
-                { id:'panel_10', title:'REVISION & RESUBMISSION CYCLE', color:'#e5b31e', progress:0, comment:'', subtopics:[
+                { id:'panel_10', title:'REVISION & RESUBMISSION CYCLE', color:'#45484f', progress:0, comment:'', subtopics:[
                     { id:'sub_10_1', text:'Revise plans & reports', completed:false, items:[] },
                     { id:'sub_10_2', text:'Address all comments', completed:false, items:[] },
                     { id:'sub_10_3', text:'Provide clarifications', completed:false, items:[] },
                     { id:'sub_10_4', text:'Resubmit for review (repeat if needed)', completed:false, items:[] },
                     { id:'sub_10_5', text:'Outcome: All Comments Resolved', completed:false, items:[] }
                 ], order:9 },
-                { id:'panel_11', title:'FINAL TECHNICAL CLEARANCE', color:'#cc9e16', progress:0, comment:'', subtopics:[
+                { id:'panel_11', title:'FINAL TECHNICAL CLEARANCE', color:'#595d66', progress:0, comment:'', subtopics:[
                     { id:'sub_11_1', text:'All departments issue clearance', completed:false, items:[] },
                     { id:'sub_11_2', text:'Engineers sign off', completed:false, items:[] },
                     { id:'sub_11_3', text:'Technical committee recommendations finalized', completed:false, items:[] },
                     { id:'sub_11_4', text:'Outcome: Technical Clearance Issued', completed:false, items:[] }
                 ], order:10 },
-                { id:'panel_12', title:'FINAL APPROVAL BY AUTHORITY', color:'#b3880e', progress:0, comment:'', subtopics:[
+                { id:'panel_12', title:'FINAL APPROVAL BY AUTHORITY', color:'#707580', progress:0, comment:'', subtopics:[
                     { id:'sub_12_1', text:'Review final recommendation', completed:false, items:[] },
                     { id:'sub_12_2', text:'Grant official approval', completed:false, items:[] },
                     { id:'sub_12_3', text:'Approval may include specific conditions', completed:false, items:[] },
@@ -529,7 +522,7 @@
                     { id:'sub_15_4', text:'Ensure quality & safety standards', completed:false, items:[] },
                     { id:'sub_15_5', text:'Outcome: Work in Progress with Compliance', completed:false, items:[] }
                 ], order:14 },
-                { id:'panel_16', title:'COMPLETION CERTIFICATION', color:'#38a169', progress:0, comment:'', subtopics:[
+                { id:'panel_16', title:'COMPLETION CERTIFICATION', color:'#28a745', progress:0, comment:'', subtopics:[
                     { id:'sub_16_1', text:'Inspect completed works', completed:false, items:[] },
                     { id:'sub_16_2', text:'Verify compliance with approved plans', completed:false, items:[] },
                     { id:'sub_16_3', text:'Issue Certificate of Conformity', completed:false, items:[] },
@@ -635,6 +628,7 @@
                 grid.innerHTML = '';
                 appData.panels.forEach((p, index) => { grid.appendChild(createPanelCard(p, index)); });
                 
+                // Show panel accordion toggles only if more than one panel
                 $$('.panel-accordion-toggle').forEach(toggle => {
                     toggle.style.display = appData.panels.length > 1 ? 'block' : 'none';
                 });
@@ -660,6 +654,7 @@
                 
                 const dragHandle = document.createElement('span'); dragHandle.className='panel-drag-handle'; dragHandle.innerHTML='<i class="fa-solid fa-grip-vertical"></i>';
                 
+                // 6. Panel Accordion Toggle
                 const panelToggle = document.createElement('span'); panelToggle.className='panel-accordion-toggle';
                 panelToggle.innerHTML = '<i class="fa-solid fa-chevron-up"></i>';
                 panelToggle.addEventListener('click', (e)=>{ 
@@ -738,6 +733,7 @@
                 footer.appendChild(insBefore); footer.appendChild(insAfter); footer.appendChild(delSelBtn); footer.appendChild(delPanel);
                 card.appendChild(footer);
                 
+                // 1. Check completion on load
                 if(isPanelCompleted(panel)) card.classList.add('panel-completed');
 
                 return card;
@@ -750,9 +746,8 @@
                 
                 const dragHandle = document.createElement('span'); dragHandle.className='subtopic-drag-handle admin-only-inline'; dragHandle.innerHTML='<i class="fa-solid fa-grip-vertical"></i>';
                 const selCheck = document.createElement('input'); selCheck.type='checkbox'; selCheck.className='subtopic-select-checkbox';
-                
-                // Visible to all viewers
                 const checkbox = document.createElement('input'); checkbox.type='checkbox'; checkbox.className='subtopic-checkbox'; checkbox.checked=sub.completed;
+                
                 checkbox.addEventListener('change', ()=>{ 
                     sub.completed=checkbox.checked; 
                     if(sub.completed) li.classList.add('completed'); else li.classList.remove('completed');
@@ -770,13 +765,15 @@
                     debounceSave(); 
                 });
                 
-                // 1. Expand Toggle Fix: Make sure it's always available
+                // 6. Item Accordion Toggle
                 const itemToggle = document.createElement('span'); itemToggle.className='item-accordion-toggle';
                 itemToggle.innerHTML = '<i class="fa-solid fa-chevron-down"></i>';
                 itemToggle.addEventListener('click', (e)=>{ 
                     e.stopPropagation(); 
                     li.classList.toggle('item-collapsed'); 
                 });
+                
+                // Auto collapse item initially if you want, else leave open. I'll leave open by default.
                 
                 const deleteBtn = document.createElement('button'); deleteBtn.className='subtopic-delete-btn admin-only-inline'; deleteBtn.innerHTML='<i class="fa-solid fa-xmark"></i>';
                 deleteBtn.addEventListener('click', (e)=>{ e.stopPropagation(); li.remove(); panel.subtopics=panel.subtopics.filter(s=>s.id!==sub.id); checkPanelCompletion(panel.id); debounceSave(); });
@@ -800,7 +797,7 @@
                 const addSubSubBtn = document.createElement('button'); addSubSubBtn.className='add-subsub-btn admin-only-inline'; addSubSubBtn.innerHTML='<i class="fa-solid fa-plus"></i> Add Sub-item';
                 addSubSubBtn.addEventListener('click', (e)=>{
                     e.stopPropagation();
-                    li.classList.remove('item-collapsed'); 
+                    li.classList.remove('item-collapsed'); // Ensure it's open when adding
                     const newItem = { id:`item_${subSubIdCounter++}`, text:'New sub-item', completed:false };
                     sub.items.push(newItem);
                     renderSubSubList(subSubList, sub, subIndex);
@@ -826,11 +823,9 @@
                 
                 li.appendChild(subSubWrapper);
                 
-                if(sub.items.length === 0) {
-                    itemToggle.style.visibility = 'hidden'; 
-                } else {
-                    li.classList.add('item-collapsed'); // Default to closed to keep it neat
-                }
+                // Show Item Accordion only if target has sub items
+                if(sub.items.length === 0) itemToggle.style.visibility = 'hidden';
+                else li.classList.add('item-collapsed'); // Optional: start sub-items collapsed for neatness
 
                 return li;
             }
@@ -841,8 +836,6 @@
                     const li = document.createElement('li'); li.className='sub-sub-item'; li.dataset.itemId=item.id;
                     const drag = document.createElement('span'); drag.className='sub-sub-drag'; drag.innerHTML='<i class="fa-solid fa-grip-vertical"></i>';
                     const sel = document.createElement('input'); sel.type='checkbox'; sel.className='sub-sub-select';
-                    
-                    // Visible to all viewers
                     const cb = document.createElement('input'); cb.type='checkbox'; cb.className='sub-sub-checkbox'; cb.checked=item.completed||false;
                     
                     const text = document.createElement('span'); text.className='sub-sub-text';
@@ -1010,7 +1003,7 @@
                 
                 const newPanel = {
                     id:`panel_${panelIdCounter++}`, title,
-                    color:['#fcc827','#e5b31e','#cc9e16','#b3880e','#2d2f33'][Math.floor(Math.random()*5)],
+                    color:['#2d2f33','#45484f','#595d66','#fcc827','#e5b31e','#cc9e16'][Math.floor(Math.random()*6)],
                     subtopics:[{ id:`sub_new_${subtopicIdCounter++}`, text:'New sub-item', completed:false, items:[] }],
                     progress:0, comment:'', order:insertAt
                 };
