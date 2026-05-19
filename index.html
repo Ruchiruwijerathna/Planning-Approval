@@ -4,49 +4,71 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Planning Approval Workflow Dashboard</title>
+    <link rel="icon" href="data:,">
+    
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
     <style>
         :root {
-            /* 5. Professional Color Palette */
-            --bg-primary: #ffffff; /* White */
-            --bg-secondary: rgba(255, 255, 255, 0.85); /* Transparent White */
-            --text-dark: #333333; /* Dark Grey for text */
-            --accent-yellow: #fff3cd; /* Professional Yellow (subtle) */
-            --border-light: #e0e0e0; /* Light Grey for borders */
-            --accent-blue: #007bff; /* Professional Blue (for links/accents) */
-            --success-green: #28a745; /* Green for completion */
-            --danger-red: #dc3545; /* Red for errors/alerts */
+            --bg-primary: #ffffff;
+            --bg-secondary: rgba(255, 255, 255, 0.85);
+            --text-dark: #1a1a1a; 
+            --accent-yellow: #fcc827; /* Bhoomi Yellow */
+            --accent-grey: #2d2f33; /* Bhoomi Dark Grey */
+            --border-light: #e2e8f0; 
+            --accent-blue: #007bff; 
+            --success-green: #28a745; 
+            --danger-red: #dc3545; 
 
-            --shadow-subtle: 0 2px 5px rgba(0,0,0,0.05);
-            --radius-md: 10px;
-            --radius-sm: 5px;
+            --shadow-subtle: 0 4px 12px rgba(0,0,0,0.05);
+            --radius-md: 12px;
+            --radius-sm: 6px;
         }
 
         * { margin:0; padding:0; box-sizing:border-box; }
 
-        /* 2. & 5. Animated Geometric Gradient Background */
         body {
             font-family: 'Segoe UI', system-ui, sans-serif;
             color: var(--text-dark);
             line-height: 1.6;
             min-height: 100vh;
             overflow-x: hidden;
-            background: linear-gradient(135deg, var(--bg-primary) 0%, var(--accent-yellow) 20%, var(--bg-secondary) 50%, var(--accent-yellow) 80%, var(--bg-primary) 100%);
-            background-size: 400% 400%;
-            animation: gradientAnimation 15s ease infinite;
+            background-color: #ffffff;
         }
 
-        @keyframes gradientAnimation {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
+        /* --- NEW PROFESSIONAL BACKGROUND --- */
+        .bg-gradient {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -2;
+            /* Yellow, White, and Transparent White gradient */
+            background: linear-gradient(135deg, rgba(255,255,255,1) 0%, rgba(252,200,39,0.15) 50%, rgba(255,255,255,0.8) 100%);
+            background-size: 200% 200%;
+            animation: gradientShift 12s ease-in-out infinite alternate;
+        }
+        .bg-arrows {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1;
+            /* Subtle Yellow Arrows moving diagonally */
+            background-image: url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 20l20 20-20 20M40 20l20 20-20 20' stroke='rgba(252, 200, 39, 0.2)' stroke-width='2.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+            animation: arrowPan 30s linear infinite;
+            pointer-events: none;
         }
 
-        /* 3. Header Logo & 4. Overall Progress Icon Removal */
+        @keyframes gradientShift { 
+            0% { background-position: 0% 50%; } 
+            100% { background-position: 100% 50%; } 
+        }
+        @keyframes arrowPan { 
+            0% { background-position: 0px 0px; } 
+            100% { background-position: 80px 80px; } 
+        }
+
+        /* Header */
         .dashboard-header {
-            background: var(--bg-secondary);
-            border-bottom: 1px solid var(--border-light);
-            padding: 15px 30px;
+            background: var(--bg-primary);
+            border-bottom: 3px solid var(--accent-yellow);
+            padding: 12px 28px;
             position: sticky; top: 0; z-index: 100;
             display: flex; flex-wrap: wrap; align-items: center; gap: 20px;
             justify-content: space-between;
@@ -55,426 +77,211 @@
 
         .header-left { display:flex; align-items:center; gap:15px; }
         
+        /* Fixed Logo Container */
         .header-logo {
-            width:50px; height:50px; border-radius:var(--radius-sm);
-            background:#f0f0f0; /* Temporary background for placeholder */
+            height: 45px; 
             display:flex; align-items:center; justify-content:center;
-            font-size:24px; color:#aaa; font-weight:bold;
-            /* Placeholder: Replace with your actual logo img later */
-            overflow: hidden; /* Ensure image fits */
-        }
-        
-        /* Optional: CSS for logo image (once added in HTML) */
-        .header-logo img {
-            max-width: 100%;
-            max-height: 100%;
-            object-fit: contain; /* Maintain aspect ratio */
-        }
-
-        .project-name-display { font-size:1.3rem; font-weight:700; color:var(--text-dark); }
-        .progress-section { display:flex; align-items:center; gap:15px; }
-        
-        /* 4. Progress Label - Icon Removed */
-        .progress-label { font-size:0.9rem; font-weight:600; color:#555; }
-        
-        .progress-bar-wrap { width:200px; height:12px; background:#e9ecef; border-radius:25px; overflow:hidden; }
-        .progress-bar-fill { height:100%; background:var(--accent-blue); border-radius:25px; transition:width 0.5s; }
-        .progress-percent { font-weight:700; font-size:1rem; color:var(--accent-blue); min-width:45px; text-align:center; }
-
-        .btn-outline { padding:8px 16px; border:1px solid #ccc; background:white; color:var(--text-dark); border-radius:25px; font-weight:600; font-size:0.85rem; cursor:pointer; }
-        .btn-outline:hover { background:#f5f5f5; border-color:#bbb; }
-
-        .main-container { max-width:1600px; margin:0 auto; padding:30px 20px 70px; }
-        
-        .panels-grid {
-            display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:25px; align-items:start;
-        }
-
-        /* 6. Panel Expand/Collapse Styles */
-        .panel-card {
-            background:var(--bg-primary); border-radius:var(--radius-md);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.03); border:1px solid var(--border-light);
-            overflow:hidden; display:flex; flex-direction:column;
-            transition: opacity 0.3s ease, filter 0.3s ease, box-shadow 0.2s;
-        }
-
-        /* 1. Completed Task Transparency - 75% */
-        .panel-card.panel-completed {
-            opacity:0.75; filter:grayscale(30%); /* Subtle grayscale only, unblur managed on body for individual items */
-        }
-        
-        .panel-card.panel-completed:hover { opacity:1; filter:none; }
-
-        .panel-card-header { 
-            padding:15px 20px 10px; display:flex; align-items:center; gap:12px; 
-            background:#fafafa; border-bottom:1px solid #eee;
-        }
-        .panel-number {
-            width:35px; height:35px; border-radius:50%;
-            display:flex; align-items:center; justify-content:center;
-            font-weight:700; font-size:0.9rem; color:#fff; flex-shrink:0;
-        }
-        .panel-title-wrap { flex:1; min-width:0; }
-        .panel-title-display { font-weight:700; font-size:1.1rem; color:var(--text-dark); }
-
-        /* Panel Accordion Control - Hidden by default, made visible in JS if panels > 1 */
-        .panel-accordion-toggle {
-            font-size:1.2rem; color:#888; cursor:pointer; padding:5px; transition:color 0.2s;
-            display: none; /* JS will show this only for target panels */
-        }
-        .panel-accordion-toggle:hover { color:var(--accent-blue); }
-        .panel-card.panel-collapsed .panel-accordion-toggle i::before { content: "\f107"; } /* Chevron Down */
-        .panel-card:not(.panel-collapsed) .panel-accordion-toggle i::before { content: "\f106"; } /* Chevron Up */
-
-        /* Panel Body - Collapsible */
-        .panel-card-body { padding:10px 20px 20px; flex:1; }
-        .panel-card.panel-collapsed .panel-card-body { display: none; }
-
-
-        .subtopic-list { list-style:none; display:flex; flex-direction:column; gap:8px; }
-        .subtopic-item {
-            display:flex; flex-wrap: wrap; align-items:center; gap:10px; font-size:0.9rem;
-            color:#555; padding:8px 12px; border-radius:var(--radius-sm);
-            background:#f8f9fa; border:1px solid #eee; transition: background 0.15s, opacity 0.3s, filter 0.3s;
-        }
-        
-        .subtopic-item:hover { background:#f2f2f2; }
-        
-        /* 1. Unblur Completed Items on Hover - CSS on Body enables this */
-        body.unblur-on-hover .subtopic-item.completed:hover { filter: none !important; opacity: 1 !important; }
-
-        .subtopic-checkbox { width:18px; height:18px; accent-color:var(--accent-blue); cursor:pointer; flex-shrink:0; }
-        .subtopic-text { flex:1; word-break:break-word; }
-        .subtopic-text .item-number { font-weight:600; margin-right:6px; color:var(--text-dark); }
-
-        /* 6. Item Expand/Collapse Styles */
-        .item-accordion-toggle {
-            font-size:1.1rem; color:#888; cursor:pointer; padding:3px; transition:color 0.2s;
-            visibility: hidden; /* JS will show for target items */
-        }
-        .subtopic-item:hover .item-accordion-toggle { visibility: visible; }
-        .item-accordion-toggle:hover { color:var(--accent-blue); }
-        
-        /* Define icons for item accordion */
-        .item-accordion-toggle .fa-chevron-down { display: block; }
-        .item-accordion-toggle .fa-chevron-up { display: none; }
-        
-        .subtopic-item.item-collapsed .item-accordion-toggle .fa-chevron-down { display: none; }
-        .subtopic-item.item-collapsed .item-accordion-toggle .fa-chevron-up { display: block; }
-
-
-        /* Sub-items (expanded section) */
-        .sub-sub-wrapper { width: 100%; display: none; margin-top: 5px; padding-left: 30px; }
-        .sub-sub-item {
-            display:flex; align-items:center; gap:10px; font-size:0.85rem;
-            color:#666; padding:6px 12px; border-radius:var(--radius-sm);
-            background:#fbfcfd; border:1px solid #e9ecef;
-        }
-
-        /* 1. Faded completed individual sub-items */
-        .sub-sub-item.completed { opacity: 0.6; filter: grayscale(50%); unblur managed on hover on parent item via body unblur rule }
-        .sub-sub-checkbox { width:16px; height:16px; accent-color:var(--accent-blue); cursor:pointer; flex-shrink:0; }
-        .sub-sub-text { flex:1; word-break:break-word; }
-        .sub-sub-text .item-number { font-weight:600; color:var(--text-dark); margin-right:6px; }
-
-        /* Footer / Comments */
-        .panel-progress-wrap {
-            display:flex; align-items:center; gap:10px; padding:6px 20px 10px;
-            font-size:0.8rem; color:#777; background:#fafafa; border-top:1px solid #eee;
-        }
-        .panel-comment-wrap { padding:10px 20px 15px; background:var(--bg-primary); }
-        .panel-comment-label { font-size:0.85rem; font-weight:600; color:#666; margin-bottom:5px; }
-        .panel-comment-textarea {
-            width:100%; min-height:45px; resize:vertical; font-size:0.85rem;
-            border:1px solid var(--border-light); border-radius:var(--radius-sm); padding:8px 10px;
-            font-family:inherit; color:var(--text-dark);
-        }
-
-    </style>
-</head>
-<body class="unblur-on-hover">
-    <header class="dashboard-header">
-        <div class="header-left">
-            <div class="header-logo" id="headerLogo">
-                <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <style>
-        :root {
-            --bg: #f4f6f9;
-            --surface: #ffffff;
-            --surface-alt: #f8fafb;
-            --text: #000000;
-            --text-secondary: #000000;
-            --border: #cbd5e0;
-            --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
-            --shadow: 0 4px 12px rgba(0,0,0,0.08);
-            --shadow-lg: 0 12px 32px rgba(0,0,0,0.12);
-            --radius: 14px;
-            --radius-sm: 8px;
-            
-            /* Branded Colors based on Bhoomi Logo */
-            --accent: #2d2f33; /* Corporate Dark Grey */
-            --accent-highlight: #fcc827; /* Corporate Yellow */
-            --danger: #e53e3e;
-            --success: #38a169;
-            --progress-bg: #e2e8f0;
-            --progress-fill: linear-gradient(90deg, #2d2f33, #fcc827); /* Branded Gradient */
-        }
-        * { margin:0; padding:0; box-sizing:border-box; }
-        
-        body {
-            font-family: 'Segoe UI', system-ui, sans-serif;
-            color: var(--text);
-            line-height: 1.6;
-            min-height: 100vh;
-            background: var(--bg); 
-        }
-        
-        /* Professional Animated Arrow Background */
-        .bg-animation {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            z-index: -2; overflow: hidden;
-            background-color: #f4f6f9; 
-        }
-        .bg-animation::before, .bg-animation::after {
-            content: ''; position: absolute; width: 200vw; height: 200vh;
-            top: -50%; left: -50%;
-        }
-        /* Dark grey small moving arrows */
-        .bg-animation::before {
-            background-image: url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 20l20 20-20 20M40 20l20 20-20 20' stroke='rgba(45,47,51,0.035)' stroke-width='2.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-            animation: arrowMove 35s linear infinite;
-        }
-        /* Yellow large subtle moving arrows */
-        .bg-animation::after {
-            background-image: url("data:image/svg+xml,%3Csvg width='120' height='120' viewBox='0 0 120 120' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 30l30 30-30 30' stroke='rgba(252,200,39,0.04)' stroke-width='3.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-            animation: arrowMove 50s linear infinite;
-        }
-        .bg-glow {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            z-index: -1; pointer-events: none;
-            background: radial-gradient(circle at 10% 20%, rgba(252, 200, 39, 0.05), transparent 60%);
-        }
-        @keyframes arrowMove {
-            0% { transform: translate(0px, 0px); }
-            100% { transform: translate(240px, 240px); } /* 240 is lowest common multiple for seamless loop */
-        }
-
-        /* Header */
-        .dashboard-header {
-            background: var(--surface);
-            border-bottom: 2px solid var(--accent-highlight);
-            padding: 12px 28px;
-            position: sticky; top: 0; z-index: 100;
-            display: flex; flex-wrap: wrap; align-items: center; gap: 16px;
-            justify-content: space-between;
-            box-shadow: var(--shadow);
-        }
-        .header-left { display:flex; align-items:center; gap:18px; }
-        
-        /* Updated Logo Class */
-        .header-logo {
-            height: 48px; 
-            border-radius: 4px;
-            display:flex; align-items:center; justify-content:center;
-            overflow: hidden;
         }
         .header-logo img {
-            height: 100%; width: auto; object-fit: contain;
+            height: 100%; 
+            width: auto; 
+            object-fit: contain; 
         }
 
-        .project-name-display { font-size:1.25rem; font-weight:800; color:var(--text); }
+        .project-name-display { font-size:1.3rem; font-weight:800; color:var(--accent-grey); }
         .project-name-input {
-            font-size:1.25rem; font-weight:800; color:#000;
-            border:2px dashed var(--accent); border-radius:var(--radius-sm);
+            font-size:1.3rem; font-weight:800; color:var(--accent-grey);
+            border:2px dashed var(--accent-yellow); border-radius:var(--radius-sm);
             padding:4px 10px; width:360px; display:none;
         }
         body.is-admin .project-name-input { display:inline-block; }
         body.is-admin .project-name-display { display:none; }
+
+        .progress-section { display:flex; align-items:center; gap:15px; }
+        .progress-label { font-size:0.9rem; font-weight:700; color:var(--accent-grey); }
+        .progress-bar-wrap { width:200px; height:12px; background:#e9ecef; border-radius:25px; overflow:hidden; }
+        .progress-bar-fill { height:100%; background:var(--accent-yellow); border-radius:25px; transition:width 0.5s; }
+        .progress-percent { font-weight:800; font-size:1rem; color:var(--accent-grey); min-width:45px; text-align:center; }
         
-        .progress-section { display:flex; align-items:center; gap:12px; }
-        .progress-label { font-size:0.85rem; font-weight:700; color:var(--text-secondary); }
-        .progress-bar-wrap { width:180px; height:10px; background:var(--progress-bg); border-radius:20px; overflow:hidden; }
-        .progress-bar-fill { height:100%; background:var(--progress-fill); border-radius:20px; transition:width 0.5s; }
-        .progress-percent { font-weight:800; font-size:0.95rem; color:var(--accent); min-width:38px; text-align:center; }
-        .progress-slider { width:100px; accent-color:var(--accent); display:none; }
+        .progress-slider { width:100px; accent-color:var(--accent-yellow); display:none; }
         body.is-admin .progress-slider { display:inline-block; }
-        
+
+        /* Buttons */
         .btn {
             padding:9px 18px; border-radius:25px; border:none;
             font-weight:700; font-size:0.85rem; cursor:pointer;
             display:inline-flex; align-items:center; gap:7px;
             transition:0.2s; font-family:inherit;
         }
-        .btn-admin { background:var(--accent); color:#fff; }
+        .btn-admin { background:var(--accent-grey); color:#fff; }
         .btn-admin:hover { background: #1a1b1d; }
-        .btn-admin.active { background:var(--accent-highlight); color:var(--accent); box-shadow: 0 2px 10px rgba(252,200,39,0.3); }
-        .btn-outline { background:transparent; border:2px solid var(--border); color:var(--text); }
-        .btn-outline:hover { border-color:var(--accent); color:var(--accent); }
+        .btn-admin.active { background:var(--accent-yellow); color:var(--accent-grey); box-shadow: 0 2px 10px rgba(252,200,39,0.3); }
+        .btn-outline { background:transparent; border:2px solid var(--border-light); color:var(--text-dark); }
+        .btn-outline:hover { border-color:var(--accent-yellow); color:var(--accent-grey); }
         .btn-sm { padding:5px 12px; font-size:0.75rem; border-radius:18px; }
+        
         .btn-add-panel {
             background:#fff; border:2px dashed #cbd5e0; color:#4a5568;
             padding:10px 20px; border-radius:25px; font-weight:700;
             cursor:pointer; display:inline-flex; align-items:center; gap:6px;
         }
-        .btn-add-panel:hover { border-color:var(--accent-highlight); color:var(--accent); background:#fffef5; }
-        
-        .main-container { max-width:1500px; margin:0 auto; padding:24px 20px 60px; }
-        .panels-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:18px; align-items:start; }
-        
-        @media (max-width:1400px) { .panels-grid { grid-template-columns:repeat(3,1fr); } }
-        @media (max-width:1050px) { .panels-grid { grid-template-columns:repeat(2,1fr); } }
-        @media (max-width:650px) { .panels-grid { grid-template-columns:1fr; } }
-        
+        .btn-add-panel:hover { border-color:var(--accent-yellow); color:var(--accent-grey); background:#fffef5; }
+
+        .main-container { max-width:1600px; margin:0 auto; padding:30px 20px 70px; }
+        .panels-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:25px; align-items:start; }
+
         /* Panel Card */
         .panel-card {
-            background:var(--surface); border-radius:var(--radius);
-            box-shadow:var(--shadow); border:1.5px solid var(--border);
-            transition: opacity 0.4s ease, filter 0.4s ease, transform 0.2s, box-shadow 0.2s; 
+            background:var(--bg-primary); border-radius:var(--radius-md);
+            box-shadow: var(--shadow-subtle); border:1px solid var(--border-light);
             overflow:hidden; display:flex; flex-direction:column;
+            transition: opacity 0.3s ease, filter 0.3s ease, box-shadow 0.2s;
         }
-        
+        .panel-card:hover { box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
+
+        /* 75% Transparency for completed panels */
         .panel-card.panel-completed {
-            opacity: 0.85; 
-            filter: blur(0.5px) grayscale(20%);
+            opacity: 0.75; filter: grayscale(15%); 
         }
-        .panel-card.panel-completed:hover {
-            opacity: 1; filter: blur(0px) grayscale(0%);
-        }
-        
-        .panel-card:hover { box-shadow:var(--shadow-lg); transform:translateY(-2px); }
+        .panel-card.panel-completed:hover { opacity: 1; filter: none; }
+
         .panel-color-strip { height:6px; }
-        .panel-card-header { padding:14px 16px 10px; display:flex; align-items:flex-start; gap:10px; }
+        .panel-card-header { padding:15px 20px 10px; display:flex; align-items:center; gap:12px; background:#fafafa; border-bottom:1px solid #eee; }
         .panel-number {
-            width:32px; height:32px; border-radius:50%;
+            width:35px; height:35px; border-radius:50%;
             display:flex; align-items:center; justify-content:center;
-            font-weight:800; font-size:0.85rem; color:#fff; flex-shrink:0;
+            font-weight:800; font-size:0.9rem; color:#fff; flex-shrink:0;
         }
         .panel-title-wrap { flex:1; min-width:0; }
-        .panel-title-display { font-weight:800; font-size:0.95rem; word-break:break-word; color:var(--text); }
+        .panel-title-display { font-weight:800; font-size:1.05rem; color:var(--accent-grey); }
         .panel-title-input {
-            font-weight:800; font-size:0.95rem; border:2px dashed var(--accent);
-            border-radius:6px; padding:3px 8px; width:100%; display:none; color:#000;
+            font-weight:800; font-size:1.05rem; border:2px dashed var(--accent-yellow);
+            border-radius:6px; padding:3px 8px; width:100%; display:none; color:var(--accent-grey);
         }
         body.is-admin .panel-title-input { display:block; }
         body.is-admin .panel-title-display { display:none; }
+        
         .panel-drag-handle { cursor:grab; color:#cbd5e0; padding:4px 2px; display:none; }
         body.is-admin .panel-drag-handle { display:block; }
-        .panel-card-body { padding:4px 16px 14px; flex:1; }
-        
-        /* Subtopics */
-        .subtopic-list { list-style:none; display:flex; flex-direction:column; gap:5px; }
-        .subtopic-item {
-            display:flex; flex-wrap: wrap; align-items:center; gap:8px; font-size:0.85rem;
-            color:var(--text); padding:5px 8px; border-radius:6px;
-            background:var(--surface-alt); border:1px solid transparent;
-        }
-        .subtopic-item-top { display: flex; width: 100%; align-items: center; gap: 8px; }
-        .subtopic-checkbox { width:18px; height:18px; accent-color:var(--accent); cursor:pointer; flex-shrink:0; }
-        .subtopic-text { flex:1; word-break:break-word; font-weight: 600; transition: opacity 0.3s, filter 0.3s; }
-        
-        .subtopic-item:hover .subtopic-text, .sub-sub-item:hover .sub-sub-text {
-            opacity: 1 !important; filter: blur(0px) !important;
-        }
 
-        .item-number { font-weight:800; margin-right:6px; color:#000000; background: #e2e8f0; padding: 1px 5px; border-radius: 4px; font-size: 0.75rem;}
+        /* Panel Expand/Collapse Control */
+        .panel-accordion-toggle {
+            font-size:1.2rem; color:#888; cursor:pointer; padding:5px; transition:color 0.2s; display: none;
+        }
+        .panel-accordion-toggle:hover { color:var(--accent-yellow); }
+        .panel-card.panel-collapsed .panel-accordion-toggle i::before { content: "\f107"; } 
+        .panel-card:not(.panel-collapsed) .panel-accordion-toggle i::before { content: "\f106"; }
+
+        .panel-card-body { padding:10px 20px 20px; flex:1; }
+        .panel-card.panel-collapsed .panel-card-body, 
+        .panel-card.panel-collapsed .panel-comment-wrap,
+        .panel-card.panel-collapsed .panel-progress-wrap,
+        .panel-card.panel-collapsed .panel-card-footer { display: none !important; }
+
+        /* Subtopics */
+        .subtopic-list { list-style:none; display:flex; flex-direction:column; gap:8px; }
+        .subtopic-item {
+            display:flex; flex-wrap: wrap; align-items:center; gap:10px; font-size:0.9rem;
+            color:var(--text-dark); padding:8px 12px; border-radius:var(--radius-sm);
+            background:#f8f9fa; border:1px solid #eee; transition: background 0.15s, opacity 0.3s, filter 0.3s;
+        }
+        .subtopic-item:hover { background:#f2f2f2; }
         
+        body.unblur-on-hover .subtopic-item.completed:hover { filter: none !important; opacity: 1 !important; }
+
+        .subtopic-item-top { display: flex; width: 100%; align-items: center; gap: 8px; }
+        .subtopic-checkbox { width:18px; height:18px; accent-color:var(--success-green); cursor:pointer; flex-shrink:0; }
+        
+        .subtopic-text { flex:1; word-break:break-word; font-weight: 600; }
+        .item-number { font-weight:800; margin-right:6px; color:var(--accent-grey); background: #e2e8f0; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem;}
+
         .subtopic-input {
-            flex:1; font-size:0.85rem; font-weight:600; border:1.5px dashed #cbd5e0;
-            border-radius:5px; padding:3px 7px; background:#fff; display:none; color:#000;
+            flex:1; font-size:0.9rem; font-weight:600; border:1.5px dashed var(--accent-yellow);
+            border-radius:5px; padding:3px 7px; background:#fff; display:none; color:var(--text-dark);
         }
         body.is-admin .subtopic-input { display:none; }
         
-        .subtopic-expand-icon {
-            cursor:pointer; color:var(--accent); font-size:0.95rem;
-            transition: transform 0.3s ease; flex-shrink:0; padding: 4px;
+        /* Item Expand/Collapse Control */
+        .item-accordion-toggle {
+            font-size:1.1rem; color:#888; cursor:pointer; padding:3px; transition:color 0.2s; visibility: hidden;
         }
-        .subtopic-expand-icon.open { transform: rotate(180deg); }
-        
+        .subtopic-item:hover .item-accordion-toggle { visibility: visible; }
+        .item-accordion-toggle:hover { color:var(--accent-yellow); }
+        .item-accordion-toggle .fa-chevron-down { display: block; }
+        .item-accordion-toggle .fa-chevron-up { display: none; }
+        .subtopic-item.item-collapsed .item-accordion-toggle .fa-chevron-down { display: none; }
+        .subtopic-item.item-collapsed .item-accordion-toggle .fa-chevron-up { display: block; }
+
         .subtopic-delete-btn {
             width:22px; height:22px; border-radius:50%; border:none;
             background:transparent; color:#cbd5e0; cursor:pointer; font-size:12px;
             display:none; align-items:center; justify-content:center;
         }
         body.is-admin .subtopic-delete-btn { display:flex; }
-        .subtopic-delete-btn:hover { color:var(--danger); background:#fff5f5; }
+        .subtopic-delete-btn:hover { color:var(--danger-red); background:#fff5f5; }
+
+        /* Sub-items (expanded section) */
+        .sub-sub-wrapper { width: 100%; display: none; margin-top: 5px; padding-left: 32px; }
+        .subtopic-item:not(.item-collapsed) .sub-sub-wrapper { display: block; }
         
-        /* Expand Animation */
-        .sub-sub-wrapper {
-            width: 100%; max-height: 0; overflow: hidden;
-            transition: max-height 0.3s ease-out, margin 0.3s ease;
-            margin: 0 0 0 32px;
-        }
-        .sub-sub-wrapper.open { max-height: 800px; margin-top: 6px; margin-bottom: 4px; }
-        
-        .sub-sub-list { list-style:none; display:flex; flex-direction:column; gap:4px; padding-right: 32px;}
+        .sub-sub-list { list-style:none; display:flex; flex-direction:column; gap:4px; padding-right: 10px;}
         .sub-sub-item {
-            display:flex; align-items:center; gap:8px; font-size:0.8rem;
-            color:var(--text); padding:4px 8px; border-radius:5px;
-            background:#f1f5f9; border:1px solid #e2e8f0;
+            display:flex; align-items:center; gap:8px; font-size:0.85rem;
+            color:#444; padding:6px 10px; border-radius:5px;
+            background:#ffffff; border:1px solid #e9ecef;
         }
-        .sub-sub-checkbox { width:16px; height:16px; accent-color:var(--accent); cursor:pointer; flex-shrink:0; }
+        .sub-sub-item.completed { opacity: 0.6; filter: grayscale(50%); }
+        .sub-sub-checkbox { width:16px; height:16px; accent-color:var(--success-green); cursor:pointer; flex-shrink:0; }
+        
         .sub-sub-drag { cursor:grab; color:#cbd5e0; display:none; }
         body.is-admin .sub-sub-drag { display:flex; }
-        
-        .sub-sub-select { width:14px; height:14px; accent-color:var(--danger); display:none; }
+        .sub-sub-select { width:14px; height:14px; accent-color:var(--danger-red); display:none; }
         body.is-admin .sub-sub-select { display:inline-block; }
         
-        .sub-sub-text { flex:1; word-break:break-word; font-weight: 600; transition: opacity 0.3s, filter 0.3s;}
-        
+        .sub-sub-text { flex:1; word-break:break-word; font-weight: 600; }
         .sub-sub-input {
-            flex:1; font-size:0.8rem; font-weight:600; border:1.5px dashed #cbd5e0;
-            border-radius:5px; padding:2px 6px; background:#fff; display:none; color:#000;
+            flex:1; font-size:0.85rem; font-weight:600; border:1.5px dashed var(--accent-yellow);
+            border-radius:5px; padding:2px 6px; background:#fff; display:none; color:var(--text-dark);
         }
 
-        .sub-sub-delete {
-            background:none; border:none; color:#cbd5e0; cursor:pointer; font-size:12px; display:none;
-        }
+        .sub-sub-delete { background:none; border:none; color:#cbd5e0; cursor:pointer; font-size:12px; display:none; }
         body.is-admin .sub-sub-delete { display:inline-block; }
-        .sub-sub-delete:hover { color:var(--danger); }
+        .sub-sub-delete:hover { color:var(--danger-red); }
+
         .add-subtopic-btn, .add-subsub-btn {
-            margin-top:6px; font-size:0.75rem; color:var(--accent);
-            background:none; border:1.5px dashed #d0d7f0; border-radius:16px;
-            padding:5px 12px; font-weight:700; cursor:pointer; display:none;
+            margin-top:6px; font-size:0.8rem; color:var(--accent-grey);
+            background:none; border:1.5px dashed var(--border-light); border-radius:16px;
+            padding:6px 14px; font-weight:700; cursor:pointer; display:none;
         }
         body.is-admin .add-subtopic-btn, body.is-admin .add-subsub-btn { display:inline-flex; align-items:center; gap:4px; }
-        
-        .panel-card-footer {
-            padding:8px 16px 12px; display:none; gap:6px; flex-wrap:wrap;
-            border-top:1px solid #f7fafc;
-        }
+        .add-subtopic-btn:hover, .add-subsub-btn:hover { border-color: var(--accent-yellow); }
+
+        .panel-card-footer { padding:10px 20px 15px; display:none; gap:8px; flex-wrap:wrap; border-top:1px solid #eee; }
         body.is-admin .panel-card-footer { display:flex; }
         .insert-btn, .delete-panel-btn, .delete-selected-btn {
-            font-size:0.7rem; background:transparent; border:1px solid #e8ecf8;
-            color:#4a5568; cursor:pointer; padding:5px 12px; border-radius:12px;
-            transition:0.2s; font-weight:600; font-family:inherit;
+            font-size:0.75rem; background:transparent; border:1px solid #e8ecf8;
+            color:#4a5568; cursor:pointer; padding:6px 14px; border-radius:12px;
+            transition:0.2s; font-weight:700; font-family:inherit;
         }
         .delete-panel-btn, .delete-selected-btn { border-color:#fed7d7; color:#c53030; }
         .delete-panel-btn:hover, .delete-selected-btn:hover { background:#fff5f5; }
-        
-        .panel-progress-wrap {
-            display:flex; align-items:center; gap:8px; padding:4px 16px 8px;
-            font-size:0.75rem; color:var(--text); font-weight: 600;
-        }
+
+        .panel-progress-wrap { display:flex; align-items:center; gap:10px; padding:6px 20px 10px; font-size:0.8rem; color:#777; background:#fafafa; border-top:1px solid #eee;}
         .panel-progress-bar { flex:1; height:6px; background:var(--progress-bg); border-radius:10px; overflow:hidden; }
-        .panel-progress-fill { height:100%; background:var(--progress-fill); border-radius:10px; }
-        .panel-progress-slider { width:60px; accent-color:var(--accent); display:none; }
+        .panel-progress-fill { height:100%; background:var(--accent-yellow); border-radius:10px; }
+        .panel-progress-slider { width:60px; accent-color:var(--accent-yellow); display:none; }
         body.is-admin .panel-progress-slider { display:inline-block; }
-        .panel-progress-percent { font-weight:800; min-width:32px; text-align:right; }
-        .panel-flow-arrow {
-            text-align:right; font-size:0.75rem; color:#718096; font-weight: 600;
-            padding:0 16px 6px; cursor:default;
-        }
-        .panel-flow-arrow i { font-size:0.9rem; margin-left:4px; }
+        .panel-progress-percent { font-weight:800; min-width:35px; text-align:right; color: var(--accent-grey); }
         
-        .panel-comment-wrap { padding:0 16px 10px; }
-        .panel-comment-label { font-size:0.75rem; font-weight:700; color:var(--text); margin-bottom:4px; }
+        .panel-comment-wrap { padding:10px 20px 15px; background:var(--bg-primary); }
+        .panel-comment-label { font-size:0.85rem; font-weight:700; color:var(--accent-grey); margin-bottom:5px; }
         .panel-comment-textarea {
-            width:100%; min-height:45px; resize:vertical; font-size:0.8rem; font-weight: 600;
-            border:2px solid var(--border); border-radius:6px; padding:6px 8px;
-            font-family:inherit; color:var(--text); background: #fafbff;
+            width:100%; min-height:45px; resize:vertical; font-size:0.85rem; font-weight: 600;
+            border:2px solid var(--border-light); border-radius:var(--radius-sm); padding:8px 10px;
+            font-family:inherit; color:var(--text-dark); background: #fafbff;
         }
-        .panel-comment-textarea:focus { outline: none; border-color: var(--accent); }
-        
+        .panel-comment-textarea:focus { outline: none; border-color: var(--accent-yellow); }
+
         .admin-only { display:none; }
         body.is-admin .admin-only { display:flex; }
         .admin-only-inline { display:none; }
@@ -483,40 +290,40 @@
         body.is-admin .admin-only-block { display:block; }
         .subtopic-select-checkbox { display:none; }
         body.is-admin .subtopic-select-checkbox { display:inline-block; }
-        
+
         /* Modals and Toasts */
         .modal-overlay {
             position:fixed; top:0; left:0; width:100%; height:100%;
-            background:rgba(45, 47, 51, 0.7); z-index:999; display:none;
+            background:rgba(45, 47, 51, 0.8); z-index:999; display:none;
             align-items:center; justify-content:center; backdrop-filter:blur(4px);
         }
         .modal-dialog {
-            background:#fff; border-radius:var(--radius); padding:24px;
+            background:#fff; border-radius:var(--radius-md); padding:25px;
             width:450px; max-width:92vw; box-shadow:var(--shadow-lg);
-            max-height:80vh; overflow-y:auto; border-top: 5px solid var(--accent-highlight);
+            max-height:80vh; overflow-y:auto; border-top: 5px solid var(--accent-yellow);
         }
-        .modal-dialog h3 { margin-bottom:6px; font-size:1.1rem; font-weight: 800; color:var(--accent); }
+        .modal-dialog h3 { margin-bottom:10px; font-size:1.2rem; font-weight: 800; color:var(--accent-grey); }
         .modal-input {
-            width:100%; padding:11px 14px; border:2px solid var(--border);
+            width:100%; padding:12px 15px; border:2px solid var(--border-light);
             border-radius:var(--radius-sm); font-size:0.95rem; outline:none; font-family:inherit; font-weight: 600;
         }
-        .modal-input:focus { border-color:var(--accent); }
-        .modal-actions { display:flex; gap:10px; margin-top:18px; justify-content:flex-end; }
+        .modal-input:focus { border-color:var(--accent-yellow); }
+        .modal-actions { display:flex; gap:10px; margin-top:20px; justify-content:flex-end; }
         .toast-container { position:fixed; bottom:24px; right:24px; z-index:1000; display:flex; flex-direction:column; gap:8px; }
         .toast {
-            background:var(--accent); color:#fff; padding:12px 20px; border-radius:25px;
-            font-size:0.85rem; font-weight: 600; box-shadow:var(--shadow-lg); border-left: 3px solid var(--accent-highlight);
+            background:var(--accent-grey); color:#fff; padding:12px 20px; border-radius:25px;
+            font-size:0.9rem; font-weight: 600; box-shadow:var(--shadow-lg); border-left: 4px solid var(--accent-yellow);
         }
     </style>
 </head>
-<body>
-    <div class="bg-animation"></div>
-    <div class="bg-glow"></div>
+<body class="unblur-on-hover">
+    <div class="bg-gradient"></div>
+    <div class="bg-arrows"></div>
 
     <header class="dashboard-header">
         <div class="header-left">
             <div class="header-logo" id="headerLogo">
-                <img src="data:image/jpeg;base64,...(Paste your full Base64 string here)..." alt="Bhoomi Logo">
+                <img src="bhoomi-logo.jpg" alt="Bhoomi Logo">
             </div>
             <div>
                 <span class="project-name-display" id="projectNameDisplay">PLANNING APPROVAL WORKFLOW</span>
@@ -524,7 +331,8 @@
             </div>
         </div>
         <div class="progress-section">
-            <span class="progress-label">📊 Overall Progress</span> <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progressBarFill" style="width:0%;"></div></div>
+            <span class="progress-label">Overall Progress</span>
+            <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progressBarFill" style="width:0%;"></div></div>
             <span class="progress-percent" id="progressPercent">0%</span>
             <input type="range" class="progress-slider" id="progressSlider" min="0" max="100" value="0">
         </div>
@@ -535,12 +343,12 @@
     </header>
 
     <div class="main-container">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
-            <h2 style="font-size:1.1rem;color:var(--accent);font-weight:800;"><i class="fa-solid fa-diagram-project"></i> Workflow Stages <span id="panelCount">(16 Panels)</span></h2>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+            <h2 style="font-size:1.2rem;color:var(--accent-grey);font-weight:800;"><i class="fa-solid fa-diagram-project"></i> Workflow Stages <span id="panelCount">(16 Panels)</span></h2>
             <button class="btn-add-panel admin-only-inline" id="btnAddPanelTop"><i class="fa-solid fa-plus"></i> Add New Panel</button>
         </div>
         <div class="panels-grid" id="panelsGrid"></div>
-        <div style="text-align:center;margin-top:24px;">
+        <div style="text-align:center;margin-top:30px;">
             <button class="btn-add-panel admin-only-inline" id="btnAddPanelBottom"><i class="fa-solid fa-plus"></i> Add New Panel at End</button>
         </div>
     </div>
@@ -548,9 +356,9 @@
     <div class="modal-overlay" id="adminModal">
         <div class="modal-dialog">
             <h3><i class="fa-solid fa-shield-halved"></i> Admin Authentication</h3>
-            <p style="font-weight:600; font-size:0.85rem; margin-bottom:10px;">Enter the admin password to enable editing.</p>
+            <p style="font-weight:600; font-size:0.9rem; margin-bottom:12px; color:#555;">Enter the admin password to enable editing.</p>
             <input type="password" class="modal-input" id="adminPasswordInput" placeholder="Password..." autocomplete="off">
-            <div class="modal-error" id="adminModalError" style="display:none;color:var(--danger);margin-top:6px;font-weight:bold;">Incorrect Password.</div>
+            <div class="modal-error" id="adminModalError" style="display:none;color:var(--danger-red);margin-top:8px;font-weight:bold;">Incorrect Password.</div>
             <div class="modal-actions">
                 <button class="btn btn-outline btn-sm" id="btnCancelAdmin">Cancel</button>
                 <button class="btn btn-admin btn-sm" id="btnConfirmAdmin">Login</button>
@@ -561,10 +369,10 @@
     <div class="modal-overlay" id="newPanelModal">
         <div class="modal-dialog">
             <h3><i class="fa-solid fa-folder-plus"></i> Add New Panel</h3>
-            <p style="font-weight:600; font-size:0.85rem; margin-bottom:10px;">Enter the title for the new workflow panel.</p>
+            <p style="font-weight:600; font-size:0.9rem; margin-bottom:12px; color:#555;">Enter the title for the new workflow panel.</p>
             <input type="text" class="modal-input" id="newPanelTitleInput" placeholder="e.g., LEGAL REVIEW">
-            <label style="display:block;margin-top:10px;font-size:0.85rem;font-weight:bold;">Insert Position:</label>
-            <select class="modal-input" id="newPanelPosition" style="margin-top:4px;">
+            <label style="display:block;margin-top:15px;font-size:0.9rem;font-weight:bold;color:var(--accent-grey);">Insert Position:</label>
+            <select class="modal-input" id="newPanelPosition" style="margin-top:6px;">
                 <option value="end">At the End</option>
                 <option value="start">At the Beginning</option>
             </select>
@@ -579,7 +387,6 @@
 
     <script>
         (function() {
-            // ... (Firebase and App Data logic from Turn 3 original code) ...
             const firebaseConfig = {
                 apiKey: "YOUR_API_KEY",
                 authDomain: "YOUR_PROJECT.firebaseapp.com",
@@ -603,8 +410,7 @@
             const FIRESTORE_DOC_ID = "planning_approval_workflow";
             
             const defaultPanels = [
-                // ... (Panel data from Turn 3 original code) ...
-                { id:'panel_1', title:'LAND IDENTIFICATION & INITIAL FEASIBILITY', color:'#4A90D9', progress:0, comment:'', subtopics:[
+                { id:'panel_1', title:'LAND IDENTIFICATION & INITIAL FEASIBILITY', color:'#2d2f33', progress:0, comment:'', subtopics:[
                     { id:'sub_1_1', text:'Verify land ownership', completed:false, items:[] },
                     { id:'sub_1_2', text:'Check zoning regulations', completed:false, items:[] },
                     { id:'sub_1_3', text:'Review access roads', completed:false, items:[] },
@@ -613,7 +419,7 @@
                     { id:'sub_1_6', text:'Market & financial feasibility', completed:false, items:[] },
                     { id:'sub_1_7', text:'Outcome: Feasible Decision', completed:false, items:[] }
                 ], order:0 },
-                { id:'panel_2', title:'CONCEPT DEVELOPMENT / PRELIMINARY LAYOUT', color:'#5BA0D0', progress:0, comment:'', subtopics:[
+                { id:'panel_2', title:'CONCEPT DEVELOPMENT / PRELIMINARY LAYOUT', color:'#45484f', progress:0, comment:'', subtopics:[
                     { id:'sub_2_1', text:'Prepare initial layout', completed:false, items:[] },
                     { id:'sub_2_2', text:'Road network planning', completed:false, items:[] },
                     { id:'sub_2_3', text:'Drainage concept', completed:false, items:[] },
@@ -622,7 +428,108 @@
                     { id:'sub_2_6', text:'Reservation areas', completed:false, items:[] },
                     { id:'sub_2_7', text:'Outcome: Draft Layout', completed:false, items:[] }
                 ], order:1 },
-                // ... (add other 14 default panels here) ...
+                { id:'panel_3', title:'PRE-CONSULTATION WITH AUTHORITIES', color:'#595d66', progress:0, comment:'', subtopics:[
+                    { id:'sub_3_1', text:'Discuss concept with key authorities', completed:false, items:[] },
+                    { id:'sub_3_2', text:'Identify potential issues', completed:false, items:[] },
+                    { id:'sub_3_3', text:'Understand requirements', completed:false, items:[] },
+                    { id:'sub_3_4', text:'Reduce rejection risk', completed:false, items:[] },
+                    { id:'sub_3_5', text:'Outcome: Guidance & Early Feedback', completed:false, items:[] }
+                ], order:2 },
+                { id:'panel_4', title:'DETAILED TECHNICAL PREPARATION', color:'#707580', progress:0, comment:'', subtopics:[
+                    { id:'sub_4_1', text:'Survey & legal documents', completed:false, items:[] },
+                    { id:'sub_4_2', text:'Planning drawings', completed:false, items:[] },
+                    { id:'sub_4_3', text:'Engineering drawings', completed:false, items:[] },
+                    { id:'sub_4_4', text:'Environmental reports', completed:false, items:[] },
+                    { id:'sub_4_5', text:'Supporting technical reports', completed:false, items:[] },
+                    { id:'sub_4_6', text:'Outcome: Complete Technical Documents', completed:false, items:[] }
+                ], order:3 },
+                { id:'panel_5', title:'FORMAL SUBMISSION OF APPLICATION', color:'#fcc827', progress:0, comment:'', subtopics:[
+                    { id:'sub_5_1', text:'Submit application forms', completed:false, items:[] },
+                    { id:'sub_5_2', text:'Submit technical drawings', completed:false, items:[] },
+                    { id:'sub_5_3', text:'Submit reports & documents', completed:false, items:[] },
+                    { id:'sub_5_4', text:'Pay required fees', completed:false, items:[] },
+                    { id:'sub_5_5', text:'Outcome: Application Registered', completed:false, items:[] }
+                ], order:4 },
+                { id:'panel_6', title:'INITIAL TECHNICAL SCREENING', color:'#e5b31e', progress:0, comment:'', subtopics:[
+                    { id:'sub_6_1', text:'Check completeness', completed:false, items:[] },
+                    { id:'sub_6_2', text:'Verify documents', completed:false, items:[] },
+                    { id:'sub_6_3', text:'Check drawing standards', completed:false, items:[] },
+                    { id:'sub_6_4', text:'Verify payments', completed:false, items:[] },
+                    { id:'sub_6_5', text:'Outcome: Accepted for Review or Returned', completed:false, items:[] }
+                ], order:5 },
+                { id:'panel_7', title:'CIRCULATION TO RELEVANT DEPARTMENTS', color:'#cc9e16', progress:0, comment:'', subtopics:[
+                    { id:'sub_7_1', text:'Planning: Zoning, land use, layout', completed:false, items:[] },
+                    { id:'sub_7_2', text:'Engineering: Roads, drainage, infrastructure', completed:false, items:[] },
+                    { id:'sub_7_3', text:'Water Board: Water supply requirements', completed:false, items:[] },
+                    { id:'sub_7_4', text:'Electricity Board: Power supply', completed:false, items:[] },
+                    { id:'sub_7_5', text:'Environmental: Impact assessment', completed:false, items:[] },
+                    { id:'sub_7_6', text:'Fire Department: Fire safety', completed:false, items:[] },
+                    { id:'sub_7_7', text:'RDA / Other: Road access & links', completed:false, items:[] },
+                    { id:'sub_7_8', text:'Outcome: Technical Comments from Each Dept', completed:false, items:[] }
+                ], order:6 },
+                { id:'panel_8', title:'TECHNICAL COMMITTEE MEETING', color:'#b3880e', progress:0, comment:'', subtopics:[
+                    { id:'sub_8_1', text:'All stakeholders review the project', completed:false, items:[] },
+                    { id:'sub_8_2', text:'Discuss technical aspects', completed:false, items:[] },
+                    { id:'sub_8_3', text:'Evaluate compliance & impacts', completed:false, items:[] },
+                    { id:'sub_8_4', text:'Suggest modifications / conditions', completed:false, items:[] },
+                    { id:'sub_8_5', text:'Outcome A: APPROVED', completed:false, items:[] },
+                    { id:'sub_8_6', text:'Outcome B: APPROVED WITH CONDITIONS', completed:false, items:[] },
+                    { id:'sub_8_7', text:'Outcome C: DEFERRED', completed:false, items:[] },
+                    { id:'sub_8_8', text:'Outcome D: REJECTED', completed:false, items:[] }
+                ], order:7 },
+                { id:'panel_9', title:'ISSUING COMMENTS', color:'#2d2f33', progress:0, comment:'', subtopics:[
+                    { id:'sub_9_1', text:'Official comments issued', completed:false, items:[] },
+                    { id:'sub_9_2', text:'List of required revisions', completed:false, items:[] },
+                    { id:'sub_9_3', text:'Additional studies if needed', completed:false, items:[] },
+                    { id:'sub_9_4', text:'Outcome: Comments to Developer', completed:false, items:[] }
+                ], order:8 },
+                { id:'panel_10', title:'REVISION & RESUBMISSION CYCLE', color:'#45484f', progress:0, comment:'', subtopics:[
+                    { id:'sub_10_1', text:'Revise plans & reports', completed:false, items:[] },
+                    { id:'sub_10_2', text:'Address all comments', completed:false, items:[] },
+                    { id:'sub_10_3', text:'Provide clarifications', completed:false, items:[] },
+                    { id:'sub_10_4', text:'Resubmit for review (repeat if needed)', completed:false, items:[] },
+                    { id:'sub_10_5', text:'Outcome: All Comments Resolved', completed:false, items:[] }
+                ], order:9 },
+                { id:'panel_11', title:'FINAL TECHNICAL CLEARANCE', color:'#595d66', progress:0, comment:'', subtopics:[
+                    { id:'sub_11_1', text:'All departments issue clearance', completed:false, items:[] },
+                    { id:'sub_11_2', text:'Engineers sign off', completed:false, items:[] },
+                    { id:'sub_11_3', text:'Technical committee recommendations finalized', completed:false, items:[] },
+                    { id:'sub_11_4', text:'Outcome: Technical Clearance Issued', completed:false, items:[] }
+                ], order:10 },
+                { id:'panel_12', title:'FINAL APPROVAL BY AUTHORITY', color:'#707580', progress:0, comment:'', subtopics:[
+                    { id:'sub_12_1', text:'Review final recommendation', completed:false, items:[] },
+                    { id:'sub_12_2', text:'Grant official approval', completed:false, items:[] },
+                    { id:'sub_12_3', text:'Approval may include specific conditions', completed:false, items:[] },
+                    { id:'sub_12_4', text:'Outcome: Official Approval Granted', completed:false, items:[] }
+                ], order:11 },
+                { id:'panel_13', title:'PAYMENT OF APPROVAL CHARGES', color:'#fcc827', progress:0, comment:'', subtopics:[
+                    { id:'sub_13_1', text:'Pay approval fees', completed:false, items:[] },
+                    { id:'sub_13_2', text:'Development charges', completed:false, items:[] },
+                    { id:'sub_13_3', text:'Infrastructure levies', completed:false, items:[] },
+                    { id:'sub_13_4', text:'Security deposits (if any)', completed:false, items:[] },
+                    { id:'sub_13_5', text:'Outcome: Payments Completed', completed:false, items:[] }
+                ], order:12 },
+                { id:'panel_14', title:'PERMIT ISSUANCE', color:'#e5b31e', progress:0, comment:'', subtopics:[
+                    { id:'sub_14_1', text:'Development / Building permit', completed:false, items:[] },
+                    { id:'sub_14_2', text:'Subdivision permit', completed:false, items:[] },
+                    { id:'sub_14_3', text:'Other required permits', completed:false, items:[] },
+                    { id:'sub_14_4', text:'Outcome: Permit Issued - Project Can Commence', completed:false, items:[] }
+                ], order:13 },
+                { id:'panel_15', title:'CONSTRUCTION & COMPLIANCE MONITORING', color:'#cc9e16', progress:0, comment:'', subtopics:[
+                    { id:'sub_15_1', text:'Commence construction as per approved plans', completed:false, items:[] },
+                    { id:'sub_15_2', text:'Inspections during construction', completed:false, items:[] },
+                    { id:'sub_15_3', text:'Monitor compliance with conditions', completed:false, items:[] },
+                    { id:'sub_15_4', text:'Ensure quality & safety standards', completed:false, items:[] },
+                    { id:'sub_15_5', text:'Outcome: Work in Progress with Compliance', completed:false, items:[] }
+                ], order:14 },
+                { id:'panel_16', title:'COMPLETION CERTIFICATION', color:'#28a745', progress:0, comment:'', subtopics:[
+                    { id:'sub_16_1', text:'Inspect completed works', completed:false, items:[] },
+                    { id:'sub_16_2', text:'Verify compliance with approved plans', completed:false, items:[] },
+                    { id:'sub_16_3', text:'Issue Certificate of Conformity', completed:false, items:[] },
+                    { id:'sub_16_4', text:'Issue Completion Certificate / Occupancy Certificate', completed:false, items:[] },
+                    { id:'sub_16_5', text:'Outcome: Project Completed & Certified', completed:false, items:[] },
+                    { id:'sub_16_6', text:'FINAL STATUS: LEGALLY APPROVED & COMPLETE ✅', completed:false, items:[] }
+                ], order:15 }
             ];
             
             let appData = { projectName:'PLANNING APPROVAL WORKFLOW', progress:0, panels: JSON.parse(JSON.stringify(defaultPanels)) };
@@ -710,8 +617,10 @@
             
             function renderHeader() {
                 document.getElementById('projectNameDisplay').textContent = appData.projectName;
+                document.getElementById('projectNameInput').value = appData.projectName;
                 document.getElementById('progressBarFill').style.width = appData.progress+'%';
                 document.getElementById('progressPercent').textContent = appData.progress+'%';
+                document.getElementById('progressSlider').value = appData.progress;
             }
             
             function renderPanels() {
@@ -725,6 +634,10 @@
                 });
             }
             
+            function isPanelCompleted(panel) {
+                return panel.subtopics.length > 0 && panel.subtopics.every(s => s.completed);
+            }
+            
             function createPanelCard(panel, index) {
                 const card = document.createElement('div'); card.className='panel-card'; card.dataset.panelId=panel.id;
                 
@@ -734,54 +647,144 @@
                 const badge = document.createElement('div'); badge.className='panel-number'; badge.style.background=panel.color; badge.textContent=index+1;
                 const titleWrap = document.createElement('div'); titleWrap.className='panel-title-wrap';
                 const titleDisp = document.createElement('span'); titleDisp.className='panel-title-display'; titleDisp.textContent=panel.title;
+                const titleInp = document.createElement('input'); titleInp.type='text'; titleInp.className='panel-title-input admin-only-block'; titleInp.value=panel.title;
+                
+                titleInp.addEventListener('input', ()=>{ panel.title=titleInp.value; titleDisp.textContent=panel.title||'(Untitled)'; debounceSave(); });
+                titleWrap.appendChild(titleDisp); titleWrap.appendChild(titleInp);
+                
+                const dragHandle = document.createElement('span'); dragHandle.className='panel-drag-handle'; dragHandle.innerHTML='<i class="fa-solid fa-grip-vertical"></i>';
                 
                 // 6. Panel Accordion Toggle
                 const panelToggle = document.createElement('span'); panelToggle.className='panel-accordion-toggle';
                 panelToggle.innerHTML = '<i class="fa-solid fa-chevron-up"></i>';
-                panelToggle.addEventListener('click', (e)=>{ e.stopPropagation(); togglePanelCollapse(panel.id); });
+                panelToggle.addEventListener('click', (e)=>{ 
+                    e.stopPropagation(); 
+                    card.classList.toggle('panel-collapsed'); 
+                });
 
-                titleWrap.appendChild(titleDisp);
-                header.appendChild(badge); header.appendChild(titleWrap); header.appendChild(panelToggle); card.appendChild(header);
+                header.appendChild(badge); header.appendChild(titleWrap); header.appendChild(dragHandle); header.appendChild(panelToggle); card.appendChild(header);
                 
                 const body = document.createElement('div'); body.className='panel-card-body';
                 const subtopicList = document.createElement('ul'); subtopicList.className='subtopic-list'; subtopicList.dataset.panelId=panel.id;
                 panel.subtopics.forEach((sub, subIndex) => subtopicList.appendChild(createSubtopicItem(panel, sub, subIndex)));
                 body.appendChild(subtopicList);
                 
+                const addSubBtn = document.createElement('button'); addSubBtn.className='add-subtopic-btn admin-only-inline'; addSubBtn.innerHTML='<i class="fa-solid fa-plus-circle"></i> Add Sub-item';
+                addSubBtn.addEventListener('click', ()=>{
+                    const newSub = { id:`sub_${panel.id.split('_')[1]}_${subtopicIdCounter++}`, text:'New sub-item', completed:false, items:[] };
+                    panel.subtopics.push(newSub);
+                    const newLi = createSubtopicItem(panel, newSub, panel.subtopics.length-1);
+                    subtopicList.appendChild(newLi);
+                    reinitSingleSubtopicSortable(subtopicList);
+                    checkPanelCompletion(panel.id);
+                    debounceSave();
+                });
+                body.appendChild(addSubBtn);
                 card.appendChild(body);
                 
-                // Comments Wrapping
-                const commentWrap = document.createElement('div'); commentWrap.className='panel-comment-wrap';
-                const commentArea = document.createElement('textarea'); commentArea.className='panel-comment-textarea'; commentArea.value = panel.comment || '';
-                commentWrap.appendChild(commentArea);
+                const progressWrap = document.createElement('div'); progressWrap.className='panel-progress-wrap';
+                progressWrap.innerHTML = `<span>Progress</span><div class="panel-progress-bar"><div class="panel-progress-fill" style="width:${panel.progress}%;"></div></div><span class="panel-progress-percent">${panel.progress}%</span>`;
+                const progressSlider = document.createElement('input'); progressSlider.type='range'; progressSlider.className='panel-progress-slider admin-only-inline';
+                progressSlider.min=0; progressSlider.max=100; progressSlider.value=panel.progress;
+                progressSlider.addEventListener('input', ()=>{
+                    if(!isAdmin) return;
+                    panel.progress = parseInt(progressSlider.value);
+                    progressWrap.querySelector('.panel-progress-fill').style.width = panel.progress+'%';
+                    progressWrap.querySelector('.panel-progress-percent').textContent = panel.progress+'%';
+                    debounceSave(400);
+                });
+                progressWrap.appendChild(progressSlider);
+                card.appendChild(progressWrap);
                 
+                const commentWrap = document.createElement('div'); commentWrap.className='panel-comment-wrap';
+                const commentLabel = document.createElement('div'); commentLabel.className='panel-comment-label'; commentLabel.innerHTML='💬 Viewer Comments & Notes';
+                const commentArea = document.createElement('textarea'); commentArea.className='panel-comment-textarea'; commentArea.value = panel.comment || '';
+                commentArea.placeholder = 'e.g., 1.2: Awaiting final signature...';
+                commentArea.addEventListener('input', ()=>{ panel.comment = commentArea.value; debounceSave(800); });
+                commentWrap.appendChild(commentLabel); commentWrap.appendChild(commentArea);
                 card.appendChild(commentWrap);
                 
-                // Completed State
-                const completedCount = panel.subtopics.filter(s => s.completed).length;
-                if(completedCount === panel.subtopics.length && panel.subtopics.length > 0) card.classList.add('panel-completed');
+                const footer = document.createElement('div'); footer.className='panel-card-footer admin-only';
+                const insBefore = document.createElement('button'); insBefore.className='insert-btn'; insBefore.innerHTML='<i class="fa-solid fa-arrow-up"></i> Insert Before';
+                insBefore.addEventListener('click', (e)=>{ e.stopPropagation(); openNewPanelModalAt(index); });
+                const insAfter = document.createElement('button'); insAfter.className='insert-btn'; insAfter.innerHTML='<i class="fa-solid fa-arrow-down"></i> Insert After';
+                insAfter.addEventListener('click', (e)=>{ e.stopPropagation(); openNewPanelModalAt(index+1); });
                 
+                const delSelBtn = document.createElement('button'); delSelBtn.className='delete-selected-btn'; delSelBtn.innerHTML='<i class="fa-solid fa-check-double"></i> Delete Selected';
+                delSelBtn.addEventListener('click', (e)=>{
+                    e.stopPropagation();
+                    const list = card.querySelector('.subtopic-list');
+                    const checked = list.querySelectorAll('.subtopic-select-checkbox:checked');
+                    if(checked.length===0) { showToast('No subtopics selected.','error'); return; }
+                    const ids = new Set(); checked.forEach(cb=>{ const li=cb.closest('.subtopic-item'); if(li){ ids.add(li.dataset.subtopicId); li.remove(); } });
+                    panel.subtopics = panel.subtopics.filter(s => !ids.has(s.id));
+                    reinitSingleSubtopicSortable(list);
+                    checkPanelCompletion(panel.id);
+                    debounceSave();
+                });
+                
+                const delPanel = document.createElement('button'); delPanel.className='delete-panel-btn'; delPanel.innerHTML='<i class="fa-solid fa-trash-can"></i> Delete';
+                delPanel.addEventListener('click', (e)=>{
+                    e.stopPropagation();
+                    if(appData.panels.length<=1) { showToast('Cannot delete last panel.','error'); return; }
+                    if(confirm(`Delete "${panel.title}"?`)) { appData.panels = appData.panels.filter(p=>p.id!==panel.id); saveData(true); renderAll(); }
+                });
+                
+                footer.appendChild(insBefore); footer.appendChild(insAfter); footer.appendChild(delSelBtn); footer.appendChild(delPanel);
+                card.appendChild(footer);
+                
+                // 1. Check completion on load
+                if(isPanelCompleted(panel)) card.classList.add('panel-completed');
+
                 return card;
             }
             
             function createSubtopicItem(panel, sub, subIndex) {
                 const li = document.createElement('li'); li.className='subtopic-item'; li.dataset.subtopicId=sub.id;
-                if(sub.completed) li.classList.add('completed');
-
+                
                 const topRow = document.createElement('div'); topRow.className='subtopic-item-top';
                 
+                const dragHandle = document.createElement('span'); dragHandle.className='subtopic-drag-handle admin-only-inline'; dragHandle.innerHTML='<i class="fa-solid fa-grip-vertical"></i>';
+                const selCheck = document.createElement('input'); selCheck.type='checkbox'; selCheck.className='subtopic-select-checkbox';
                 const checkbox = document.createElement('input'); checkbox.type='checkbox'; checkbox.className='subtopic-checkbox'; checkbox.checked=sub.completed;
-                checkbox.addEventListener('change', ()=>{ toggleSubtopicCompletion(panel.id, sub.id); });
+                
+                checkbox.addEventListener('change', ()=>{ 
+                    sub.completed=checkbox.checked; 
+                    if(sub.completed) li.classList.add('completed'); else li.classList.remove('completed');
+                    checkPanelCompletion(panel.id); 
+                    debounceSave(); 
+                });
                 
                 const textSpan = document.createElement('span'); textSpan.className='subtopic-text';
                 textSpan.innerHTML = `<span class="item-number">${subIndex+1}.</span> ${sub.text}`;
                 
+                const inputEl = document.createElement('input'); inputEl.type='text'; inputEl.className='subtopic-input'; inputEl.value=sub.text;
+                inputEl.addEventListener('input', ()=>{ 
+                    sub.text=inputEl.value; 
+                    textSpan.innerHTML = `<span class="item-number">${subIndex+1}.</span> ${sub.text||'(empty)'}`; 
+                    debounceSave(); 
+                });
+                
                 // 6. Item Accordion Toggle
                 const itemToggle = document.createElement('span'); itemToggle.className='item-accordion-toggle';
-                itemToggle.innerHTML = '<i class="fa-solid fa-chevron-up"></i>'; // Chevron Up is open, Down is closed
-                itemToggle.addEventListener('click', (e)=>{ e.stopPropagation(); toggleItemCollapse(li); });
-
-                topRow.appendChild(checkbox); topRow.appendChild(textSpan); topRow.appendChild(itemToggle);
+                itemToggle.innerHTML = '<i class="fa-solid fa-chevron-down"></i>';
+                itemToggle.addEventListener('click', (e)=>{ 
+                    e.stopPropagation(); 
+                    li.classList.toggle('item-collapsed'); 
+                });
+                
+                // Auto collapse item initially if you want, else leave open. I'll leave open by default.
+                
+                const deleteBtn = document.createElement('button'); deleteBtn.className='subtopic-delete-btn admin-only-inline'; deleteBtn.innerHTML='<i class="fa-solid fa-xmark"></i>';
+                deleteBtn.addEventListener('click', (e)=>{ e.stopPropagation(); li.remove(); panel.subtopics=panel.subtopics.filter(s=>s.id!==sub.id); checkPanelCompletion(panel.id); debounceSave(); });
+                
+                textSpan.addEventListener('dblclick', ()=>{ if(isAdmin){ textSpan.style.display='none'; inputEl.style.display='block'; inputEl.focus(); } });
+                inputEl.addEventListener('blur', ()=>{ textSpan.style.display='block'; inputEl.style.display='none'; });
+                
+                if(sub.completed) li.classList.add('completed');
+                
+                topRow.appendChild(dragHandle); topRow.appendChild(selCheck); topRow.appendChild(checkbox);
+                topRow.appendChild(textSpan); topRow.appendChild(inputEl); topRow.appendChild(itemToggle); topRow.appendChild(deleteBtn);
                 li.appendChild(topRow);
                 
                 const subSubWrapper = document.createElement('div'); subSubWrapper.className='sub-sub-wrapper';
@@ -791,10 +794,38 @@
                 renderSubSubList(subSubList, sub, subIndex);
                 subSubWrapper.appendChild(subSubList);
                 
+                const addSubSubBtn = document.createElement('button'); addSubSubBtn.className='add-subsub-btn admin-only-inline'; addSubSubBtn.innerHTML='<i class="fa-solid fa-plus"></i> Add Sub-item';
+                addSubSubBtn.addEventListener('click', (e)=>{
+                    e.stopPropagation();
+                    li.classList.remove('item-collapsed'); // Ensure it's open when adding
+                    const newItem = { id:`item_${subSubIdCounter++}`, text:'New sub-item', completed:false };
+                    sub.items.push(newItem);
+                    renderSubSubList(subSubList, sub, subIndex);
+                    if(isAdmin && typeof Sortable !== 'undefined') initSubSubSortable(subSubList);
+                    itemToggle.style.visibility = 'visible';
+                    debounceSave();
+                });
+                subSubWrapper.appendChild(addSubSubBtn);
+                
+                const delSelSubSubBtn = document.createElement('button'); delSelSubSubBtn.className='delete-selected-btn admin-only-inline'; delSelSubSubBtn.style.marginLeft='8px'; delSelSubSubBtn.innerHTML='<i class="fa-solid fa-check-double"></i> Del Selected';
+                delSelSubSubBtn.addEventListener('click', (e)=>{
+                    e.stopPropagation();
+                    const checked = subSubList.querySelectorAll('.sub-sub-select:checked');
+                    if(checked.length===0) { showToast('No sub-items selected.','error'); return; }
+                    const ids = new Set(); checked.forEach(cb=>{ const listIt=cb.closest('.sub-sub-item'); if(listIt){ ids.add(listIt.dataset.itemId); listIt.remove(); } });
+                    sub.items = sub.items.filter(it => !ids.has(it.id));
+                    renderSubSubList(subSubList, sub, subIndex);
+                    if(isAdmin && typeof Sortable !== 'undefined') initSubSubSortable(subSubList);
+                    if(sub.items.length === 0) itemToggle.style.visibility = 'hidden';
+                    debounceSave();
+                });
+                subSubWrapper.appendChild(delSelSubSubBtn);
+                
                 li.appendChild(subSubWrapper);
                 
-                // Show Item Accordion only if target target targets targets target has target has targets target has target has target has target has targets target has target has target has target has target has target has target has sub targets has sub targets has target has sub targets sub targets sub targets sub sub sub sub sub sub sub sub items
-                if(sub.items.length > 0) itemToggle.style.visibility = 'visible';
+                // Show Item Accordion only if target has sub items
+                if(sub.items.length === 0) itemToggle.style.visibility = 'hidden';
+                else li.classList.add('item-collapsed'); // Optional: start sub-items collapsed for neatness
 
                 return li;
             }
@@ -803,8 +834,223 @@
                 listEl.innerHTML = '';
                 (subtopic.items || []).forEach((item, idx) => {
                     const li = document.createElement('li'); li.className='sub-sub-item'; li.dataset.itemId=item.id;
-                    if(item.completed) li.classList.add('completed');
+                    const drag = document.createElement('span'); drag.className='sub-sub-drag'; drag.innerHTML='<i class="fa-solid fa-grip-vertical"></i>';
+                    const sel = document.createElement('input'); sel.type='checkbox'; sel.className='sub-sub-select';
                     const cb = document.createElement('input'); cb.type='checkbox'; cb.className='sub-sub-checkbox'; cb.checked=item.completed||false;
-                    cb.addEventListener('change', ()=>{ toggleSubSubCompletion(subtopic, item.id); });
+                    
                     const text = document.createElement('span'); text.className='sub-sub-text';
-                    text.innerHTML = `<span class="item-number">${parentIndex+1}.${idx+1}
+                    text.innerHTML = `<span class="item-number">${parentIndex+1}.${idx+1}</span> ${item.text}`;
+                    
+                    const inputEl = document.createElement('input'); inputEl.type='text'; inputEl.className='sub-sub-input'; inputEl.value=item.text;
+                    inputEl.addEventListener('input', ()=>{ 
+                        item.text = inputEl.value; 
+                        text.innerHTML = `<span class="item-number">${parentIndex+1}.${idx+1}</span> ${item.text||'(empty)'}`; 
+                        debounceSave(); 
+                    });
+
+                    text.addEventListener('dblclick', ()=>{ if(isAdmin){ text.style.display='none'; inputEl.style.display='block'; inputEl.focus(); } });
+                    inputEl.addEventListener('blur', ()=>{ text.style.display='block'; inputEl.style.display='none'; });
+
+                    if(item.completed) li.classList.add('completed');
+
+                    cb.addEventListener('change', ()=>{ 
+                        item.completed=cb.checked; 
+                        if(item.completed) li.classList.add('completed'); else li.classList.remove('completed');
+                        debounceSave(); 
+                    });
+                    
+                    const del = document.createElement('button'); del.className='sub-sub-delete'; del.innerHTML='<i class="fa-solid fa-xmark"></i>';
+                    del.addEventListener('click', (e)=>{
+                        e.stopPropagation();
+                        li.remove();
+                        subtopic.items = subtopic.items.filter(it => it.id!==item.id);
+                        debounceSave();
+                        renderSubSubList(listEl, subtopic, parentIndex);
+                        if(isAdmin && typeof Sortable !== 'undefined') initSubSubSortable(listEl);
+                    });
+                    
+                    li.appendChild(drag); li.appendChild(sel); li.appendChild(cb); li.appendChild(text); li.appendChild(inputEl); li.appendChild(del);
+                    listEl.appendChild(li);
+                });
+            }
+            
+            function initSubSubSortable(listEl) {
+                if(!isAdmin || typeof Sortable === 'undefined') return;
+                const wrapper = listEl.closest('.sub-sub-wrapper');
+                if(!wrapper) return;
+                if(wrapper._sortable) wrapper._sortable.destroy();
+                wrapper._sortable = new Sortable(listEl, {
+                    animation:150, handle:'.sub-sub-drag',
+                    onEnd: function() {
+                        const panelId = listEl.closest('.panel-card')?.dataset.panelId;
+                        const subtopicId = listEl.closest('.subtopic-item')?.dataset.subtopicId;
+                        if(!panelId || !subtopicId) return;
+                        const panel = appData.panels.find(p=>p.id===panelId);
+                        if(!panel) return;
+                        const subtopic = panel.subtopics.find(s=>s.id===subtopicId);
+                        if(!subtopic) return;
+                        const newOrder = Array.from(listEl.querySelectorAll('.sub-sub-item')).map(li=>li.dataset.itemId);
+                        subtopic.items = newOrder.map(id=>subtopic.items.find(it=>it.id===id)).filter(it=>it);
+                        debounceSave();
+                    }
+                });
+            }
+            
+            function checkPanelCompletion(panelId) {
+                const card = document.querySelector(`.panel-card[data-panel-id="${panelId}"]`);
+                if(!card) return;
+                const panel = appData.panels.find(p=>p.id===panelId);
+                if(!panel) return;
+                if(isPanelCompleted(panel)) card.classList.add('panel-completed');
+                else card.classList.remove('panel-completed');
+            }
+            
+            function updatePanelCount() { document.getElementById('panelCount').textContent = `(${appData.panels.length} Panels)`; }
+            
+            function updateAdminUI() {
+                if(isAdmin) {
+                    document.body.classList.add('is-admin');
+                    document.getElementById('btnAdminText').textContent = 'Exit Admin';
+                    document.getElementById('btnAdminToggle').classList.add('active');
+                } else {
+                    document.body.classList.remove('is-admin');
+                    document.getElementById('btnAdminText').textContent = 'Admin Login';
+                    document.getElementById('btnAdminToggle').classList.remove('active');
+                    $$('.subtopic-input').forEach(el=>el.style.display='none');
+                    $$('.subtopic-text').forEach(el=>el.style.display='block');
+                    $$('.sub-sub-input').forEach(el=>el.style.display='none');
+                    $$('.sub-sub-text').forEach(el=>el.style.display='block');
+                }
+                initSortable();
+            }
+            
+            function destroyAllSortables() {
+                if(panelSortable) { panelSortable.destroy(); panelSortable=null; }
+                subtopicSortables.forEach(s=>s.destroy()); subtopicSortables=[];
+                $$('.sub-sub-wrapper').forEach(w=>{ if(w._sortable) { w._sortable.destroy(); w._sortable=null; } });
+            }
+            
+            function initSortable() {
+                destroyAllSortables();
+                if(typeof Sortable==='undefined') return;
+                if(isAdmin && document.getElementById('panelsGrid') && appData.panels.length>0){
+                    panelSortable = new Sortable(document.getElementById('panelsGrid'), {
+                        animation:200, handle:'.panel-drag-handle',
+                        onEnd: function(evt){
+                            const moved = appData.panels.splice(evt.oldIndex,1)[0];
+                            appData.panels.splice(evt.newIndex,0,moved);
+                            appData.panels.forEach((p,i)=>p.order=i);
+                            saveData(true);
+                            renderAll();
+                        }
+                    });
+                }
+                if(isAdmin){
+                    $$('.subtopic-list').forEach(list => initSingleSubtopicSortable(list));
+                }
+            }
+            
+            function initSingleSubtopicSortable(listEl) {
+                if(!isAdmin || subtopicSortables.some(s=>s.el===listEl)) return;
+                const sortable = new Sortable(listEl, {
+                    animation:150, handle:'.subtopic-drag-handle',
+                    onEnd: function(){
+                        const panelId = listEl.dataset.panelId;
+                        const panel = appData.panels.find(p=>p.id===panelId);
+                        if(!panel) return;
+                        const ids = Array.from(listEl.querySelectorAll('.subtopic-item')).map(li=>li.dataset.subtopicId);
+                        panel.subtopics = ids.map(id=>panel.subtopics.find(s=>s.id===id)).filter(s=>s);
+                        debounceSave();
+                        renderAll();
+                    }
+                });
+                subtopicSortables.push(sortable);
+            }
+            
+            function reinitSingleSubtopicSortable(listEl) {
+                subtopicSortables = subtopicSortables.filter(s=>{ if(s.el===listEl){ s.destroy(); return false; } return true; });
+                initSingleSubtopicSortable(listEl);
+            }
+            
+            function openAdminModal() { document.getElementById('adminModal').style.display='flex'; document.getElementById('adminPasswordInput').value = ''; document.getElementById('adminModalError').style.display = 'none'; document.getElementById('adminPasswordInput').focus(); }
+            function closeAdminModal() { document.getElementById('adminModal').style.display='none'; }
+            
+            document.getElementById('btnCancelAdmin').addEventListener('click', closeAdminModal);
+            document.getElementById('btnConfirmAdmin').addEventListener('click', ()=>{
+                if(document.getElementById('adminPasswordInput').value === ADMIN_PASSWORD) {
+                    isAdmin = true; updateAdminUI(); renderAll(); closeAdminModal(); showToast('Admin Login activated! 🔓');
+                } else {
+                    document.getElementById('adminModalError').style.display='block';
+                }
+            });
+            
+            document.getElementById('btnAdminToggle').addEventListener('click', ()=> isAdmin ? exitAdminMode() : openAdminModal());
+            function exitAdminMode() { isAdmin=false; updateAdminUI(); renderAll(); showToast('Admin Login deactivated. 🔒'); }
+            
+            let pendingInsertIndex = null;
+            function openNewPanelModalAt(idx) { if(!isAdmin) return; pendingInsertIndex=idx; document.getElementById('newPanelModal').style.display='flex'; document.getElementById('newPanelTitleInput').focus(); }
+            document.getElementById('btnAddPanelTop').addEventListener('click', ()=> openNewPanelModalGeneric('start'));
+            document.getElementById('btnAddPanelBottom').addEventListener('click', ()=> openNewPanelModalGeneric('end'));
+            
+            function openNewPanelModalGeneric(pos='end') { if(!isAdmin) return; pendingInsertIndex = (pos==='start'?0:appData.panels.length); document.getElementById('newPanelModal').style.display='flex'; document.getElementById('newPanelTitleInput').focus(); }
+            
+            document.getElementById('btnCancelNewPanel').addEventListener('click', ()=>{ document.getElementById('newPanelModal').style.display='none'; pendingInsertIndex=null; });
+            document.getElementById('btnConfirmNewPanel').addEventListener('click', ()=>{
+                const title = document.getElementById('newPanelTitleInput').value.trim();
+                if(!title) return;
+                let insertAt = pendingInsertIndex !== null ? pendingInsertIndex : (document.getElementById('newPanelPosition').value==='start'?0:appData.panels.length);
+                insertAt = Math.max(0, Math.min(insertAt, appData.panels.length));
+                
+                const newPanel = {
+                    id:`panel_${panelIdCounter++}`, title,
+                    color:['#2d2f33','#45484f','#595d66','#fcc827','#e5b31e','#cc9e16'][Math.floor(Math.random()*6)],
+                    subtopics:[{ id:`sub_new_${subtopicIdCounter++}`, text:'New sub-item', completed:false, items:[] }],
+                    progress:0, comment:'', order:insertAt
+                };
+                
+                appData.panels.splice(insertAt,0,newPanel);
+                appData.panels.forEach((p,i)=>p.order=i);
+                document.getElementById('newPanelModal').style.display='none'; pendingInsertIndex=null; document.getElementById('newPanelTitleInput').value = '';
+                saveData(true); renderAll();
+            });
+            
+            document.getElementById('btnResetAll').addEventListener('click', ()=>{
+                if(!isAdmin) return;
+                if(confirm('Reset all data?')) {
+                    appData.panels = JSON.parse(JSON.stringify(defaultPanels));
+                    appData.progress=0; appData.projectName='PLANNING APPROVAL WORKFLOW';
+                    panelIdCounter=17; subtopicIdCounter=1000; subSubIdCounter=2000;
+                    saveData(true); renderAll();
+                }
+            });
+            
+            document.getElementById('progressSlider').addEventListener('input', ()=>{
+                if(!isAdmin) { document.getElementById('progressSlider').value=appData.progress; return; }
+                appData.progress = parseInt(document.getElementById('progressSlider').value);
+                document.getElementById('progressBarFill').style.width = appData.progress+'%';
+                document.getElementById('progressPercent').textContent = appData.progress+'%';
+                debounceSave(400);
+            });
+            
+            document.getElementById('projectNameInput').addEventListener('input', ()=>{
+                appData.projectName = document.getElementById('projectNameInput').value;
+                document.getElementById('projectNameDisplay').textContent = appData.projectName||'PLANNING APPROVAL WORKFLOW';
+                debounceSave();
+            });
+            
+            document.addEventListener('keydown', (e)=>{
+                if(e.key==='Escape') { closeAdminModal(); document.getElementById('newPanelModal').style.display='none'; }
+                if(e.ctrlKey && e.shiftKey && e.key==='A') { e.preventDefault(); isAdmin ? exitAdminMode() : openAdminModal(); }
+            });
+            
+            (async function init(){
+                await loadData();
+                appData.panels.forEach((p,i)=>{ if(p.order===undefined) p.order=i; });
+                appData.panels.sort((a,b)=>(a.order||0)-(b.order||0));
+                renderAll();
+                console.log('Dashboard ready – admin password: Dlns@4512#');
+            })().catch(e=>{ console.error(e); appData.panels=JSON.parse(JSON.stringify(defaultPanels)); renderAll(); });
+        })();
+    </script>
+</body>
+</html>
