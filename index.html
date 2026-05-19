@@ -4,24 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Planning Approval Workflow Dashboard</title>
-
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-
     <!-- SortableJS -->
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
-
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-
     <style>
         :root {
             --bg: #f0f4f8;
             --surface: #ffffff;
             --surface-alt: #f8fafb;
-            --text: #0a0a0a;
-            --text-secondary: #2d3748;
+            /* Made text pure black for long-distance visibility */
+            --text: #000000;
+            --text-secondary: #000000;
             --border: #cbd5e0;
             --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
             --shadow: 0 4px 12px rgba(0,0,0,0.08);
@@ -35,20 +32,28 @@
             --progress-fill: linear-gradient(90deg, #4f6ef7, #38a169);
         }
         * { margin:0; padding:0; box-sizing:border-box; }
-
+        
+        /* 1. Professional Animated Background */
         body::before {
             content: '';
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: linear-gradient(135deg, #f0f4f8 0%, #d9e2ef 50%, #f0f4f8 100%);
-            background-size: 400% 400%;
-            animation: gradientMove 20s ease infinite;
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(135deg, #e4eaf5 0%, #f3f5f9 100%);
+            z-index: -2;
+        }
+        body::after {
+            content: '';
+            position: fixed; top: -50%; left: -50%; width: 200%; height: 200%;
+            background-image: 
+                radial-gradient(circle at 50% 50%, rgba(79,110,247,0.05) 0%, transparent 40%),
+                linear-gradient(rgba(0, 0, 0, 0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 0, 0, 0.02) 1px, transparent 1px);
+            background-size: 100% 100%, 40px 40px, 40px 40px;
+            animation: professionalPulse 25s ease-in-out infinite alternate;
             z-index: -1;
         }
-        @keyframes gradientMove {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
+        @keyframes professionalPulse {
+            0% { transform: scale(0.9) translate(0px, 0px); }
+            100% { transform: scale(1.05) translate(30px, 30px); }
         }
 
         body {
@@ -74,26 +79,24 @@
             background:var(--accent); color:#fff;
             display:flex; align-items:center; justify-content:center; font-size:20px;
         }
-        .project-name-display { font-size:1.25rem; font-weight:700; }
+        .project-name-display { font-size:1.25rem; font-weight:800; color:var(--text); }
         .project-name-input {
-            font-size:1.25rem; font-weight:700;
+            font-size:1.25rem; font-weight:800; color:#000;
             border:2px dashed var(--accent); border-radius:var(--radius-sm);
             padding:4px 10px; width:360px; display:none;
         }
         body.is-admin .project-name-input { display:inline-block; }
         body.is-admin .project-name-display { display:none; }
-
         .progress-section { display:flex; align-items:center; gap:12px; }
-        .progress-label { font-size:0.82rem; font-weight:600; color:var(--text-secondary); }
+        .progress-label { font-size:0.85rem; font-weight:700; color:var(--text-secondary); }
         .progress-bar-wrap { width:180px; height:10px; background:var(--progress-bg); border-radius:20px; overflow:hidden; }
         .progress-bar-fill { height:100%; background:var(--progress-fill); border-radius:20px; transition:width 0.5s; }
-        .progress-percent { font-weight:700; font-size:0.9rem; color:var(--accent); min-width:38px; text-align:center; }
+        .progress-percent { font-weight:800; font-size:0.95rem; color:var(--accent); min-width:38px; text-align:center; }
         .progress-slider { width:100px; accent-color:var(--accent); display:none; }
         body.is-admin .progress-slider { display:inline-block; }
-
         .btn {
             padding:9px 18px; border-radius:25px; border:none;
-            font-weight:600; font-size:0.85rem; cursor:pointer;
+            font-weight:700; font-size:0.85rem; cursor:pointer;
             display:inline-flex; align-items:center; gap:7px;
             transition:0.2s; font-family:inherit;
         }
@@ -103,143 +106,171 @@
         .btn-outline:hover { border-color:var(--accent); color:var(--accent); }
         .btn-sm { padding:5px 12px; font-size:0.75rem; border-radius:18px; }
         .btn-add-panel {
-            background:#fff; border:2px dashed #cbd5e0; color:#718096;
-            padding:10px 20px; border-radius:25px; font-weight:600;
+            background:#fff; border:2px dashed #cbd5e0; color:#4a5568;
+            padding:10px 20px; border-radius:25px; font-weight:700;
             cursor:pointer; display:inline-flex; align-items:center; gap:6px;
         }
         .btn-add-panel:hover { border-color:var(--accent); color:var(--accent); background:#fafbff; }
-
         .main-container { max-width:1500px; margin:0 auto; padding:24px 20px 60px; }
-        .panels-grid {
-            display:grid; grid-template-columns:repeat(4,1fr); gap:18px; align-items:start;
-        }
+        .panels-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:18px; align-items:start; }
+        
         @media (max-width:1400px) { .panels-grid { grid-template-columns:repeat(3,1fr); } }
         @media (max-width:1050px) { .panels-grid { grid-template-columns:repeat(2,1fr); } }
         @media (max-width:650px) { .panels-grid { grid-template-columns:1fr; } }
-
+        
         /* Panel Card */
         .panel-card {
             background:var(--surface); border-radius:var(--radius);
             box-shadow:var(--shadow); border:1.5px solid var(--border);
-            transition:0.2s; overflow:hidden; display:flex; flex-direction:column;
+            transition: opacity 0.4s ease, filter 0.4s ease, transform 0.2s, box-shadow 0.2s; 
+            overflow:hidden; display:flex; flex-direction:column;
         }
+        
+        /* 6. Blur and reduce transparency for completed panels */
         .panel-card.panel-completed {
-            opacity:0.7; filter:grayscale(20%);
+            opacity: 0.55; 
+            filter: blur(1.2px) grayscale(30%);
         }
+        .panel-card.panel-completed:hover {
+            opacity: 1; filter: blur(0px) grayscale(0%); /* Unblur on hover so it can be read */
+        }
+        
         .panel-card:hover { box-shadow:var(--shadow-lg); transform:translateY(-2px); }
         .panel-color-strip { height:6px; }
         .panel-card-header { padding:14px 16px 10px; display:flex; align-items:flex-start; gap:10px; }
         .panel-number {
             width:32px; height:32px; border-radius:50%;
             display:flex; align-items:center; justify-content:center;
-            font-weight:700; font-size:0.8rem; color:#fff; flex-shrink:0;
+            font-weight:800; font-size:0.85rem; color:#fff; flex-shrink:0;
         }
         .panel-title-wrap { flex:1; min-width:0; }
-        .panel-title-display { font-weight:700; font-size:0.9rem; word-break:break-word; color:var(--text); }
+        .panel-title-display { font-weight:800; font-size:0.95rem; word-break:break-word; color:var(--text); }
         .panel-title-input {
-            font-weight:700; font-size:0.9rem; border:2px dashed var(--accent);
-            border-radius:6px; padding:3px 8px; width:100%; display:none;
+            font-weight:800; font-size:0.95rem; border:2px dashed var(--accent);
+            border-radius:6px; padding:3px 8px; width:100%; display:none; color:#000;
         }
         body.is-admin .panel-title-input { display:block; }
         body.is-admin .panel-title-display { display:none; }
-
         .panel-drag-handle { cursor:grab; color:#cbd5e0; padding:4px 2px; display:none; }
         body.is-admin .panel-drag-handle { display:block; }
-
         .panel-card-body { padding:4px 16px 14px; flex:1; }
+        
+        /* Subtopics */
         .subtopic-list { list-style:none; display:flex; flex-direction:column; gap:5px; }
         .subtopic-item {
-            display:flex; align-items:center; gap:8px; font-size:0.8rem;
-            color:var(--text-secondary); padding:5px 8px; border-radius:6px;
+            display:flex; flex-wrap: wrap; align-items:center; gap:8px; font-size:0.85rem;
+            color:var(--text); padding:5px 8px; border-radius:6px;
             background:var(--surface-alt); border:1px solid transparent;
         }
-        .subtopic-checkbox { width:16px; height:16px; accent-color:var(--accent); cursor:pointer; flex-shrink:0; }
-        .subtopic-text { flex:1; word-break:break-word; }
-        .subtopic-text .item-number { font-weight:600; margin-right:4px; color:var(--text); }
+        .subtopic-item-top { display: flex; width: 100%; align-items: center; gap: 8px; }
+        .subtopic-checkbox { width:18px; height:18px; accent-color:var(--accent); cursor:pointer; flex-shrink:0; }
+        .subtopic-text { flex:1; word-break:break-word; font-weight: 600; transition: opacity 0.3s, filter 0.3s; }
+        
+        /* Subtopic Blur on complete */
+        .subtopic-item:hover .subtopic-text, .sub-sub-item:hover .sub-sub-text {
+            opacity: 1 !important; filter: blur(0px) !important;
+        }
+
+        /* 3. Special Numbers formatting */
+        .item-number { font-weight:800; margin-right:6px; color:#000000; background: #e2e8f0; padding: 1px 5px; border-radius: 4px; font-size: 0.75rem;}
+        
         .subtopic-input {
-            flex:1; font-size:0.8rem; border:1.5px dashed #cbd5e0;
-            border-radius:5px; padding:3px 7px; background:#fff; display:none;
+            flex:1; font-size:0.85rem; font-weight:600; border:1.5px dashed #cbd5e0;
+            border-radius:5px; padding:3px 7px; background:#fff; display:none; color:#000;
         }
         body.is-admin .subtopic-input { display:none; }
+        
         .subtopic-expand-icon {
-            cursor:pointer; color:var(--accent); font-size:0.9rem;
-            transition:0.2s; flex-shrink:0;
+            cursor:pointer; color:var(--accent); font-size:0.95rem;
+            transition: transform 0.3s ease; flex-shrink:0; padding: 4px;
         }
-        .subtopic-expand-icon:hover { transform:scale(1.2); }
+        .subtopic-expand-icon.open { transform: rotate(180deg); }
+        
         .subtopic-delete-btn {
             width:22px; height:22px; border-radius:50%; border:none;
-            background:transparent; color:#cbd5e0; cursor:pointer; font-size:11px;
+            background:transparent; color:#cbd5e0; cursor:pointer; font-size:12px;
             display:none; align-items:center; justify-content:center;
         }
         body.is-admin .subtopic-delete-btn { display:flex; }
         .subtopic-delete-btn:hover { color:var(--danger); background:#fff5f5; }
-
-        .sub-sub-wrapper { display:none; margin:4px 0 2px 28px; }
-        .sub-sub-wrapper.open { display:block; }
-        .sub-sub-list { list-style:none; display:flex; flex-direction:column; gap:4px; }
+        
+        /* 2. Expand Animation (Accordion style) */
+        .sub-sub-wrapper {
+            width: 100%;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out, margin 0.3s ease;
+            margin: 0 0 0 32px;
+        }
+        .sub-sub-wrapper.open {
+            max-height: 800px; /* Expands in place smoothly */
+            margin-top: 6px;
+            margin-bottom: 4px;
+        }
+        
+        .sub-sub-list { list-style:none; display:flex; flex-direction:column; gap:4px; padding-right: 32px;}
         .sub-sub-item {
-            display:flex; align-items:center; gap:8px; font-size:0.76rem;
-            color:var(--text-secondary); padding:4px 8px; border-radius:5px;
+            display:flex; align-items:center; gap:8px; font-size:0.8rem;
+            color:var(--text); padding:4px 8px; border-radius:5px;
             background:#f1f5f9; border:1px solid #e2e8f0;
         }
-        .sub-sub-checkbox { width:14px; height:14px; accent-color:var(--accent); cursor:pointer; flex-shrink:0; }
+        .sub-sub-checkbox { width:16px; height:16px; accent-color:var(--accent); cursor:pointer; flex-shrink:0; }
         .sub-sub-drag { cursor:grab; color:#cbd5e0; display:none; }
         body.is-admin .sub-sub-drag { display:flex; }
-        .sub-sub-select { width:13px; height:13px; accent-color:var(--danger); display:none; }
+        
+        /* 5. Viewer vs Admin checkboxes */
+        .sub-sub-select { width:14px; height:14px; accent-color:var(--danger); display:none; }
         body.is-admin .sub-sub-select { display:inline-block; }
-        .sub-sub-text { flex:1; word-break:break-word; }
-        .sub-sub-text .item-number { font-weight:600; color:var(--text); margin-right:4px; }
+        
+        .sub-sub-text { flex:1; word-break:break-word; font-weight: 600; transition: opacity 0.3s, filter 0.3s;}
         .sub-sub-delete {
-            background:none; border:none; color:#cbd5e0; cursor:pointer; font-size:11px; display:none;
+            background:none; border:none; color:#cbd5e0; cursor:pointer; font-size:12px; display:none;
         }
         body.is-admin .sub-sub-delete { display:inline-block; }
         .sub-sub-delete:hover { color:var(--danger); }
-
         .add-subtopic-btn, .add-subsub-btn {
-            margin-top:6px; font-size:0.72rem; color:var(--accent);
+            margin-top:6px; font-size:0.75rem; color:var(--accent);
             background:none; border:1.5px dashed #d0d7f0; border-radius:16px;
-            padding:5px 12px; font-weight:600; cursor:pointer; display:none;
+            padding:5px 12px; font-weight:700; cursor:pointer; display:none;
         }
         body.is-admin .add-subtopic-btn, body.is-admin .add-subsub-btn { display:inline-flex; align-items:center; gap:4px; }
-
         .panel-card-footer {
             padding:8px 16px 12px; display:none; gap:6px; flex-wrap:wrap;
             border-top:1px solid #f7fafc;
         }
         body.is-admin .panel-card-footer { display:flex; }
-
         .insert-btn, .delete-panel-btn, .delete-selected-btn {
-            font-size:0.68rem; background:transparent; border:1px solid #e8ecf8;
-            color:#718096; cursor:pointer; padding:4px 10px; border-radius:12px;
-            transition:0.2s; font-weight:500; font-family:inherit;
+            font-size:0.7rem; background:transparent; border:1px solid #e8ecf8;
+            color:#4a5568; cursor:pointer; padding:5px 12px; border-radius:12px;
+            transition:0.2s; font-weight:600; font-family:inherit;
         }
         .delete-panel-btn, .delete-selected-btn { border-color:#fed7d7; color:#c53030; }
         .delete-panel-btn:hover, .delete-selected-btn:hover { background:#fff5f5; }
-
         .panel-progress-wrap {
             display:flex; align-items:center; gap:8px; padding:4px 16px 8px;
-            font-size:0.7rem; color:var(--text-secondary);
+            font-size:0.75rem; color:var(--text); font-weight: 600;
         }
         .panel-progress-bar { flex:1; height:6px; background:var(--progress-bg); border-radius:10px; overflow:hidden; }
         .panel-progress-fill { height:100%; background:var(--progress-fill); border-radius:10px; }
         .panel-progress-slider { width:60px; accent-color:var(--accent); display:none; }
         body.is-admin .panel-progress-slider { display:inline-block; }
-        .panel-progress-percent { font-weight:600; min-width:32px; text-align:right; }
-
+        .panel-progress-percent { font-weight:800; min-width:32px; text-align:right; }
         .panel-flow-arrow {
-            text-align:right; font-size:0.7rem; color:#a0aec0;
+            text-align:right; font-size:0.75rem; color:#718096; font-weight: 600;
             padding:0 16px 6px; cursor:default;
         }
         .panel-flow-arrow i { font-size:0.9rem; margin-left:4px; }
-
+        
+        /* 4. Viewer Comments styling */
         .panel-comment-wrap { padding:0 16px 10px; }
-        .panel-comment-label { font-size:0.7rem; font-weight:600; color:var(--text-secondary); margin-bottom:4px; }
+        .panel-comment-label { font-size:0.75rem; font-weight:700; color:var(--text); margin-bottom:4px; }
         .panel-comment-textarea {
-            width:100%; min-height:40px; resize:vertical; font-size:0.75rem;
-            border:1px solid var(--border); border-radius:6px; padding:6px 8px;
-            font-family:inherit; color:var(--text);
+            width:100%; min-height:45px; resize:vertical; font-size:0.8rem; font-weight: 600;
+            border:2px solid var(--border); border-radius:6px; padding:6px 8px;
+            font-family:inherit; color:var(--text); background: #fafbff;
         }
-
+        .panel-comment-textarea:focus { outline: none; border-color: var(--accent); }
+        
         .admin-only { display:none; }
         body.is-admin .admin-only { display:flex; }
         .admin-only-inline { display:none; }
@@ -248,33 +279,33 @@
         body.is-admin .admin-only-block { display:block; }
         .subtopic-select-checkbox { display:none; }
         body.is-admin .subtopic-select-checkbox { display:inline-block; }
-
+        
+        /* Modals and Toasts */
         .modal-overlay {
             position:fixed; top:0; left:0; width:100%; height:100%;
-            background:rgba(15,20,30,0.55); z-index:999; display:none;
-            align-items:center; justify-content:center; backdrop-filter:blur(3px);
+            background:rgba(15,20,30,0.65); z-index:999; display:none;
+            align-items:center; justify-content:center; backdrop-filter:blur(4px);
         }
         .modal-dialog {
             background:#fff; border-radius:var(--radius); padding:24px;
             width:450px; max-width:92vw; box-shadow:var(--shadow-lg);
             max-height:80vh; overflow-y:auto;
         }
-        .modal-dialog h3 { margin-bottom:6px; font-size:1.1rem; }
+        .modal-dialog h3 { margin-bottom:6px; font-size:1.1rem; font-weight: 800; }
         .modal-input {
             width:100%; padding:11px 14px; border:2px solid var(--border);
-            border-radius:var(--radius-sm); font-size:0.9rem; outline:none; font-family:inherit;
+            border-radius:var(--radius-sm); font-size:0.95rem; outline:none; font-family:inherit; font-weight: 600;
         }
         .modal-input:focus { border-color:var(--accent); }
         .modal-actions { display:flex; gap:10px; margin-top:18px; justify-content:flex-end; }
         .toast-container { position:fixed; bottom:24px; right:24px; z-index:1000; display:flex; flex-direction:column; gap:8px; }
         .toast {
             background:#1a202c; color:#fff; padding:12px 20px; border-radius:25px;
-            font-size:0.82rem; box-shadow:var(--shadow-lg);
+            font-size:0.85rem; font-weight: 600; box-shadow:var(--shadow-lg);
         }
     </style>
 </head>
 <body>
-
     <header class="dashboard-header">
         <div class="header-left">
             <div class="header-logo"><i class="fa-solid fa-building-columns"></i></div>
@@ -297,7 +328,7 @@
 
     <div class="main-container">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
-            <h2 style="font-size:1.05rem;color:var(--text-secondary);"><i class="fa-solid fa-diagram-project"></i> Workflow Stages <span id="panelCount">(16 Panels)</span></h2>
+            <h2 style="font-size:1.1rem;color:var(--text);font-weight:800;"><i class="fa-solid fa-diagram-project"></i> Workflow Stages <span id="panelCount">(16 Panels)</span></h2>
             <button class="btn-add-panel admin-only-inline" id="btnAddPanelTop"><i class="fa-solid fa-plus"></i> Add New Panel</button>
         </div>
         <div class="panels-grid" id="panelsGrid"></div>
@@ -310,9 +341,9 @@
     <div class="modal-overlay" id="adminModal">
         <div class="modal-dialog">
             <h3><i class="fa-solid fa-shield-halved"></i> Admin Authentication</h3>
-            <p>Enter the admin password to enable editing.</p>
+            <p style="font-weight:600; font-size:0.85rem; margin-bottom:10px;">Enter the admin password to enable editing.</p>
             <input type="password" class="modal-input" id="adminPasswordInput" placeholder="Password..." autocomplete="off">
-            <div class="modal-error" id="adminModalError" style="display:none;color:var(--danger);margin-top:6px;"></div>
+            <div class="modal-error" id="adminModalError" style="display:none;color:var(--danger);margin-top:6px;font-weight:bold;">Incorrect Password.</div>
             <div class="modal-actions">
                 <button class="btn btn-outline btn-sm" id="btnCancelAdmin">Cancel</button>
                 <button class="btn btn-admin btn-sm" id="btnConfirmAdmin">Unlock</button>
@@ -324,9 +355,9 @@
     <div class="modal-overlay" id="newPanelModal">
         <div class="modal-dialog">
             <h3><i class="fa-solid fa-folder-plus"></i> Add New Panel</h3>
-            <p>Enter the title for the new workflow panel.</p>
+            <p style="font-weight:600; font-size:0.85rem; margin-bottom:10px;">Enter the title for the new workflow panel.</p>
             <input type="text" class="modal-input" id="newPanelTitleInput" placeholder="e.g., LEGAL REVIEW">
-            <label style="display:block;margin-top:10px;font-size:0.78rem;">Insert Position:</label>
+            <label style="display:block;margin-top:10px;font-size:0.85rem;font-weight:bold;">Insert Position:</label>
             <select class="modal-input" id="newPanelPosition" style="margin-top:4px;">
                 <option value="end">At the End</option>
                 <option value="start">At the Beginning</option>
@@ -358,13 +389,12 @@
                     firebaseReady = true;
                 }
             } catch(e) {}
-
+            
             const ADMIN_PASSWORD = "Dlns@4512#";
             const STORAGE_KEY = "planning_approval_dashboard_data";
             const FIRESTORE_COLLECTION = "dashboards";
             const FIRESTORE_DOC_ID = "planning_approval_workflow";
-
-            // Full 16-panel default data (with progress, comment, items arrays)
+            
             const defaultPanels = [
                 { id:'panel_1', title:'LAND IDENTIFICATION & INITIAL FEASIBILITY', color:'#4A90D9', progress:0, comment:'', subtopics:[
                     { id:'sub_1_1', text:'Verify land ownership', completed:false, items:[] },
@@ -487,16 +517,16 @@
                     { id:'sub_16_6', text:'FINAL STATUS: LEGALLY APPROVED & COMPLETE ✅', completed:false, items:[] }
                 ], order:15 }
             ];
-
+            
             let appData = { projectName:'PLANNING APPROVAL WORKFLOW', progress:0, panels: JSON.parse(JSON.stringify(defaultPanels)) };
             let isAdmin = false;
             let panelIdCounter = 17, subtopicIdCounter = 1000, subSubIdCounter = 2000;
             let saveTimeout, isSaving = false;
             let panelSortable = null, subtopicSortables = [];
-
+            
             const $ = (sel) => document.querySelector(sel);
             const $$ = (sel) => document.querySelectorAll(sel);
-
+            
             async function loadData() {
                 if (firebaseReady && firestoreDB) {
                     try {
@@ -525,7 +555,7 @@
                 appData.panels = JSON.parse(JSON.stringify(defaultPanels));
                 restoreCounters();
             }
-
+            
             function restoreCounters() {
                 let maxPanel=16, maxSub=0, maxSubSub=0;
                 appData.panels.forEach(p => {
@@ -542,7 +572,7 @@
                 });
                 panelIdCounter = maxPanel+1; subtopicIdCounter = maxSub+1; subSubIdCounter = maxSubSub+1;
             }
-
+            
             async function saveData(showToast=true) {
                 if(isSaving) return;
                 isSaving = true;
@@ -556,18 +586,21 @@
                 isSaving = false;
                 if(showToast) showToast('Changes saved! 💾');
             }
+            
             function debounceSave(delay=600) {
                 if(saveTimeout) clearTimeout(saveTimeout);
                 saveTimeout = setTimeout(()=>saveData(true), delay);
             }
+            
             function showToast(msg, type='success') {
                 const t = document.createElement('div'); t.className='toast';
                 t.innerHTML = `<i class="fa-solid fa-${type==='success'?'check-circle':'exclamation-circle'}"></i> ${msg}`;
                 document.getElementById('toastContainer').appendChild(t);
                 setTimeout(()=>t.remove(), 3000);
             }
-
+            
             function renderAll() { renderHeader(); renderPanels(); updatePanelCount(); updateAdminUI(); initSortable(); }
+            
             function renderHeader() {
                 document.getElementById('projectNameDisplay').textContent = appData.projectName;
                 document.getElementById('projectNameInput').value = appData.projectName;
@@ -575,31 +608,41 @@
                 document.getElementById('progressPercent').textContent = appData.progress+'%';
                 document.getElementById('progressSlider').value = appData.progress;
             }
-
+            
+            function renderPanels() {
+                const grid = document.getElementById('panelsGrid');
+                grid.innerHTML = '';
+                appData.panels.forEach((p, index) => { grid.appendChild(createPanelCard(p, index)); });
+            }
+            
             function isPanelCompleted(panel) {
                 return panel.subtopics.length > 0 && panel.subtopics.every(s => s.completed);
             }
-
+            
             function createPanelCard(panel, index) {
                 const card = document.createElement('div'); card.className='panel-card'; card.dataset.panelId=panel.id;
                 card.style.borderLeft = `4px solid ${panel.color}`;
                 if(isPanelCompleted(panel)) card.classList.add('panel-completed');
-
+                
                 const strip = document.createElement('div'); strip.className='panel-color-strip'; strip.style.background=panel.color; card.appendChild(strip);
+                
                 const header = document.createElement('div'); header.className='panel-card-header';
                 const badge = document.createElement('div'); badge.className='panel-number'; badge.style.background=panel.color; badge.textContent=index+1;
                 const titleWrap = document.createElement('div'); titleWrap.className='panel-title-wrap';
                 const titleDisp = document.createElement('span'); titleDisp.className='panel-title-display'; titleDisp.textContent=panel.title;
                 const titleInp = document.createElement('input'); titleInp.type='text'; titleInp.className='panel-title-input admin-only-block'; titleInp.value=panel.title;
+                
                 titleInp.addEventListener('input', ()=>{ panel.title=titleInp.value; titleDisp.textContent=panel.title||'(Untitled)'; debounceSave(); });
                 titleWrap.appendChild(titleDisp); titleWrap.appendChild(titleInp);
+                
                 const dragHandle = document.createElement('span'); dragHandle.className='panel-drag-handle'; dragHandle.innerHTML='<i class="fa-solid fa-grip-vertical"></i>';
                 header.appendChild(badge); header.appendChild(titleWrap); header.appendChild(dragHandle); card.appendChild(header);
-
+                
                 const body = document.createElement('div'); body.className='panel-card-body';
                 const subtopicList = document.createElement('ul'); subtopicList.className='subtopic-list'; subtopicList.dataset.panelId=panel.id;
                 panel.subtopics.forEach((sub, subIndex) => subtopicList.appendChild(createSubtopicItem(panel, sub, subIndex)));
                 body.appendChild(subtopicList);
+                
                 const addSubBtn = document.createElement('button'); addSubBtn.className='add-subtopic-btn admin-only-inline'; addSubBtn.innerHTML='<i class="fa-solid fa-plus-circle"></i> Add Sub-item';
                 addSubBtn.addEventListener('click', ()=>{
                     const newSub = { id:`sub_${panel.id.split('_')[1]}_${subtopicIdCounter++}`, text:'New sub-item', completed:false, items:[] };
@@ -612,7 +655,7 @@
                 });
                 body.appendChild(addSubBtn);
                 card.appendChild(body);
-
+                
                 const progressWrap = document.createElement('div'); progressWrap.className='panel-progress-wrap';
                 progressWrap.innerHTML = `<span>Progress</span><div class="panel-progress-bar"><div class="panel-progress-fill" style="width:${panel.progress}%;"></div></div><span class="panel-progress-percent">${panel.progress}%</span>`;
                 const progressSlider = document.createElement('input'); progressSlider.type='range'; progressSlider.className='panel-progress-slider admin-only-inline';
@@ -626,15 +669,16 @@
                 });
                 progressWrap.appendChild(progressSlider);
                 card.appendChild(progressWrap);
-
+                
+                // 4. Update Viewer Comments Section
                 const commentWrap = document.createElement('div'); commentWrap.className='panel-comment-wrap';
-                const commentLabel = document.createElement('div'); commentLabel.className='panel-comment-label'; commentLabel.textContent='💬 Comments';
+                const commentLabel = document.createElement('div'); commentLabel.className='panel-comment-label'; commentLabel.innerHTML='💬 Viewer Comments & Notes';
                 const commentArea = document.createElement('textarea'); commentArea.className='panel-comment-textarea'; commentArea.value = panel.comment || '';
-                commentArea.placeholder = 'Add notes about this stage...';
+                commentArea.placeholder = 'e.g., 1.2: Awaiting final signature...';
                 commentArea.addEventListener('input', ()=>{ panel.comment = commentArea.value; debounceSave(800); });
                 commentWrap.appendChild(commentLabel); commentWrap.appendChild(commentArea);
                 card.appendChild(commentWrap);
-
+                
                 if(index < appData.panels.length-1){
                     const nextPanel = appData.panels[index+1];
                     const arrowDiv = document.createElement('div'); arrowDiv.className='panel-flow-arrow';
@@ -642,12 +686,14 @@
                     arrowDiv.innerHTML = `<span>Next stage</span> <i class="fa-solid fa-arrow-right"></i>`;
                     card.appendChild(arrowDiv);
                 }
-
+                
                 const footer = document.createElement('div'); footer.className='panel-card-footer admin-only';
                 const insBefore = document.createElement('button'); insBefore.className='insert-btn'; insBefore.innerHTML='<i class="fa-solid fa-arrow-up"></i> Insert Before';
                 insBefore.addEventListener('click', (e)=>{ e.stopPropagation(); openNewPanelModalAt(index); });
                 const insAfter = document.createElement('button'); insAfter.className='insert-btn'; insAfter.innerHTML='<i class="fa-solid fa-arrow-down"></i> Insert After';
                 insAfter.addEventListener('click', (e)=>{ e.stopPropagation(); openNewPanelModalAt(index+1); });
+                
+                // 5. Select & Delete is purely admin-only
                 const delSelBtn = document.createElement('button'); delSelBtn.className='delete-selected-btn'; delSelBtn.innerHTML='<i class="fa-solid fa-check-double"></i> Delete Selected';
                 delSelBtn.addEventListener('click', (e)=>{
                     e.stopPropagation();
@@ -660,50 +706,81 @@
                     checkPanelCompletion(panel.id);
                     debounceSave();
                 });
+                
                 const delPanel = document.createElement('button'); delPanel.className='delete-panel-btn'; delPanel.innerHTML='<i class="fa-solid fa-trash-can"></i> Delete';
                 delPanel.addEventListener('click', (e)=>{
                     e.stopPropagation();
                     if(appData.panels.length<=1) { showToast('Cannot delete last panel.','error'); return; }
                     if(confirm(`Delete "${panel.title}"?`)) { appData.panels = appData.panels.filter(p=>p.id!==panel.id); saveData(true); renderAll(); }
                 });
+                
                 footer.appendChild(insBefore); footer.appendChild(insAfter); footer.appendChild(delSelBtn); footer.appendChild(delPanel);
                 card.appendChild(footer);
-
+                
                 return card;
             }
-
+            
             function createSubtopicItem(panel, sub, subIndex) {
                 const li = document.createElement('li'); li.className='subtopic-item'; li.dataset.subtopicId=sub.id;
+                
+                const topRow = document.createElement('div'); topRow.className='subtopic-item-top';
+                
                 const dragHandle = document.createElement('span'); dragHandle.className='subtopic-drag-handle admin-only-inline'; dragHandle.innerHTML='<i class="fa-solid fa-grip-vertical"></i>';
                 const selCheck = document.createElement('input'); selCheck.type='checkbox'; selCheck.className='subtopic-select-checkbox';
                 const checkbox = document.createElement('input'); checkbox.type='checkbox'; checkbox.className='subtopic-checkbox'; checkbox.checked=sub.completed;
-                checkbox.addEventListener('change', ()=>{ sub.completed=checkbox.checked; updateTextStyle(); checkPanelCompletion(panel.id); debounceSave(); });
+                
+                checkbox.addEventListener('change', ()=>{ 
+                    sub.completed=checkbox.checked; 
+                    updateTextStyle(); 
+                    checkPanelCompletion(panel.id); 
+                    debounceSave(); 
+                });
+                
                 const textSpan = document.createElement('span'); textSpan.className='subtopic-text';
                 textSpan.innerHTML = `<span class="item-number">${subIndex+1}.</span> ${sub.text}`;
+                
                 const inputEl = document.createElement('input'); inputEl.type='text'; inputEl.className='subtopic-input admin-only-block'; inputEl.value=sub.text;
-                inputEl.addEventListener('input', ()=>{ sub.text=inputEl.value; textSpan.innerHTML = `<span class="item-number">${subIndex+1}.</span> ${sub.text||'(empty)'}`; debounceSave(); });
-                const expandIcon = document.createElement('span'); expandIcon.className='subtopic-expand-icon'; expandIcon.innerHTML='<i class="fa-solid fa-list-ul"></i>';
+                inputEl.addEventListener('input', ()=>{ 
+                    sub.text=inputEl.value; 
+                    textSpan.innerHTML = `<span class="item-number">${subIndex+1}.</span> ${sub.text||'(empty)'}`; 
+                    debounceSave(); 
+                });
+                
+                // Expand Chevron icon
+                const expandIcon = document.createElement('span'); expandIcon.className='subtopic-expand-icon'; expandIcon.innerHTML='<i class="fa-solid fa-chevron-down"></i>';
                 expandIcon.title='Toggle sub-items';
+                
                 const deleteBtn = document.createElement('button'); deleteBtn.className='subtopic-delete-btn admin-only-inline'; deleteBtn.innerHTML='<i class="fa-solid fa-xmark"></i>';
                 deleteBtn.addEventListener('click', (e)=>{ e.stopPropagation(); li.remove(); panel.subtopics=panel.subtopics.filter(s=>s.id!==sub.id); checkPanelCompletion(panel.id); debounceSave(); });
-
+                
                 textSpan.addEventListener('dblclick', ()=>{ if(isAdmin){ textSpan.style.display='none'; inputEl.style.display='block'; inputEl.focus(); } });
-                inputEl.addEventListener('blur', ()=>{ textSpan.style.display='inline'; inputEl.style.display='none'; });
-
+                inputEl.addEventListener('blur', ()=>{ textSpan.style.display='block'; inputEl.style.display='none'; });
+                
+                // 6. Blur and fading instead of strikethrough
                 function updateTextStyle() {
-                    if(sub.completed) { textSpan.style.textDecoration='line-through'; textSpan.style.opacity='0.6'; }
-                    else { textSpan.style.textDecoration='none'; textSpan.style.opacity='1'; }
+                    if(sub.completed) { 
+                        textSpan.style.opacity='0.4'; 
+                        textSpan.style.filter='blur(0.8px)';
+                        textSpan.style.textDecoration='none';
+                    } else { 
+                        textSpan.style.opacity='1'; 
+                        textSpan.style.filter='none';
+                        textSpan.style.textDecoration='none';
+                    }
                 }
                 updateTextStyle();
-
-                li.appendChild(dragHandle); li.appendChild(selCheck); li.appendChild(checkbox);
-                li.appendChild(textSpan); li.appendChild(inputEl); li.appendChild(expandIcon); li.appendChild(deleteBtn);
-
+                
+                topRow.appendChild(dragHandle); topRow.appendChild(selCheck); topRow.appendChild(checkbox);
+                topRow.appendChild(textSpan); topRow.appendChild(inputEl); topRow.appendChild(expandIcon); topRow.appendChild(deleteBtn);
+                li.appendChild(topRow);
+                
                 const subSubWrapper = document.createElement('div'); subSubWrapper.className='sub-sub-wrapper';
                 const subSubList = document.createElement('ul'); subSubList.className='sub-sub-list';
+                
                 if(!sub.items) sub.items = [];
                 renderSubSubList(subSubList, sub, subIndex);
                 subSubWrapper.appendChild(subSubList);
+                
                 const addSubSubBtn = document.createElement('button'); addSubSubBtn.className='add-subsub-btn admin-only-inline'; addSubSubBtn.innerHTML='<i class="fa-solid fa-plus"></i> Add Sub-item';
                 addSubSubBtn.addEventListener('click', (e)=>{
                     e.stopPropagation();
@@ -714,43 +791,51 @@
                     debounceSave();
                 });
                 subSubWrapper.appendChild(addSubSubBtn);
+                
                 const delSelSubSubBtn = document.createElement('button'); delSelSubSubBtn.className='delete-selected-btn admin-only-inline'; delSelSubSubBtn.style.marginLeft='8px'; delSelSubSubBtn.innerHTML='<i class="fa-solid fa-check-double"></i> Del Selected';
                 delSelSubSubBtn.addEventListener('click', (e)=>{
                     e.stopPropagation();
                     const checked = subSubList.querySelectorAll('.sub-sub-select:checked');
                     if(checked.length===0) { showToast('No sub-items selected.','error'); return; }
-                    const ids = new Set(); checked.forEach(cb=>{ const li=cb.closest('.sub-sub-item'); if(li){ ids.add(li.dataset.itemId); li.remove(); } });
+                    const ids = new Set(); checked.forEach(cb=>{ const listIt=cb.closest('.sub-sub-item'); if(listIt){ ids.add(listIt.dataset.itemId); listIt.remove(); } });
                     sub.items = sub.items.filter(it => !ids.has(it.id));
                     renderSubSubList(subSubList, sub, subIndex);
                     if(isAdmin && typeof Sortable !== 'undefined') initSubSubSortable(subSubList);
                     debounceSave();
                 });
                 subSubWrapper.appendChild(delSelSubSubBtn);
+                
                 li.appendChild(subSubWrapper);
-
+                
+                // 2. Expand Toggle Logic (Accordion)
                 expandIcon.addEventListener('click', (e)=>{
                     e.stopPropagation();
-                    // Close all other open sub-sub-wrappers in the same panel
                     const panelCard = li.closest('.panel-card');
                     if(panelCard) {
+                        // Close all other open wrappers in this panel
                         panelCard.querySelectorAll('.sub-sub-wrapper.open').forEach(w => {
                             if(w !== subSubWrapper) {
                                 w.classList.remove('open');
+                                const icon = w.parentElement.querySelector('.subtopic-expand-icon');
+                                if(icon) icon.classList.remove('open');
                                 if(w._sortable) { w._sortable.destroy(); w._sortable = null; }
                             }
                         });
                     }
+                    
                     subSubWrapper.classList.toggle('open');
+                    expandIcon.classList.toggle('open');
+                    
                     if(subSubWrapper.classList.contains('open')) {
                         if(isAdmin && typeof Sortable !== 'undefined') initSubSubSortable(subSubList);
                     } else {
                         if(subSubWrapper._sortable) { subSubWrapper._sortable.destroy(); subSubWrapper._sortable = null; }
                     }
                 });
-
+                
                 return li;
             }
-
+            
             function renderSubSubList(listEl, subtopic, parentIndex) {
                 listEl.innerHTML = '';
                 (subtopic.items || []).forEach((item, idx) => {
@@ -758,9 +843,25 @@
                     const drag = document.createElement('span'); drag.className='sub-sub-drag'; drag.innerHTML='<i class="fa-solid fa-grip-vertical"></i>';
                     const sel = document.createElement('input'); sel.type='checkbox'; sel.className='sub-sub-select';
                     const cb = document.createElement('input'); cb.type='checkbox'; cb.className='sub-sub-checkbox'; cb.checked=item.completed||false;
-                    cb.addEventListener('change', ()=>{ item.completed=cb.checked; debounceSave(); });
+                    
                     const text = document.createElement('span'); text.className='sub-sub-text';
                     text.innerHTML = `<span class="item-number">${parentIndex+1}.${idx+1}</span> ${item.text}`;
+                    
+                    function updateSubSubStyle() {
+                        if(item.completed) {
+                            text.style.opacity='0.4'; text.style.filter='blur(0.8px)';
+                        } else {
+                            text.style.opacity='1'; text.style.filter='none';
+                        }
+                    }
+                    updateSubSubStyle();
+
+                    cb.addEventListener('change', ()=>{ 
+                        item.completed=cb.checked; 
+                        updateSubSubStyle(); 
+                        debounceSave(); 
+                    });
+                    
                     const del = document.createElement('button'); del.className='sub-sub-delete'; del.innerHTML='<i class="fa-solid fa-xmark"></i>';
                     del.addEventListener('click', (e)=>{
                         e.stopPropagation();
@@ -770,11 +871,12 @@
                         renderSubSubList(listEl, subtopic, parentIndex);
                         if(isAdmin && typeof Sortable !== 'undefined') initSubSubSortable(listEl);
                     });
+                    
                     li.appendChild(drag); li.appendChild(sel); li.appendChild(cb); li.appendChild(text); li.appendChild(del);
                     listEl.appendChild(li);
                 });
             }
-
+            
             function initSubSubSortable(listEl) {
                 if(!isAdmin || typeof Sortable === 'undefined') return;
                 const wrapper = listEl.closest('.sub-sub-wrapper');
@@ -796,7 +898,7 @@
                     }
                 });
             }
-
+            
             function checkPanelCompletion(panelId) {
                 const card = document.querySelector(`.panel-card[data-panel-id="${panelId}"]`);
                 if(!card) return;
@@ -805,8 +907,9 @@
                 if(isPanelCompleted(panel)) card.classList.add('panel-completed');
                 else card.classList.remove('panel-completed');
             }
-
+            
             function updatePanelCount() { document.getElementById('panelCount').textContent = `(${appData.panels.length} Panels)`; }
+            
             function updateAdminUI() {
                 if(isAdmin) {
                     document.body.classList.add('is-admin');
@@ -817,16 +920,17 @@
                     document.getElementById('btnAdminText').textContent = 'Admin Mode';
                     document.getElementById('btnAdminToggle').classList.remove('active');
                     $$('.subtopic-input').forEach(el=>el.style.display='none');
-                    $$('.subtopic-text').forEach(el=>el.style.display='inline');
+                    $$('.subtopic-text').forEach(el=>el.style.display='block');
                 }
                 initSortable();
             }
-
+            
             function destroyAllSortables() {
                 if(panelSortable) { panelSortable.destroy(); panelSortable=null; }
                 subtopicSortables.forEach(s=>s.destroy()); subtopicSortables=[];
                 $$('.sub-sub-wrapper').forEach(w=>{ if(w._sortable) { w._sortable.destroy(); w._sortable=null; } });
             }
+            
             function initSortable() {
                 destroyAllSortables();
                 if(typeof Sortable==='undefined') return;
@@ -846,6 +950,7 @@
                     $$('.subtopic-list').forEach(list => initSingleSubtopicSortable(list));
                 }
             }
+            
             function initSingleSubtopicSortable(listEl) {
                 if(!isAdmin || subtopicSortables.some(s=>s.el===listEl)) return;
                 const sortable = new Sortable(listEl, {
@@ -862,13 +967,15 @@
                 });
                 subtopicSortables.push(sortable);
             }
+            
             function reinitSingleSubtopicSortable(listEl) {
                 subtopicSortables = subtopicSortables.filter(s=>{ if(s.el===listEl){ s.destroy(); return false; } return true; });
                 initSingleSubtopicSortable(listEl);
             }
-
-            function openAdminModal() { document.getElementById('adminModal').style.display='flex'; }
+            
+            function openAdminModal() { document.getElementById('adminModal').style.display='flex'; document.getElementById('adminPasswordInput').value = ''; document.getElementById('adminModalError').style.display = 'none'; document.getElementById('adminPasswordInput').focus(); }
             function closeAdminModal() { document.getElementById('adminModal').style.display='none'; }
+            
             document.getElementById('btnCancelAdmin').addEventListener('click', closeAdminModal);
             document.getElementById('btnConfirmAdmin').addEventListener('click', ()=>{
                 if(document.getElementById('adminPasswordInput').value === ADMIN_PASSWORD) {
@@ -877,32 +984,37 @@
                     document.getElementById('adminModalError').style.display='block';
                 }
             });
+            
             document.getElementById('btnAdminToggle').addEventListener('click', ()=> isAdmin ? exitAdminMode() : openAdminModal());
             function exitAdminMode() { isAdmin=false; updateAdminUI(); renderAll(); showToast('Admin mode deactivated. 🔒'); }
-
+            
             let pendingInsertIndex = null;
-            function openNewPanelModalAt(idx) { if(!isAdmin) return; pendingInsertIndex=idx; document.getElementById('newPanelModal').style.display='flex'; }
+            function openNewPanelModalAt(idx) { if(!isAdmin) return; pendingInsertIndex=idx; document.getElementById('newPanelModal').style.display='flex'; document.getElementById('newPanelTitleInput').focus(); }
             document.getElementById('btnAddPanelTop').addEventListener('click', ()=> openNewPanelModalGeneric('start'));
             document.getElementById('btnAddPanelBottom').addEventListener('click', ()=> openNewPanelModalGeneric('end'));
-            function openNewPanelModalGeneric(pos='end') { if(!isAdmin) return; pendingInsertIndex = (pos==='start'?0:appData.panels.length); document.getElementById('newPanelModal').style.display='flex'; }
+            
+            function openNewPanelModalGeneric(pos='end') { if(!isAdmin) return; pendingInsertIndex = (pos==='start'?0:appData.panels.length); document.getElementById('newPanelModal').style.display='flex'; document.getElementById('newPanelTitleInput').focus(); }
+            
             document.getElementById('btnCancelNewPanel').addEventListener('click', ()=>{ document.getElementById('newPanelModal').style.display='none'; pendingInsertIndex=null; });
             document.getElementById('btnConfirmNewPanel').addEventListener('click', ()=>{
                 const title = document.getElementById('newPanelTitleInput').value.trim();
                 if(!title) return;
                 let insertAt = pendingInsertIndex !== null ? pendingInsertIndex : (document.getElementById('newPanelPosition').value==='start'?0:appData.panels.length);
                 insertAt = Math.max(0, Math.min(insertAt, appData.panels.length));
+                
                 const newPanel = {
                     id:`panel_${panelIdCounter++}`, title,
                     color:['#4A90D9','#5BA0D0','#6CB4A1','#F5A623','#E8833A','#9B59B6','#4ECDC4','#2ECC71','#E67E22','#27AE60'][Math.floor(Math.random()*10)],
                     subtopics:[{ id:`sub_new_${subtopicIdCounter++}`, text:'New sub-item', completed:false, items:[] }],
                     progress:0, comment:'', order:insertAt
                 };
+                
                 appData.panels.splice(insertAt,0,newPanel);
                 appData.panels.forEach((p,i)=>p.order=i);
-                document.getElementById('newPanelModal').style.display='none'; pendingInsertIndex=null;
+                document.getElementById('newPanelModal').style.display='none'; pendingInsertIndex=null; document.getElementById('newPanelTitleInput').value = '';
                 saveData(true); renderAll();
             });
-
+            
             document.getElementById('btnResetAll').addEventListener('click', ()=>{
                 if(!isAdmin) return;
                 if(confirm('Reset all data?')) {
@@ -912,7 +1024,7 @@
                     saveData(true); renderAll();
                 }
             });
-
+            
             document.getElementById('progressSlider').addEventListener('input', ()=>{
                 if(!isAdmin) { document.getElementById('progressSlider').value=appData.progress; return; }
                 appData.progress = parseInt(document.getElementById('progressSlider').value);
@@ -920,17 +1032,18 @@
                 document.getElementById('progressPercent').textContent = appData.progress+'%';
                 debounceSave(400);
             });
+            
             document.getElementById('projectNameInput').addEventListener('input', ()=>{
                 appData.projectName = document.getElementById('projectNameInput').value;
                 document.getElementById('projectNameDisplay').textContent = appData.projectName||'PLANNING APPROVAL WORKFLOW';
                 debounceSave();
             });
-
+            
             document.addEventListener('keydown', (e)=>{
                 if(e.key==='Escape') { closeAdminModal(); document.getElementById('newPanelModal').style.display='none'; }
                 if(e.ctrlKey && e.shiftKey && e.key==='A') { e.preventDefault(); isAdmin ? exitAdminMode() : openAdminModal(); }
             });
-
+            
             (async function init(){
                 await loadData();
                 appData.panels.forEach((p,i)=>{ if(p.order===undefined) p.order=i; });
