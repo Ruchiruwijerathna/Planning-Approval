@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Planning Approval Workflow Dashboard</title>
 
-    <!-- Firebase SDKs (optional) -->
+    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 
@@ -36,7 +36,6 @@
         }
         * { margin:0; padding:0; box-sizing:border-box; }
 
-        /* animated background */
         body::before {
             content: '';
             position: fixed;
@@ -343,7 +342,6 @@
 
     <script>
         (function() {
-            // Firebase (optional)
             const firebaseConfig = {
                 apiKey: "YOUR_API_KEY",
                 authDomain: "YOUR_PROJECT.firebaseapp.com",
@@ -366,7 +364,7 @@
             const FIRESTORE_COLLECTION = "dashboards";
             const FIRESTORE_DOC_ID = "planning_approval_workflow";
 
-            // Full 16-panel default data (all panels included, exactly as originally defined)
+            // Full 16-panel default data (with progress, comment, items arrays)
             const defaultPanels = [
                 { id:'panel_1', title:'LAND IDENTIFICATION & INITIAL FEASIBILITY', color:'#4A90D9', progress:0, comment:'', subtopics:[
                     { id:'sub_1_1', text:'Verify land ownership', completed:false, items:[] },
@@ -499,7 +497,6 @@
             const $ = (sel) => document.querySelector(sel);
             const $$ = (sel) => document.querySelectorAll(sel);
 
-            // Persistence
             async function loadData() {
                 if (firebaseReady && firestoreDB) {
                     try {
@@ -733,6 +730,16 @@
 
                 expandIcon.addEventListener('click', (e)=>{
                     e.stopPropagation();
+                    // Close all other open sub-sub-wrappers in the same panel
+                    const panelCard = li.closest('.panel-card');
+                    if(panelCard) {
+                        panelCard.querySelectorAll('.sub-sub-wrapper.open').forEach(w => {
+                            if(w !== subSubWrapper) {
+                                w.classList.remove('open');
+                                if(w._sortable) { w._sortable.destroy(); w._sortable = null; }
+                            }
+                        });
+                    }
                     subSubWrapper.classList.toggle('open');
                     if(subSubWrapper.classList.contains('open')) {
                         if(isAdmin && typeof Sortable !== 'undefined') initSubSubSortable(subSubList);
