@@ -16,7 +16,6 @@
             --bg: #f0f4f8;
             --surface: #ffffff;
             --surface-alt: #f8fafb;
-            /* Made text pure black for long-distance visibility */
             --text: #000000;
             --text-secondary: #000000;
             --border: #cbd5e0;
@@ -33,34 +32,50 @@
         }
         * { margin:0; padding:0; box-sizing:border-box; }
         
-        /* 1. Professional Animated Background */
-        body::before {
-            content: '';
-            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-            background: linear-gradient(135deg, #e4eaf5 0%, #f3f5f9 100%);
-            z-index: -2;
-        }
-        body::after {
-            content: '';
-            position: fixed; top: -50%; left: -50%; width: 200%; height: 200%;
-            background-image: 
-                radial-gradient(circle at 50% 50%, rgba(79,110,247,0.05) 0%, transparent 40%),
-                linear-gradient(rgba(0, 0, 0, 0.02) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 0, 0, 0.02) 1px, transparent 1px);
-            background-size: 100% 100%, 40px 40px, 40px 40px;
-            animation: professionalPulse 25s ease-in-out infinite alternate;
-            z-index: -1;
-        }
-        @keyframes professionalPulse {
-            0% { transform: scale(0.9) translate(0px, 0px); }
-            100% { transform: scale(1.05) translate(30px, 30px); }
-        }
-
+        /* 2. Professional Corporate Geometric Mesh Background */
         body {
             font-family: 'Segoe UI', system-ui, sans-serif;
             color: var(--text);
             line-height: 1.6;
             min-height: 100vh;
+            background: #f0f4f8; /* Base color */
+        }
+        
+        .bg-animation {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            z-index: -2; overflow: hidden;
+            background: linear-gradient(135deg, #e4ebf5 0%, #f9fbfd 100%);
+        }
+        .bg-animation::before, .bg-animation::after {
+            content: ''; position: absolute; width: 200vw; height: 200vh;
+            top: -50%; left: -50%;
+        }
+        .bg-animation::before {
+            background-image: 
+                repeating-linear-gradient(45deg, transparent, transparent 40px, rgba(79, 110, 247, 0.035) 40px, rgba(79, 110, 247, 0.035) 41px),
+                repeating-linear-gradient(-45deg, transparent, transparent 40px, rgba(79, 110, 247, 0.035) 40px, rgba(79, 110, 247, 0.035) 41px);
+            animation: moveMesh 45s linear infinite;
+        }
+        .bg-animation::after {
+            background-image: 
+                repeating-linear-gradient(0deg, transparent, transparent 60px, rgba(0, 0, 0, 0.02) 60px, rgba(0, 0, 0, 0.02) 61px),
+                repeating-linear-gradient(90deg, transparent, transparent 60px, rgba(0, 0, 0, 0.02) 60px, rgba(0, 0, 0, 0.02) 61px);
+            animation: moveMeshSlow 65s linear infinite reverse;
+        }
+        .bg-glow {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            z-index: -1; pointer-events: none;
+            background: 
+                radial-gradient(circle at 15% 50%, rgba(79, 110, 247, 0.05), transparent 55%),
+                radial-gradient(circle at 85% 30%, rgba(56, 161, 105, 0.04), transparent 50%);
+        }
+        @keyframes moveMesh {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(80px, 80px); }
+        }
+        @keyframes moveMeshSlow {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(120px, 120px); }
         }
 
         /* Header */
@@ -126,13 +141,13 @@
             overflow:hidden; display:flex; flex-direction:column;
         }
         
-        /* 6. Blur and reduce transparency for completed panels */
+        /* 3. 85% Transparency & slight blur for completed panels */
         .panel-card.panel-completed {
-            opacity: 0.55; 
-            filter: blur(1.2px) grayscale(30%);
+            opacity: 0.85; 
+            filter: blur(0.5px) grayscale(20%);
         }
         .panel-card.panel-completed:hover {
-            opacity: 1; filter: blur(0px) grayscale(0%); /* Unblur on hover so it can be read */
+            opacity: 1; filter: blur(0px) grayscale(0%);
         }
         
         .panel-card:hover { box-shadow:var(--shadow-lg); transform:translateY(-2px); }
@@ -166,12 +181,10 @@
         .subtopic-checkbox { width:18px; height:18px; accent-color:var(--accent); cursor:pointer; flex-shrink:0; }
         .subtopic-text { flex:1; word-break:break-word; font-weight: 600; transition: opacity 0.3s, filter 0.3s; }
         
-        /* Subtopic Blur on complete */
         .subtopic-item:hover .subtopic-text, .sub-sub-item:hover .sub-sub-text {
             opacity: 1 !important; filter: blur(0px) !important;
         }
 
-        /* 3. Special Numbers formatting */
         .item-number { font-weight:800; margin-right:6px; color:#000000; background: #e2e8f0; padding: 1px 5px; border-radius: 4px; font-size: 0.75rem;}
         
         .subtopic-input {
@@ -194,19 +207,13 @@
         body.is-admin .subtopic-delete-btn { display:flex; }
         .subtopic-delete-btn:hover { color:var(--danger); background:#fff5f5; }
         
-        /* 2. Expand Animation (Accordion style) */
+        /* Expand Animation */
         .sub-sub-wrapper {
-            width: 100%;
-            max-height: 0;
-            overflow: hidden;
+            width: 100%; max-height: 0; overflow: hidden;
             transition: max-height 0.3s ease-out, margin 0.3s ease;
             margin: 0 0 0 32px;
         }
-        .sub-sub-wrapper.open {
-            max-height: 800px; /* Expands in place smoothly */
-            margin-top: 6px;
-            margin-bottom: 4px;
-        }
+        .sub-sub-wrapper.open { max-height: 800px; margin-top: 6px; margin-bottom: 4px; }
         
         .sub-sub-list { list-style:none; display:flex; flex-direction:column; gap:4px; padding-right: 32px;}
         .sub-sub-item {
@@ -218,11 +225,17 @@
         .sub-sub-drag { cursor:grab; color:#cbd5e0; display:none; }
         body.is-admin .sub-sub-drag { display:flex; }
         
-        /* 5. Viewer vs Admin checkboxes */
         .sub-sub-select { width:14px; height:14px; accent-color:var(--danger); display:none; }
         body.is-admin .sub-sub-select { display:inline-block; }
         
         .sub-sub-text { flex:1; word-break:break-word; font-weight: 600; transition: opacity 0.3s, filter 0.3s;}
+        
+        /* 1. Sub-sub-input for double click editing */
+        .sub-sub-input {
+            flex:1; font-size:0.8rem; font-weight:600; border:1.5px dashed #cbd5e0;
+            border-radius:5px; padding:2px 6px; background:#fff; display:none; color:#000;
+        }
+
         .sub-sub-delete {
             background:none; border:none; color:#cbd5e0; cursor:pointer; font-size:12px; display:none;
         }
@@ -261,7 +274,6 @@
         }
         .panel-flow-arrow i { font-size:0.9rem; margin-left:4px; }
         
-        /* 4. Viewer Comments styling */
         .panel-comment-wrap { padding:0 16px 10px; }
         .panel-comment-label { font-size:0.75rem; font-weight:700; color:var(--text); margin-bottom:4px; }
         .panel-comment-textarea {
@@ -306,6 +318,10 @@
     </style>
 </head>
 <body>
+    <!-- Background Animation Containers -->
+    <div class="bg-animation"></div>
+    <div class="bg-glow"></div>
+
     <header class="dashboard-header">
         <div class="header-left">
             <div class="header-logo"><i class="fa-solid fa-building-columns"></i></div>
@@ -670,7 +686,6 @@
                 progressWrap.appendChild(progressSlider);
                 card.appendChild(progressWrap);
                 
-                // 4. Update Viewer Comments Section
                 const commentWrap = document.createElement('div'); commentWrap.className='panel-comment-wrap';
                 const commentLabel = document.createElement('div'); commentLabel.className='panel-comment-label'; commentLabel.innerHTML='💬 Viewer Comments & Notes';
                 const commentArea = document.createElement('textarea'); commentArea.className='panel-comment-textarea'; commentArea.value = panel.comment || '';
@@ -693,7 +708,6 @@
                 const insAfter = document.createElement('button'); insAfter.className='insert-btn'; insAfter.innerHTML='<i class="fa-solid fa-arrow-down"></i> Insert After';
                 insAfter.addEventListener('click', (e)=>{ e.stopPropagation(); openNewPanelModalAt(index+1); });
                 
-                // 5. Select & Delete is purely admin-only
                 const delSelBtn = document.createElement('button'); delSelBtn.className='delete-selected-btn'; delSelBtn.innerHTML='<i class="fa-solid fa-check-double"></i> Delete Selected';
                 delSelBtn.addEventListener('click', (e)=>{
                     e.stopPropagation();
@@ -739,14 +753,13 @@
                 const textSpan = document.createElement('span'); textSpan.className='subtopic-text';
                 textSpan.innerHTML = `<span class="item-number">${subIndex+1}.</span> ${sub.text}`;
                 
-                const inputEl = document.createElement('input'); inputEl.type='text'; inputEl.className='subtopic-input admin-only-block'; inputEl.value=sub.text;
+                const inputEl = document.createElement('input'); inputEl.type='text'; inputEl.className='subtopic-input'; inputEl.value=sub.text;
                 inputEl.addEventListener('input', ()=>{ 
                     sub.text=inputEl.value; 
                     textSpan.innerHTML = `<span class="item-number">${subIndex+1}.</span> ${sub.text||'(empty)'}`; 
                     debounceSave(); 
                 });
                 
-                // Expand Chevron icon
                 const expandIcon = document.createElement('span'); expandIcon.className='subtopic-expand-icon'; expandIcon.innerHTML='<i class="fa-solid fa-chevron-down"></i>';
                 expandIcon.title='Toggle sub-items';
                 
@@ -756,11 +769,11 @@
                 textSpan.addEventListener('dblclick', ()=>{ if(isAdmin){ textSpan.style.display='none'; inputEl.style.display='block'; inputEl.focus(); } });
                 inputEl.addEventListener('blur', ()=>{ textSpan.style.display='block'; inputEl.style.display='none'; });
                 
-                // 6. Blur and fading instead of strikethrough
+                // 3. 85% opacity with slight blur
                 function updateTextStyle() {
                     if(sub.completed) { 
-                        textSpan.style.opacity='0.4'; 
-                        textSpan.style.filter='blur(0.8px)';
+                        textSpan.style.opacity='0.85'; 
+                        textSpan.style.filter='blur(0.5px)';
                         textSpan.style.textDecoration='none';
                     } else { 
                         textSpan.style.opacity='1'; 
@@ -807,12 +820,10 @@
                 
                 li.appendChild(subSubWrapper);
                 
-                // 2. Expand Toggle Logic (Accordion)
                 expandIcon.addEventListener('click', (e)=>{
                     e.stopPropagation();
                     const panelCard = li.closest('.panel-card');
                     if(panelCard) {
-                        // Close all other open wrappers in this panel
                         panelCard.querySelectorAll('.sub-sub-wrapper.open').forEach(w => {
                             if(w !== subSubWrapper) {
                                 w.classList.remove('open');
@@ -847,9 +858,21 @@
                     const text = document.createElement('span'); text.className='sub-sub-text';
                     text.innerHTML = `<span class="item-number">${parentIndex+1}.${idx+1}</span> ${item.text}`;
                     
+                    // 1. Sub-sub-item editing input
+                    const inputEl = document.createElement('input'); inputEl.type='text'; inputEl.className='sub-sub-input'; inputEl.value=item.text;
+                    inputEl.addEventListener('input', ()=>{ 
+                        item.text = inputEl.value; 
+                        text.innerHTML = `<span class="item-number">${parentIndex+1}.${idx+1}</span> ${item.text||'(empty)'}`; 
+                        debounceSave(); 
+                    });
+
+                    // Double click logic
+                    text.addEventListener('dblclick', ()=>{ if(isAdmin){ text.style.display='none'; inputEl.style.display='block'; inputEl.focus(); } });
+                    inputEl.addEventListener('blur', ()=>{ text.style.display='block'; inputEl.style.display='none'; });
+
                     function updateSubSubStyle() {
                         if(item.completed) {
-                            text.style.opacity='0.4'; text.style.filter='blur(0.8px)';
+                            text.style.opacity='0.85'; text.style.filter='blur(0.5px)';
                         } else {
                             text.style.opacity='1'; text.style.filter='none';
                         }
@@ -872,7 +895,7 @@
                         if(isAdmin && typeof Sortable !== 'undefined') initSubSubSortable(listEl);
                     });
                     
-                    li.appendChild(drag); li.appendChild(sel); li.appendChild(cb); li.appendChild(text); li.appendChild(del);
+                    li.appendChild(drag); li.appendChild(sel); li.appendChild(cb); li.appendChild(text); li.appendChild(inputEl); li.appendChild(del);
                     listEl.appendChild(li);
                 });
             }
@@ -921,6 +944,8 @@
                     document.getElementById('btnAdminToggle').classList.remove('active');
                     $$('.subtopic-input').forEach(el=>el.style.display='none');
                     $$('.subtopic-text').forEach(el=>el.style.display='block');
+                    $$('.sub-sub-input').forEach(el=>el.style.display='none');
+                    $$('.sub-sub-text').forEach(el=>el.style.display='block');
                 }
                 initSortable();
             }
