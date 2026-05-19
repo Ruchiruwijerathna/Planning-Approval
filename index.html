@@ -4,16 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Planning Approval Workflow Dashboard</title>
-    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-    <!-- SortableJS -->
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
-    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         :root {
-            --bg: #f0f4f8;
+            --bg: #f4f6f9;
             --surface: #ffffff;
             --surface-alt: #f8fafb;
             --text: #000000;
@@ -24,76 +21,78 @@
             --shadow-lg: 0 12px 32px rgba(0,0,0,0.12);
             --radius: 14px;
             --radius-sm: 8px;
-            --accent: #4f6ef7;
+            
+            /* Branded Colors based on Bhoomi Logo */
+            --accent: #2d2f33; /* Corporate Dark Grey */
+            --accent-highlight: #fcc827; /* Corporate Yellow */
             --danger: #e53e3e;
             --success: #38a169;
             --progress-bg: #e2e8f0;
-            --progress-fill: linear-gradient(90deg, #4f6ef7, #38a169);
+            --progress-fill: linear-gradient(90deg, #2d2f33, #fcc827); /* Branded Gradient */
         }
         * { margin:0; padding:0; box-sizing:border-box; }
         
-        /* 2. Professional Corporate Geometric Mesh Background */
         body {
             font-family: 'Segoe UI', system-ui, sans-serif;
             color: var(--text);
             line-height: 1.6;
             min-height: 100vh;
-            background: #f0f4f8; /* Base color */
+            background: var(--bg); 
         }
         
+        /* Professional Animated Arrow Background */
         .bg-animation {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             z-index: -2; overflow: hidden;
-            background: linear-gradient(135deg, #e4ebf5 0%, #f9fbfd 100%);
+            background-color: #f4f6f9; 
         }
         .bg-animation::before, .bg-animation::after {
             content: ''; position: absolute; width: 200vw; height: 200vh;
             top: -50%; left: -50%;
         }
+        /* Dark grey small moving arrows */
         .bg-animation::before {
-            background-image: 
-                repeating-linear-gradient(45deg, transparent, transparent 40px, rgba(79, 110, 247, 0.035) 40px, rgba(79, 110, 247, 0.035) 41px),
-                repeating-linear-gradient(-45deg, transparent, transparent 40px, rgba(79, 110, 247, 0.035) 40px, rgba(79, 110, 247, 0.035) 41px);
-            animation: moveMesh 45s linear infinite;
+            background-image: url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 20l20 20-20 20M40 20l20 20-20 20' stroke='rgba(45,47,51,0.035)' stroke-width='2.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+            animation: arrowMove 35s linear infinite;
         }
+        /* Yellow large subtle moving arrows */
         .bg-animation::after {
-            background-image: 
-                repeating-linear-gradient(0deg, transparent, transparent 60px, rgba(0, 0, 0, 0.02) 60px, rgba(0, 0, 0, 0.02) 61px),
-                repeating-linear-gradient(90deg, transparent, transparent 60px, rgba(0, 0, 0, 0.02) 60px, rgba(0, 0, 0, 0.02) 61px);
-            animation: moveMeshSlow 65s linear infinite reverse;
+            background-image: url("data:image/svg+xml,%3Csvg width='120' height='120' viewBox='0 0 120 120' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 30l30 30-30 30' stroke='rgba(252,200,39,0.04)' stroke-width='3.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+            animation: arrowMove 50s linear infinite;
         }
         .bg-glow {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             z-index: -1; pointer-events: none;
-            background: 
-                radial-gradient(circle at 15% 50%, rgba(79, 110, 247, 0.05), transparent 55%),
-                radial-gradient(circle at 85% 30%, rgba(56, 161, 105, 0.04), transparent 50%);
+            background: radial-gradient(circle at 10% 20%, rgba(252, 200, 39, 0.05), transparent 60%);
         }
-        @keyframes moveMesh {
-            0% { transform: translate(0, 0); }
-            100% { transform: translate(80px, 80px); }
-        }
-        @keyframes moveMeshSlow {
-            0% { transform: translate(0, 0); }
-            100% { transform: translate(120px, 120px); }
+        @keyframes arrowMove {
+            0% { transform: translate(0px, 0px); }
+            100% { transform: translate(240px, 240px); } /* 240 is lowest common multiple for seamless loop */
         }
 
         /* Header */
         .dashboard-header {
             background: var(--surface);
-            border-bottom: 1px solid var(--border);
-            padding: 16px 28px;
+            border-bottom: 2px solid var(--accent-highlight);
+            padding: 12px 28px;
             position: sticky; top: 0; z-index: 100;
             display: flex; flex-wrap: wrap; align-items: center; gap: 16px;
             justify-content: space-between;
-            box-shadow: var(--shadow-sm);
+            box-shadow: var(--shadow);
         }
-        .header-left { display:flex; align-items:center; gap:14px; }
+        .header-left { display:flex; align-items:center; gap:18px; }
+        
+        /* Updated Logo Class */
         .header-logo {
-            width:44px; height:44px; border-radius:12px;
-            background:var(--accent); color:#fff;
-            display:flex; align-items:center; justify-content:center; font-size:20px;
+            height: 48px; 
+            border-radius: 4px;
+            display:flex; align-items:center; justify-content:center;
+            overflow: hidden;
         }
+        .header-logo img {
+            height: 100%; width: auto; object-fit: contain;
+        }
+
         .project-name-display { font-size:1.25rem; font-weight:800; color:var(--text); }
         .project-name-input {
             font-size:1.25rem; font-weight:800; color:#000;
@@ -102,6 +101,7 @@
         }
         body.is-admin .project-name-input { display:inline-block; }
         body.is-admin .project-name-display { display:none; }
+        
         .progress-section { display:flex; align-items:center; gap:12px; }
         .progress-label { font-size:0.85rem; font-weight:700; color:var(--text-secondary); }
         .progress-bar-wrap { width:180px; height:10px; background:var(--progress-bg); border-radius:20px; overflow:hidden; }
@@ -109,6 +109,7 @@
         .progress-percent { font-weight:800; font-size:0.95rem; color:var(--accent); min-width:38px; text-align:center; }
         .progress-slider { width:100px; accent-color:var(--accent); display:none; }
         body.is-admin .progress-slider { display:inline-block; }
+        
         .btn {
             padding:9px 18px; border-radius:25px; border:none;
             font-weight:700; font-size:0.85rem; cursor:pointer;
@@ -116,7 +117,8 @@
             transition:0.2s; font-family:inherit;
         }
         .btn-admin { background:var(--accent); color:#fff; }
-        .btn-admin.active { background:#1a202c; }
+        .btn-admin:hover { background: #1a1b1d; }
+        .btn-admin.active { background:var(--accent-highlight); color:var(--accent); box-shadow: 0 2px 10px rgba(252,200,39,0.3); }
         .btn-outline { background:transparent; border:2px solid var(--border); color:var(--text); }
         .btn-outline:hover { border-color:var(--accent); color:var(--accent); }
         .btn-sm { padding:5px 12px; font-size:0.75rem; border-radius:18px; }
@@ -125,7 +127,8 @@
             padding:10px 20px; border-radius:25px; font-weight:700;
             cursor:pointer; display:inline-flex; align-items:center; gap:6px;
         }
-        .btn-add-panel:hover { border-color:var(--accent); color:var(--accent); background:#fafbff; }
+        .btn-add-panel:hover { border-color:var(--accent-highlight); color:var(--accent); background:#fffef5; }
+        
         .main-container { max-width:1500px; margin:0 auto; padding:24px 20px 60px; }
         .panels-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:18px; align-items:start; }
         
@@ -141,7 +144,6 @@
             overflow:hidden; display:flex; flex-direction:column;
         }
         
-        /* 3. 85% Transparency & slight blur for completed panels */
         .panel-card.panel-completed {
             opacity: 0.85; 
             filter: blur(0.5px) grayscale(20%);
@@ -230,7 +232,6 @@
         
         .sub-sub-text { flex:1; word-break:break-word; font-weight: 600; transition: opacity 0.3s, filter 0.3s;}
         
-        /* 1. Sub-sub-input for double click editing */
         .sub-sub-input {
             flex:1; font-size:0.8rem; font-weight:600; border:1.5px dashed #cbd5e0;
             border-radius:5px; padding:2px 6px; background:#fff; display:none; color:#000;
@@ -247,6 +248,7 @@
             padding:5px 12px; font-weight:700; cursor:pointer; display:none;
         }
         body.is-admin .add-subtopic-btn, body.is-admin .add-subsub-btn { display:inline-flex; align-items:center; gap:4px; }
+        
         .panel-card-footer {
             padding:8px 16px 12px; display:none; gap:6px; flex-wrap:wrap;
             border-top:1px solid #f7fafc;
@@ -259,6 +261,7 @@
         }
         .delete-panel-btn, .delete-selected-btn { border-color:#fed7d7; color:#c53030; }
         .delete-panel-btn:hover, .delete-selected-btn:hover { background:#fff5f5; }
+        
         .panel-progress-wrap {
             display:flex; align-items:center; gap:8px; padding:4px 16px 8px;
             font-size:0.75rem; color:var(--text); font-weight: 600;
@@ -295,15 +298,15 @@
         /* Modals and Toasts */
         .modal-overlay {
             position:fixed; top:0; left:0; width:100%; height:100%;
-            background:rgba(15,20,30,0.65); z-index:999; display:none;
+            background:rgba(45, 47, 51, 0.7); z-index:999; display:none;
             align-items:center; justify-content:center; backdrop-filter:blur(4px);
         }
         .modal-dialog {
             background:#fff; border-radius:var(--radius); padding:24px;
             width:450px; max-width:92vw; box-shadow:var(--shadow-lg);
-            max-height:80vh; overflow-y:auto;
+            max-height:80vh; overflow-y:auto; border-top: 5px solid var(--accent-highlight);
         }
-        .modal-dialog h3 { margin-bottom:6px; font-size:1.1rem; font-weight: 800; }
+        .modal-dialog h3 { margin-bottom:6px; font-size:1.1rem; font-weight: 800; color:var(--accent); }
         .modal-input {
             width:100%; padding:11px 14px; border:2px solid var(--border);
             border-radius:var(--radius-sm); font-size:0.95rem; outline:none; font-family:inherit; font-weight: 600;
@@ -312,19 +315,20 @@
         .modal-actions { display:flex; gap:10px; margin-top:18px; justify-content:flex-end; }
         .toast-container { position:fixed; bottom:24px; right:24px; z-index:1000; display:flex; flex-direction:column; gap:8px; }
         .toast {
-            background:#1a202c; color:#fff; padding:12px 20px; border-radius:25px;
-            font-size:0.85rem; font-weight: 600; box-shadow:var(--shadow-lg);
+            background:var(--accent); color:#fff; padding:12px 20px; border-radius:25px;
+            font-size:0.85rem; font-weight: 600; box-shadow:var(--shadow-lg); border-left: 3px solid var(--accent-highlight);
         }
     </style>
 </head>
 <body>
-    <!-- Background Animation Containers -->
     <div class="bg-animation"></div>
     <div class="bg-glow"></div>
 
     <header class="dashboard-header">
         <div class="header-left">
-            <div class="header-logo"><i class="fa-solid fa-building-columns"></i></div>
+            <div class="header-logo">
+                <img src="bhoomi-logo.jpg" alt="Bhoomi Logo">
+            </div>
             <div>
                 <span class="project-name-display" id="projectNameDisplay">PLANNING APPROVAL WORKFLOW</span>
                 <input type="text" class="project-name-input" id="projectNameInput" placeholder="Project name...">
@@ -338,13 +342,13 @@
         </div>
         <div style="display:flex;gap:8px;">
             <button class="btn btn-outline btn-sm" id="btnResetAll"><i class="fa-solid fa-rotate-left"></i> Reset</button>
-            <button class="btn btn-admin" id="btnAdminToggle"><i class="fa-solid fa-lock"></i> <span id="btnAdminText">Admin Mode</span></button>
+            <button class="btn btn-admin" id="btnAdminToggle"><i class="fa-solid fa-lock"></i> <span id="btnAdminText">Admin Login</span></button>
         </div>
     </header>
 
     <div class="main-container">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
-            <h2 style="font-size:1.1rem;color:var(--text);font-weight:800;"><i class="fa-solid fa-diagram-project"></i> Workflow Stages <span id="panelCount">(16 Panels)</span></h2>
+            <h2 style="font-size:1.1rem;color:var(--accent);font-weight:800;"><i class="fa-solid fa-diagram-project"></i> Workflow Stages <span id="panelCount">(16 Panels)</span></h2>
             <button class="btn-add-panel admin-only-inline" id="btnAddPanelTop"><i class="fa-solid fa-plus"></i> Add New Panel</button>
         </div>
         <div class="panels-grid" id="panelsGrid"></div>
@@ -353,7 +357,6 @@
         </div>
     </div>
 
-    <!-- Admin Login Modal -->
     <div class="modal-overlay" id="adminModal">
         <div class="modal-dialog">
             <h3><i class="fa-solid fa-shield-halved"></i> Admin Authentication</h3>
@@ -362,12 +365,11 @@
             <div class="modal-error" id="adminModalError" style="display:none;color:var(--danger);margin-top:6px;font-weight:bold;">Incorrect Password.</div>
             <div class="modal-actions">
                 <button class="btn btn-outline btn-sm" id="btnCancelAdmin">Cancel</button>
-                <button class="btn btn-admin btn-sm" id="btnConfirmAdmin">Unlock</button>
+                <button class="btn btn-admin btn-sm" id="btnConfirmAdmin">Login</button>
             </div>
         </div>
     </div>
 
-    <!-- New Panel Modal -->
     <div class="modal-overlay" id="newPanelModal">
         <div class="modal-dialog">
             <h3><i class="fa-solid fa-folder-plus"></i> Add New Panel</h3>
@@ -769,7 +771,6 @@
                 textSpan.addEventListener('dblclick', ()=>{ if(isAdmin){ textSpan.style.display='none'; inputEl.style.display='block'; inputEl.focus(); } });
                 inputEl.addEventListener('blur', ()=>{ textSpan.style.display='block'; inputEl.style.display='none'; });
                 
-                // 3. 85% opacity with slight blur
                 function updateTextStyle() {
                     if(sub.completed) { 
                         textSpan.style.opacity='0.85'; 
@@ -858,7 +859,6 @@
                     const text = document.createElement('span'); text.className='sub-sub-text';
                     text.innerHTML = `<span class="item-number">${parentIndex+1}.${idx+1}</span> ${item.text}`;
                     
-                    // 1. Sub-sub-item editing input
                     const inputEl = document.createElement('input'); inputEl.type='text'; inputEl.className='sub-sub-input'; inputEl.value=item.text;
                     inputEl.addEventListener('input', ()=>{ 
                         item.text = inputEl.value; 
@@ -866,7 +866,6 @@
                         debounceSave(); 
                     });
 
-                    // Double click logic
                     text.addEventListener('dblclick', ()=>{ if(isAdmin){ text.style.display='none'; inputEl.style.display='block'; inputEl.focus(); } });
                     inputEl.addEventListener('blur', ()=>{ text.style.display='block'; inputEl.style.display='none'; });
 
@@ -940,7 +939,7 @@
                     document.getElementById('btnAdminToggle').classList.add('active');
                 } else {
                     document.body.classList.remove('is-admin');
-                    document.getElementById('btnAdminText').textContent = 'Admin Mode';
+                    document.getElementById('btnAdminText').textContent = 'Admin Login';
                     document.getElementById('btnAdminToggle').classList.remove('active');
                     $$('.subtopic-input').forEach(el=>el.style.display='none');
                     $$('.subtopic-text').forEach(el=>el.style.display='block');
@@ -1004,14 +1003,14 @@
             document.getElementById('btnCancelAdmin').addEventListener('click', closeAdminModal);
             document.getElementById('btnConfirmAdmin').addEventListener('click', ()=>{
                 if(document.getElementById('adminPasswordInput').value === ADMIN_PASSWORD) {
-                    isAdmin = true; updateAdminUI(); renderAll(); closeAdminModal(); showToast('Admin mode activated! 🔓');
+                    isAdmin = true; updateAdminUI(); renderAll(); closeAdminModal(); showToast('Admin Login activated! 🔓');
                 } else {
                     document.getElementById('adminModalError').style.display='block';
                 }
             });
             
             document.getElementById('btnAdminToggle').addEventListener('click', ()=> isAdmin ? exitAdminMode() : openAdminModal());
-            function exitAdminMode() { isAdmin=false; updateAdminUI(); renderAll(); showToast('Admin mode deactivated. 🔒'); }
+            function exitAdminMode() { isAdmin=false; updateAdminUI(); renderAll(); showToast('Admin Login deactivated. 🔒'); }
             
             let pendingInsertIndex = null;
             function openNewPanelModalAt(idx) { if(!isAdmin) return; pendingInsertIndex=idx; document.getElementById('newPanelModal').style.display='flex'; document.getElementById('newPanelTitleInput').focus(); }
