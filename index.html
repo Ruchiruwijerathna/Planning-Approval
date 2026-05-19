@@ -6,14 +6,11 @@
     <title>Planning Approval Workflow Dashboard</title>
 
     <!-- Firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js">
-    </script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js">
-    </script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 
     <!-- SortableJS for Drag & Drop -->
-    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js">
-    </script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
 
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -439,6 +436,29 @@
             cursor: pointer;
             flex-shrink: 0;
         }
+        /* New selection checkbox and drag handle styles */
+        .subtopic-select-checkbox {
+            width: 14px;
+            height: 14px;
+            cursor: pointer;
+            flex-shrink: 0;
+            accent-color: var(--danger);
+        }
+        .subtopic-drag-handle {
+            cursor: grab;
+            color: #cbd5e0;
+            font-size: 0.9rem;
+            padding: 2px;
+            transition: var(--transition);
+            flex-shrink: 0;
+            user-select: none;
+            display: flex;
+            align-items: center;
+        }
+        .subtopic-drag-handle:active {
+            cursor: grabbing;
+            color: var(--accent);
+        }
         .subtopic-text {
             flex: 1;
             word-break: break-word;
@@ -545,6 +565,25 @@
             background: #fff5f5;
             border-color: #e53e3e;
         }
+        .delete-selected-btn {
+            font-size: 0.68rem;
+            background: transparent;
+            border: 1px solid #fed7d7;
+            color: #c53030;
+            cursor: pointer;
+            padding: 4px 10px;
+            border-radius: 12px;
+            transition: var(--transition);
+            font-weight: 500;
+            font-family: inherit;
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+        }
+        .delete-selected-btn:hover {
+            background: #fff5f5;
+            border-color: #e53e3e;
+        }
 
         /* Admin-only visibility */
         .admin-only {
@@ -571,6 +610,18 @@
         .panel-drag-handle {
             display: none;
         }
+        body.is-admin .subtopic-drag-handle {
+            display: flex;
+        }
+        .subtopic-drag-handle {
+            display: none;
+        }
+        body.is-admin .subtopic-select-checkbox {
+            display: inline-block;
+        }
+        .subtopic-select-checkbox {
+            display: none;
+        }
         body.is-admin .panel-card {
             cursor: default;
         }
@@ -594,12 +645,8 @@
             animation: fadeIn 0.2s ease;
         }
         @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-            to {
-                opacity: 1;
-            }
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
         .modal-dialog {
             background: #fff;
@@ -611,14 +658,8 @@
             animation: slideUp 0.25s ease;
         }
         @keyframes slideUp {
-            from {
-                transform: translateY(30px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
         }
         .modal-dialog h3 {
             margin-bottom: 6px;
@@ -689,23 +730,12 @@
             border-left: 4px solid var(--danger);
         }
         @keyframes toastIn {
-            from {
-                transform: translateX(120px);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
+            from { transform: translateX(120px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
         }
         @keyframes toastOut {
-            from {
-                opacity: 1;
-            }
-            to {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
+            from { opacity: 1; }
+            to { opacity: 0; transform: translateY(-10px); }
         }
 
         /* ── STATUS BADGE ──────────────── */
@@ -718,33 +748,15 @@
             letter-spacing: 0.3px;
             text-transform: uppercase;
         }
-        .status-pending {
-            background: #fefcbf;
-            color: #975a16;
-        }
-        .status-in-progress {
-            background: #bee3f8;
-            color: #2a4365;
-        }
-        .status-completed {
-            background: #c6f6d5;
-            color: #22543d;
-        }
+        .status-pending { background: #fefcbf; color: #975a16; }
+        .status-in-progress { background: #bee3f8; color: #2a4365; }
+        .status-completed { background: #c6f6d5; color: #22543d; }
 
         /* ── UTILITY ───────────────────── */
-        .text-center {
-            text-align: center;
-        }
-        .mb-16 {
-            margin-bottom: 16px;
-        }
-        .gap-8 {
-            gap: 8px;
-        }
-        .flex-wrap {
-            display: flex;
-            flex-wrap: wrap;
-        }
+        .text-center { text-align: center; }
+        .mb-16 { margin-bottom: 16px; }
+        .gap-8 { gap: 8px; }
+        .flex-wrap { display: flex; flex-wrap: wrap; }
     </style>
 </head>
 <body>
@@ -1086,9 +1098,7 @@
                     { id: 'sub_16_1', text: 'Inspect completed works', completed: false },
                     { id: 'sub_16_2', text: 'Verify compliance with approved plans', completed: false },
                     { id: 'sub_16_3', text: 'Issue Certificate of Conformity', completed: false },
-                    { id: 'sub_16_4',
-                        text: 'Issue Completion Certificate / Occupancy Certificate',
-                        completed: false },
+                    { id: 'sub_16_4', text: 'Issue Completion Certificate / Occupancy Certificate', completed: false },
                     { id: 'sub_16_5', text: 'Outcome: Project Completed & Certified', completed: false },
                     { id: 'sub_16_6', text: 'FINAL STATUS: LEGALLY APPROVED & COMPLETE ✅', completed: false },
                 ],
@@ -1110,6 +1120,10 @@
             let saveTimeout = null;
             let isSaving = false;
 
+            // Sortable instances
+            let panelSortable = null;
+            let subtopicSortables = [];  // Array to hold Sortable instances for subtopic lists
+
             // ─────────────────────────────────────
             // DOM REFERENCES
             // ─────────────────────────────────────
@@ -1130,8 +1144,6 @@
             const $newPanelPosition = document.getElementById('newPanelPosition');
             const $toastContainer = document.getElementById('toastContainer');
 
-            let sortableInstance = null;
-
             // ─────────────────────────────────────
             // PERSISTENCE: Load & Save
             // ─────────────────────────────────────
@@ -1147,7 +1159,6 @@
                             appData.progress = data.progress || 0;
                             appData.panels = data.panels || JSON.parse(JSON.stringify(defaultPanels));
                             appData.lastUpdated = data.lastUpdated || null;
-                            // Restore counters
                             restoreCounters();
                             console.log('✅ Data loaded from Firestore.');
                             return;
@@ -1241,8 +1252,7 @@
             function showToastMessage(message, type = 'success') {
                 const toast = document.createElement('div');
                 toast.className = `toast ${type}`;
-                toast.innerHTML =
-                    `<i class="fa-solid fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i> ${message}`;
+                toast.innerHTML = `<i class="fa-solid fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i> ${message}`;
                 $toastContainer.appendChild(toast);
                 setTimeout(() => {
                     if (toast.parentNode) toast.parentNode.removeChild(toast);
@@ -1257,7 +1267,7 @@
                 renderPanels();
                 updatePanelCount();
                 updateAdminUI();
-                initSortable();
+                initSortable(); // This will also init subtopic sortables
             }
 
             function renderHeader() {
@@ -1266,7 +1276,6 @@
                 $progressBarFill.style.width = appData.progress + '%';
                 $progressPercent.textContent = appData.progress + '%';
                 $progressSlider.value = appData.progress;
-                // Update display visibility
                 if (isAdmin) {
                     $projectNameDisplay.style.display = 'none';
                     $projectNameInput.style.display = 'inline-block';
@@ -1371,18 +1380,18 @@
                     panel.subtopics.push(newSub);
                     const newLi = createSubtopicItem(panel, newSub);
                     subtopicList.appendChild(newLi);
-                    // Focus the new input
                     setTimeout(() => {
                         const input = newLi.querySelector('.subtopic-input');
-                        if (input) { input.focus();
-                            input.select(); }
+                        if (input) { input.focus(); input.select(); }
                     }, 100);
+                    // Re-initialize sortable for this list after adding
+                    reinitSingleSubtopicSortable(subtopicList);
                     debounceSave();
                 });
                 body.appendChild(addSubBtn);
                 card.appendChild(body);
 
-                // Footer with insert/delete buttons (admin only)
+                // Footer with insert/delete/select-delete buttons (admin only)
                 const footer = document.createElement('div');
                 footer.className = 'panel-card-footer admin-only';
 
@@ -1414,9 +1423,7 @@
                         showToastMessage('Cannot delete the last panel! ❌', 'error');
                         return;
                     }
-                    if (confirm(
-                            `Are you sure you want to delete "${panel.title}"? This action cannot be undone.`
-                            )) {
+                    if (confirm(`Are you sure you want to delete "${panel.title}"? This action cannot be undone.`)) {
                         appData.panels = appData.panels.filter(p => p.id !== panel.id);
                         saveData(true);
                         renderAll();
@@ -1424,8 +1431,38 @@
                     }
                 });
 
+                // New: Delete Selected Subtopics button
+                const deleteSelectedBtn = document.createElement('button');
+                deleteSelectedBtn.className = 'delete-selected-btn';
+                deleteSelectedBtn.innerHTML = '<i class="fa-solid fa-check-double"></i> Delete Selected';
+                deleteSelectedBtn.title = 'Delete all selected subtopics';
+                deleteSelectedBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const list = card.querySelector('.subtopic-list');
+                    const checkedBoxes = list.querySelectorAll('.subtopic-select-checkbox:checked');
+                    if (checkedBoxes.length === 0) {
+                        showToastMessage('No subtopics selected.', 'error');
+                        return;
+                    }
+                    const idsToDelete = new Set();
+                    checkedBoxes.forEach(cb => {
+                        const li = cb.closest('.subtopic-item');
+                        if (li) {
+                            idsToDelete.add(li.getAttribute('data-subtopic-id'));
+                            li.remove();  // Remove from DOM
+                        }
+                    });
+                    // Update data array
+                    panel.subtopics = panel.subtopics.filter(s => !idsToDelete.has(s.id));
+                    // Re-initialize the subtopic sortable for this list
+                    reinitSingleSubtopicSortable(list);
+                    debounceSave();
+                    showToastMessage(`${idsToDelete.size} subtopic(s) deleted.`, 'success');
+                });
+
                 footer.appendChild(insertBeforeBtn);
                 footer.appendChild(insertAfterBtn);
+                footer.appendChild(deleteSelectedBtn);
                 footer.appendChild(deletePanelBtn);
                 card.appendChild(footer);
 
@@ -1437,12 +1474,36 @@
                 li.className = 'subtopic-item';
                 li.setAttribute('data-subtopic-id', sub.id);
 
+                // Drag handle (admin only)
+                const dragHandle = document.createElement('span');
+                dragHandle.className = 'subtopic-drag-handle admin-only-inline';
+                dragHandle.innerHTML = '<i class="fa-solid fa-grip-vertical"></i>';
+                dragHandle.title = 'Drag to reorder subtopics';
+
+                // Select checkbox (admin only)
+                const selectCheck = document.createElement('input');
+                selectCheck.type = 'checkbox';
+                selectCheck.className = 'subtopic-select-checkbox admin-only-inline';
+                selectCheck.title = 'Select for bulk delete';
+
+                // Completion checkbox
                 const checkbox = document.createElement('input');
                 checkbox.type = 'checkbox';
                 checkbox.className = 'subtopic-checkbox';
                 checkbox.checked = sub.completed;
                 checkbox.addEventListener('change', () => {
                     sub.completed = checkbox.checked;
+                    // Update text style
+                    const textSpan = li.querySelector('.subtopic-text');
+                    if (textSpan) {
+                        if (sub.completed) {
+                            textSpan.style.textDecoration = 'line-through';
+                            textSpan.style.opacity = '0.6';
+                        } else {
+                            textSpan.style.textDecoration = 'none';
+                            textSpan.style.opacity = '1';
+                        }
+                    }
                     debounceSave();
                 });
 
@@ -1478,17 +1539,17 @@
                 deleteBtn.title = 'Remove this sub-item';
                 deleteBtn.addEventListener('click', (e) => {
                     e.stopPropagation();
-                    panel.subtopics = panel.subtopics.filter(s => s.id !== sub.id);
+                    // Remove the li and update data array
                     li.remove();
+                    panel.subtopics = panel.subtopics.filter(s => s.id !== sub.id);
+                    // If the list is now empty, maybe handle? No need.
+                    // Re-initialize the parent list's sortable (it will auto-detect removal)
+                    // But we can just let Sortable handle it automatically since we removed from DOM.
+                    // Actually, after removal, Sortable might still work fine. We'll just save.
                     debounceSave();
                 });
 
-                li.appendChild(checkbox);
-                li.appendChild(textSpan);
-                li.appendChild(inputEl);
-                li.appendChild(deleteBtn);
-
-                // Click on text to edit in admin mode
+                // Click on text to edit in admin mode (double-click)
                 textSpan.addEventListener('dblclick', () => {
                     if (isAdmin) {
                         textSpan.style.display = 'none';
@@ -1506,6 +1567,14 @@
                         inputEl.blur();
                     }
                 });
+
+                // Append in order: drag handle, select checkbox, completion checkbox, text, input, delete
+                li.appendChild(dragHandle);
+                li.appendChild(selectCheck);
+                li.appendChild(checkbox);
+                li.appendChild(textSpan);
+                li.appendChild(inputEl);
+                li.appendChild(deleteBtn);
 
                 return li;
             }
@@ -1527,47 +1596,105 @@
                     $btnAdminToggle.classList.remove('active');
                     $projectNameDisplay.style.display = 'inline';
                     $projectNameInput.style.display = 'none';
-                    // Hide all subtopic inputs
+                    // Hide all subtopic inputs and show texts
                     document.querySelectorAll('.subtopic-input').forEach(el => el.style.display = 'none');
                     document.querySelectorAll('.subtopic-text').forEach(el => el.style.display = 'inline');
                 }
-                // Re-init sortable when admin state changes
+                // Re-init all sortables when admin state changes
                 initSortable();
             }
 
             // ─────────────────────────────────────
-            // SORTABLE (Drag & Drop)
+            // SORTABLE (Drag & Drop) for panels and subtopics
             // ─────────────────────────────────────
-            function initSortable() {
-                if (sortableInstance) {
-                    sortableInstance.destroy();
-                    sortableInstance = null;
+            function destroyAllSortables() {
+                if (panelSortable) {
+                    panelSortable.destroy();
+                    panelSortable = null;
                 }
-                if (!isAdmin) return; // Only sortable in admin mode
+                subtopicSortables.forEach(s => s.destroy());
+                subtopicSortables = [];
+            }
 
-                const grid = document.getElementById('panelsGrid');
-                if (!grid || appData.panels.length === 0) return;
+            function initSortable() {
+                // Destroy existing
+                destroyAllSortables();
 
-                sortableInstance = new Sortable(grid, {
-                    animation: 200,
-                    easing: 'cubic-bezier(0.4, 0, 0.2, 1)',
+                // Panel sortable (only if admin)
+                if (isAdmin && $panelsGrid && appData.panels.length > 0) {
+                    panelSortable = new Sortable($panelsGrid, {
+                        animation: 200,
+                        easing: 'cubic-bezier(0.4, 0, 0.2, 1)',
+                        ghostClass: 'sortable-ghost',
+                        chosenClass: 'sortable-chosen',
+                        dragClass: 'sortable-drag',
+                        handle: '.panel-drag-handle',
+                        onEnd: function(evt) {
+                            const oldIndex = evt.oldIndex;
+                            const newIndex = evt.newIndex;
+                            if (oldIndex !== newIndex && oldIndex !== undefined && newIndex !== undefined) {
+                                const movedPanel = appData.panels.splice(oldIndex, 1)[0];
+                                appData.panels.splice(newIndex, 0, movedPanel);
+                                appData.panels.forEach((p, i) => { p.order = i; });
+                                saveData(true);
+                                renderAll();  // Re-render to update numbers
+                                showToastMessage('Panel order updated! 🔄', 'success');
+                            }
+                        },
+                    });
+                }
+
+                // Subtopic sortables (only if admin)
+                if (isAdmin) {
+                    document.querySelectorAll('.subtopic-list').forEach(list => {
+                        initSingleSubtopicSortable(list);
+                    });
+                }
+            }
+
+            function initSingleSubtopicSortable(listEl) {
+                if (!isAdmin) return;
+                // Avoid duplicate instances
+                if (subtopicSortables.some(s => s.el === listEl)) {
+                    // Already initialized
+                    return;
+                }
+                const sortable = new Sortable(listEl, {
+                    animation: 150,
+                    handle: '.subtopic-drag-handle',
                     ghostClass: 'sortable-ghost',
-                    chosenClass: 'sortable-chosen',
-                    dragClass: 'sortable-drag',
-                    handle: '.panel-drag-handle',
                     onEnd: function(evt) {
-                        const oldIndex = evt.oldIndex;
-                        const newIndex = evt.newIndex;
-                        if (oldIndex !== newIndex && oldIndex !== undefined && newIndex !== undefined) {
-                            const movedPanel = appData.panels.splice(oldIndex, 1)[0];
-                            appData.panels.splice(newIndex, 0, movedPanel);
-                            appData.panels.forEach((p, i) => { p.order = i; });
-                            saveData(true);
-                            renderAll();
-                            showToastMessage('Panel order updated! 🔄', 'success');
-                        }
-                    },
+                        const panelId = listEl.getAttribute('data-panel-id');
+                        const panel = appData.panels.find(p => p.id === panelId);
+                        if (!panel) return;
+                        // Get new order of subtopic IDs from the DOM
+                        const items = listEl.querySelectorAll('.subtopic-item');
+                        const newOrderIds = Array.from(items).map(item => item.getAttribute('data-subtopic-id'));
+                        // Reorder panel.subtopics to match newOrderIds
+                        const newSubtopics = [];
+                        newOrderIds.forEach(id => {
+                            const sub = panel.subtopics.find(s => s.id === id);
+                            if (sub) newSubtopics.push(sub);
+                        });
+                        // If some IDs missing (should not happen), keep them at end?
+                        panel.subtopics = newSubtopics;
+                        debounceSave();
+                    }
                 });
+                subtopicSortables.push(sortable);
+            }
+
+            function reinitSingleSubtopicSortable(listEl) {
+                // Remove existing sortable for this list if any
+                subtopicSortables = subtopicSortables.filter(s => {
+                    if (s.el === listEl) {
+                        s.destroy();
+                        return false;
+                    }
+                    return true;
+                });
+                // Reinitialize
+                initSingleSubtopicSortable(listEl);
             }
 
             // ─────────────────────────────────────
@@ -1599,7 +1726,6 @@
                     $adminModalError.style.display = 'block';
                     $adminPasswordInput.value = '';
                     $adminPasswordInput.focus();
-                    // Shake effect
                     $adminPasswordInput.style.animation = 'none';
                     $adminPasswordInput.offsetHeight;
                     $adminPasswordInput.style.animation = 'shake 0.4s ease';
@@ -1663,7 +1789,6 @@
                 } else {
                     insertAt = (position === 'start') ? 0 : appData.panels.length;
                 }
-                // Clamp
                 insertAt = Math.max(0, Math.min(insertAt, appData.panels.length));
 
                 const colors = [
@@ -1691,7 +1816,6 @@
                 saveData(true);
                 renderAll();
                 showToastMessage(`Panel "${title}" added successfully! ✅`, 'success');
-                // Scroll to new panel
                 setTimeout(() => {
                     const card = document.querySelector(`[data-panel-id="${newPanel.id}"]`);
                     if (card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -1706,9 +1830,7 @@
                     showToastMessage('Please enable Admin mode first to reset data.', 'error');
                     return;
                 }
-                if (confirm(
-                        '⚠️ Are you sure you want to reset ALL data to the default 16-panel workflow? All custom changes will be lost. This cannot be undone.'
-                        )) {
+                if (confirm('⚠️ Are you sure you want to reset ALL data to the default 16-panel workflow? All custom changes will be lost. This cannot be undone.')) {
                     appData.panels = JSON.parse(JSON.stringify(defaultPanels));
                     appData.progress = 0;
                     appData.projectName = 'PLANNING APPROVAL WORKFLOW';
@@ -1740,10 +1862,8 @@
             });
 
             // New panel modal
-            document.getElementById('btnAddPanelTop').addEventListener('click', () => openNewPanelModalGeneric(
-            'start'));
-            document.getElementById('btnAddPanelBottom').addEventListener('click', () => openNewPanelModalGeneric(
-            'end'));
+            document.getElementById('btnAddPanelTop').addEventListener('click', () => openNewPanelModalGeneric('start'));
+            document.getElementById('btnAddPanelBottom').addEventListener('click', () => openNewPanelModalGeneric('end'));
             document.getElementById('btnCancelNewPanel').addEventListener('click', closeNewPanelModal);
             document.getElementById('btnConfirmNewPanel').addEventListener('click', confirmNewPanel);
             $newPanelTitleInput.addEventListener('keydown', (e) => {
@@ -1792,7 +1912,6 @@
                     if ($adminModal.style.display === 'flex') closeAdminModal();
                     if ($newPanelModal.style.display === 'flex') closeNewPanelModal();
                 }
-                // Ctrl+Shift+A to toggle admin
                 if (e.ctrlKey && e.shiftKey && e.key === 'A') {
                     e.preventDefault();
                     if (isAdmin) exitAdminMode();
@@ -1805,7 +1924,6 @@
             // ─────────────────────────────────────
             async function init() {
                 await loadData();
-                // Ensure panels have order
                 appData.panels.forEach((p, i) => { if (p.order === undefined) p.order = i; });
                 appData.panels.sort((a, b) => (a.order || 0) - (b.order || 0));
                 renderAll();
@@ -1813,8 +1931,7 @@
                 console.log('🚀 Planning Approval Dashboard initialized.');
                 console.log('   💡 Tip: Press Ctrl+Shift+A to toggle Admin mode.');
                 console.log('   🔑 Admin Password: Dlns@4512#');
-                console.log('   📦 Storage:', firebaseReady ? 'Firebase Firestore + localStorage' :
-                    'localStorage (Firebase not configured)');
+                console.log('   📦 Storage:', firebaseReady ? 'Firebase Firestore + localStorage' : 'localStorage (Firebase not configured)');
             }
 
             // Add shake animation keyframes
@@ -1829,10 +1946,8 @@
           `;
             document.head.appendChild(shakeStyle);
 
-            // Start the app
             init().catch(err => {
                 console.error('Initialization error:', err);
-                // Emergency fallback
                 appData.panels = JSON.parse(JSON.stringify(defaultPanels));
                 renderAll();
             });
