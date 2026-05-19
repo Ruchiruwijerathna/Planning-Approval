@@ -5,9 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Planning Approval Workflow Dashboard</title>
 
+    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
+    <!-- SortableJS -->
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
+
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
     <style>
@@ -15,9 +20,9 @@
             --bg: #f0f4f8;
             --surface: #ffffff;
             --surface-alt: #f8fafb;
-            --text: #1a202c;
-            --text-secondary: #5a6577;
-            --border: #e2e8f0;
+            --text: #0a0a0a;               /* darker for visibility */
+            --text-secondary: #2d3748;
+            --border: #cbd5e0;
             --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
             --shadow: 0 4px 12px rgba(0,0,0,0.08);
             --shadow-lg: 0 12px 32px rgba(0,0,0,0.12);
@@ -29,214 +34,231 @@
             --progress-bg: #e2e8f0;
             --progress-fill: linear-gradient(90deg, #4f6ef7, #38a169);
         }
+
         * { margin:0; padding:0; box-sizing:border-box; }
+
+        /* animated background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(135deg, #f0f4f8 0%, #d9e2ef 50%, #f0f4f8 100%);
+            background-size: 400% 400%;
+            animation: gradientMove 20s ease infinite;
+            z-index: -1;
+        }
+        @keyframes gradientMove {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
         body {
             font-family: 'Segoe UI', system-ui, sans-serif;
-            background: var(--bg);
             color: var(--text);
             line-height: 1.6;
             min-height: 100vh;
         }
 
-        /* ── Header ── */
+        /* Header */
         .dashboard-header {
             background: var(--surface);
             border-bottom: 1px solid var(--border);
             padding: 16px 28px;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            gap: 16px;
+            position: sticky; top: 0; z-index: 100;
+            display: flex; flex-wrap: wrap; align-items: center; gap: 16px;
             justify-content: space-between;
             box-shadow: var(--shadow-sm);
         }
-        .header-left { display: flex; align-items: center; gap: 14px; }
+        .header-left { display:flex; align-items:center; gap:14px; }
         .header-logo {
-            width: 44px; height: 44px; border-radius: 12px;
-            background: var(--accent); color: #fff;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 20px;
+            width:44px; height:44px; border-radius:12px;
+            background:var(--accent); color:#fff;
+            display:flex; align-items:center; justify-content:center; font-size:20px;
         }
-        .project-name-display { font-size: 1.25rem; font-weight: 700; }
+        .project-name-display { font-size:1.25rem; font-weight:700; }
         .project-name-input {
-            font-size: 1.25rem; font-weight: 700;
-            border: 2px dashed var(--accent); border-radius: var(--radius-sm);
-            padding: 4px 10px; width: 360px; display: none;
+            font-size:1.25rem; font-weight:700;
+            border:2px dashed var(--accent); border-radius:var(--radius-sm);
+            padding:4px 10px; width:360px; display:none;
         }
-        body.is-admin .project-name-input { display: inline-block; }
-        body.is-admin .project-name-display { display: none; }
+        body.is-admin .project-name-input { display:inline-block; }
+        body.is-admin .project-name-display { display:none; }
 
-        .progress-section { display: flex; align-items: center; gap: 12px; }
-        .progress-label { font-size: 0.82rem; font-weight: 600; color: var(--text-secondary); }
-        .progress-bar-wrap { width: 180px; height: 10px; background: var(--progress-bg); border-radius: 20px; overflow: hidden; }
-        .progress-bar-fill { height: 100%; background: var(--progress-fill); border-radius: 20px; transition: width 0.5s; }
-        .progress-percent { font-weight: 700; font-size: 0.9rem; color: var(--accent); min-width: 38px; text-align: center; }
-        .progress-slider { width: 100px; accent-color: var(--accent); display: none; }
-        body.is-admin .progress-slider { display: inline-block; }
+        .progress-section { display:flex; align-items:center; gap:12px; }
+        .progress-label { font-size:0.82rem; font-weight:600; color:var(--text-secondary); }
+        .progress-bar-wrap { width:180px; height:10px; background:var(--progress-bg); border-radius:20px; overflow:hidden; }
+        .progress-bar-fill { height:100%; background:var(--progress-fill); border-radius:20px; transition:width 0.5s; }
+        .progress-percent { font-weight:700; font-size:0.9rem; color:var(--accent); min-width:38px; text-align:center; }
+        .progress-slider { width:100px; accent-color:var(--accent); display:none; }
+        body.is-admin .progress-slider { display:inline-block; }
 
         .btn {
-            padding: 9px 18px; border-radius: 25px; border: none;
-            font-weight: 600; font-size: 0.85rem; cursor: pointer;
-            display: inline-flex; align-items: center; gap: 7px;
-            transition: 0.2s; font-family: inherit;
+            padding:9px 18px; border-radius:25px; border:none;
+            font-weight:600; font-size:0.85rem; cursor:pointer;
+            display:inline-flex; align-items:center; gap:7px;
+            transition:0.2s; font-family:inherit;
         }
-        .btn-admin { background: var(--accent); color: #fff; }
-        .btn-admin.active { background: #1a202c; }
-        .btn-outline { background: transparent; border: 2px solid var(--border); color: var(--text); }
-        .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
-        .btn-sm { padding: 5px 12px; font-size: 0.75rem; border-radius: 18px; }
+        .btn-admin { background:var(--accent); color:#fff; }
+        .btn-admin.active { background:#1a202c; }
+        .btn-outline { background:transparent; border:2px solid var(--border); color:var(--text); }
+        .btn-outline:hover { border-color:var(--accent); color:var(--accent); }
+        .btn-sm { padding:5px 12px; font-size:0.75rem; border-radius:18px; }
         .btn-add-panel {
-            background: #fff; border: 2px dashed #cbd5e0; color: #718096;
-            padding: 10px 20px; border-radius: 25px; font-weight: 600;
-            cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+            background:#fff; border:2px dashed #cbd5e0; color:#718096;
+            padding:10px 20px; border-radius:25px; font-weight:600;
+            cursor:pointer; display:inline-flex; align-items:center; gap:6px;
         }
-        .btn-add-panel:hover { border-color: var(--accent); color: var(--accent); background: #fafbff; }
+        .btn-add-panel:hover { border-color:var(--accent); color:var(--accent); background:#fafbff; }
 
-        /* ── Grid ── */
-        .main-container { max-width: 1500px; margin: 0 auto; padding: 24px 20px 60px; }
+        .main-container { max-width:1500px; margin:0 auto; padding:24px 20px 60px; }
         .panels-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 18px;
-            align-items: start;
+            display:grid; grid-template-columns:repeat(4,1fr); gap:18px; align-items:start;
         }
-        @media (max-width: 1400px) { .panels-grid { grid-template-columns: repeat(3, 1fr); } }
-        @media (max-width: 1050px) { .panels-grid { grid-template-columns: repeat(2, 1fr); } }
-        @media (max-width: 650px) { .panels-grid { grid-template-columns: 1fr; } }
+        @media (max-width:1400px) { .panels-grid { grid-template-columns:repeat(3,1fr); } }
+        @media (max-width:1050px) { .panels-grid { grid-template-columns:repeat(2,1fr); } }
+        @media (max-width:650px) { .panels-grid { grid-template-columns:1fr; } }
 
-        /* ── Panel Card ── */
+        /* Panel Card */
         .panel-card {
-            background: var(--surface); border-radius: var(--radius);
-            box-shadow: var(--shadow); border: 1.5px solid var(--border);
-            transition: 0.2s; overflow: hidden; display: flex; flex-direction: column;
+            background:var(--surface); border-radius:var(--radius);
+            box-shadow:var(--shadow); border:1.5px solid var(--border);
+            transition:0.2s; overflow:hidden; display:flex; flex-direction:column;
+            position:relative;
         }
-        .panel-card:hover { box-shadow: var(--shadow-lg); transform: translateY(-2px); }
-        .panel-color-strip { height: 6px; }
-        .panel-card-header { padding: 14px 16px 10px; display: flex; align-items: flex-start; gap: 10px; }
+        .panel-card.panel-completed {
+            opacity:0.7; filter:grayscale(20%);
+        }
+        .panel-card:hover { box-shadow:var(--shadow-lg); transform:translateY(-2px); }
+        .panel-color-strip { height:6px; }
+        .panel-card-header { padding:14px 16px 10px; display:flex; align-items:flex-start; gap:10px; }
         .panel-number {
-            width: 32px; height: 32px; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            font-weight: 700; font-size: 0.8rem; color: #fff; flex-shrink: 0;
+            width:32px; height:32px; border-radius:50%;
+            display:flex; align-items:center; justify-content:center;
+            font-weight:700; font-size:0.8rem; color:#fff; flex-shrink:0;
         }
-        .panel-title-wrap { flex: 1; min-width: 0; }
-        .panel-title-display { font-weight: 700; font-size: 0.9rem; word-break: break-word; }
+        .panel-title-wrap { flex:1; min-width:0; }
+        .panel-title-display { font-weight:700; font-size:0.9rem; word-break:break-word; color:var(--text); }
         .panel-title-input {
-            font-weight: 700; font-size: 0.9rem; border: 2px dashed var(--accent);
-            border-radius: 6px; padding: 3px 8px; width: 100%; display: none;
+            font-weight:700; font-size:0.9rem; border:2px dashed var(--accent);
+            border-radius:6px; padding:3px 8px; width:100%; display:none;
         }
-        body.is-admin .panel-title-input { display: block; }
-        body.is-admin .panel-title-display { display: none; }
+        body.is-admin .panel-title-input { display:block; }
+        body.is-admin .panel-title-display { display:none; }
 
-        .panel-drag-handle { cursor: grab; color: #cbd5e0; padding: 4px 2px; display: none; }
-        body.is-admin .panel-drag-handle { display: block; }
+        .panel-drag-handle { cursor:grab; color:#cbd5e0; padding:4px 2px; display:none; }
+        body.is-admin .panel-drag-handle { display:block; }
 
-        .panel-card-body { padding: 4px 16px 14px; flex: 1; }
-        .subtopic-list { list-style: none; display: flex; flex-direction: column; gap: 5px; }
+        .panel-card-body { padding:4px 16px 14px; flex:1; }
+        .subtopic-list { list-style:none; display:flex; flex-direction:column; gap:5px; }
         .subtopic-item {
-            display: flex; align-items: center; gap: 8px; font-size: 0.8rem;
-            color: var(--text-secondary); padding: 5px 8px; border-radius: 6px;
-            background: var(--surface-alt); border: 1px solid transparent;
+            display:flex; align-items:center; gap:8px; font-size:0.8rem;
+            color:var(--text-secondary); padding:5px 8px; border-radius:6px;
+            background:var(--surface-alt); border:1px solid transparent;
         }
-        .subtopic-checkbox { width: 16px; height: 16px; accent-color: var(--accent); cursor: pointer; }
-        .subtopic-text { flex: 1; word-break: break-word; }
+        .subtopic-checkbox { width:16px; height:16px; accent-color:var(--accent); cursor:pointer; flex-shrink:0; }
+        .subtopic-text { flex:1; word-break:break-word; }
+        .subtopic-text .item-number { font-weight:600; margin-right:4px; color:var(--text); }
         .subtopic-input {
-            flex: 1; font-size: 0.8rem; border: 1.5px dashed #cbd5e0;
-            border-radius: 5px; padding: 3px 7px; background: #fff; display: none;
+            flex:1; font-size:0.8rem; border:1.5px dashed #cbd5e0;
+            border-radius:5px; padding:3px 7px; background:#fff; display:none;
         }
-        body.is-admin .subtopic-input { display: none; }  /* shown only when editing */
+        body.is-admin .subtopic-input { display:none; } /* shown when editing */
         .subtopic-expand-icon {
-            cursor: pointer; color: var(--accent); font-size: 0.9rem;
-            transition: 0.2s; flex-shrink: 0;
+            cursor:pointer; color:var(--accent); font-size:0.9rem;
+            transition:0.2s; flex-shrink:0;
         }
-        .subtopic-expand-icon:hover { transform: scale(1.2); }
+        .subtopic-expand-icon:hover { transform:scale(1.2); }
         .subtopic-delete-btn {
-            width: 22px; height: 22px; border-radius: 50%; border: none;
-            background: transparent; color: #cbd5e0; cursor: pointer; font-size: 11px;
-            display: none; align-items: center; justify-content: center;
+            width:22px; height:22px; border-radius:50%; border:none;
+            background:transparent; color:#cbd5e0; cursor:pointer; font-size:11px;
+            display:none; align-items:center; justify-content:center;
         }
-        body.is-admin .subtopic-delete-btn { display: flex; }
-        .subtopic-delete-btn:hover { color: var(--danger); background: #fff5f5; }
+        body.is-admin .subtopic-delete-btn { display:flex; }
+        .subtopic-delete-btn:hover { color:var(--danger); background:#fff5f5; }
 
-        .add-subtopic-btn {
-            margin-top: 6px; font-size: 0.72rem; color: var(--accent);
-            background: none; border: 1.5px dashed #d0d7f0; border-radius: 16px;
-            padding: 5px 12px; font-weight: 600; cursor: pointer; display: none;
+        .sub-sub-wrapper {
+            display:none; margin:4px 0 2px 28px; /* indented */
         }
-        body.is-admin .add-subtopic-btn { display: inline-flex; align-items: center; gap: 4px; }
+        .sub-sub-wrapper.open { display:block; }
+        .sub-sub-list { list-style:none; display:flex; flex-direction:column; gap:4px; }
+        .sub-sub-item {
+            display:flex; align-items:center; gap:8px; font-size:0.76rem;
+            color:var(--text-secondary); padding:4px 8px; border-radius:5px;
+            background:#f1f5f9; border:1px solid #e2e8f0;
+        }
+        .sub-sub-checkbox { width:14px; height:14px; accent-color:var(--accent); cursor:pointer; flex-shrink:0; }
+        .sub-sub-drag { cursor:grab; color:#cbd5e0; display:none; }
+        body.is-admin .sub-sub-drag { display:flex; }
+        .sub-sub-select { width:13px; height:13px; accent-color:var(--danger); display:none; }
+        body.is-admin .sub-sub-select { display:inline-block; }
+        .sub-sub-text { flex:1; word-break:break-word; }
+        .sub-sub-text .item-number { font-weight:600; color:var(--text); margin-right:4px; }
+        .sub-sub-delete {
+            background:none; border:none; color:#cbd5e0; cursor:pointer; font-size:11px; display:none;
+        }
+        body.is-admin .sub-sub-delete { display:inline-block; }
+        .sub-sub-delete:hover { color:var(--danger); }
+
+        .add-subtopic-btn, .add-subsub-btn {
+            margin-top:6px; font-size:0.72rem; color:var(--accent);
+            background:none; border:1.5px dashed #d0d7f0; border-radius:16px;
+            padding:5px 12px; font-weight:600; cursor:pointer; display:none;
+        }
+        body.is-admin .add-subtopic-btn, body.is-admin .add-subsub-btn { display:inline-flex; align-items:center; gap:4px; }
 
         .panel-card-footer {
-            padding: 8px 16px 12px; display: none; gap: 6px; flex-wrap: wrap;
-            border-top: 1px solid #f7fafc;
+            padding:8px 16px 12px; display:none; gap:6px; flex-wrap:wrap;
+            border-top:1px solid #f7fafc;
         }
-        body.is-admin .panel-card-footer { display: flex; }
+        body.is-admin .panel-card-footer { display:flex; }
 
         .insert-btn, .delete-panel-btn, .delete-selected-btn {
-            font-size: 0.68rem; background: transparent; border: 1px solid #e8ecf8;
-            color: #718096; cursor: pointer; padding: 4px 10px; border-radius: 12px;
-            transition: 0.2s; font-weight: 500; font-family: inherit;
+            font-size:0.68rem; background:transparent; border:1px solid #e8ecf8;
+            color:#718096; cursor:pointer; padding:4px 10px; border-radius:12px;
+            transition:0.2s; font-weight:500; font-family:inherit;
         }
-        .delete-panel-btn, .delete-selected-btn { border-color: #fed7d7; color: #c53030; }
-        .delete-panel-btn:hover, .delete-selected-btn:hover { background: #fff5f5; }
+        .delete-panel-btn, .delete-selected-btn { border-color:#fed7d7; color:#c53030; }
+        .delete-panel-btn:hover, .delete-selected-btn:hover { background:#fff5f5; }
 
-        /* ── Per‑panel progress ── */
+        /* Per-panel progress */
         .panel-progress-wrap {
-            display: flex; align-items: center; gap: 8px; padding: 4px 16px 8px;
-            font-size: 0.7rem; color: var(--text-secondary);
+            display:flex; align-items:center; gap:8px; padding:4px 16px 8px;
+            font-size:0.7rem; color:var(--text-secondary);
         }
-        .panel-progress-bar { flex: 1; height: 6px; background: var(--progress-bg); border-radius: 10px; overflow: hidden; }
-        .panel-progress-fill { height: 100%; background: var(--progress-fill); border-radius: 10px; }
-        .panel-progress-slider { width: 60px; accent-color: var(--accent); display: none; }
-        body.is-admin .panel-progress-slider { display: inline-block; }
-        .panel-progress-percent { font-weight: 600; min-width: 32px; text-align: right; }
+        .panel-progress-bar { flex:1; height:6px; background:var(--progress-bg); border-radius:10px; overflow:hidden; }
+        .panel-progress-fill { height:100%; background:var(--progress-fill); border-radius:10px; }
+        .panel-progress-slider { width:60px; accent-color:var(--accent); display:none; }
+        body.is-admin .panel-progress-slider { display:inline-block; }
+        .panel-progress-percent { font-weight:600; min-width:32px; text-align:right; }
 
         /* Flow arrow */
         .panel-flow-arrow {
-            text-align: right; font-size: 0.7rem; color: #a0aec0;
-            padding: 0 16px 6px; cursor: default;
+            text-align:right; font-size:0.7rem; color:#a0aec0;
+            padding:0 16px 6px; cursor:default;
         }
-        .panel-flow-arrow i { font-size: 0.9rem; margin-left: 4px; }
+        .panel-flow-arrow i { font-size:0.9rem; margin-left:4px; }
 
-        /* ── Modals ── */
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(15,20,30,0.55); z-index: 999;
-            display: none; align-items: center; justify-content: center;
-            backdrop-filter: blur(3px);
+        /* Comment box */
+        .panel-comment-wrap { padding:0 16px 10px; }
+        .panel-comment-label { font-size:0.7rem; font-weight:600; color:var(--text-secondary); margin-bottom:4px; }
+        .panel-comment-textarea {
+            width:100%; min-height:40px; resize:vertical; font-size:0.75rem;
+            border:1px solid var(--border); border-radius:6px; padding:6px 8px;
+            font-family:inherit; color:var(--text);
         }
-        .modal-dialog {
-            background: #fff; border-radius: var(--radius); padding: 24px;
-            width: 450px; max-width: 92vw; box-shadow: var(--shadow-lg);
-            max-height: 80vh; overflow-y: auto; animation: slideUp 0.25s;
-        }
-        @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } }
-        .modal-dialog h3 { margin-bottom: 6px; font-size: 1.1rem; }
-        .modal-input {
-            width: 100%; padding: 11px 14px; border: 2px solid var(--border);
-            border-radius: var(--radius-sm); font-size: 0.9rem; outline: none; font-family: inherit;
-        }
-        .modal-input:focus { border-color: var(--accent); }
 
-        /* Sub‑sub list */
-        .sub-sub-list { list-style: none; display: flex; flex-direction: column; gap: 4px; margin: 10px 0; }
-        .sub-sub-item {
-            display: flex; align-items: center; gap: 8px; font-size: 0.78rem;
-            padding: 5px 8px; border-radius: 6px; background: #f8fafb; border: 1px solid transparent;
-        }
-        .sub-sub-checkbox { width: 15px; height: 15px; accent-color: var(--accent); cursor: pointer; }
-        .sub-sub-drag, .sub-sub-select, .sub-sub-delete { display: none; }
-        body.is-admin .sub-sub-drag { display: flex; cursor: grab; color: #cbd5e0; }
-        body.is-admin .sub-sub-select { display: inline-block; width: 13px; height: 13px; accent-color: var(--danger); }
-        body.is-admin .sub-sub-delete { display: inline-block; background: none; border: none; color: #cbd5e0; cursor: pointer; }
-        .sub-sub-text { flex: 1; word-break: break-word; }
+        /* Admin visibility helpers */
+        .admin-only { display:none; }
+        body.is-admin .admin-only { display:flex; }
+        .admin-only-inline { display:none; }
+        body.is-admin .admin-only-inline { display:inline-flex; }
+        .admin-only-block { display:none; }
+        body.is-admin .admin-only-block { display:block; }
 
-        .toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 1000; display: flex; flex-direction: column; gap: 8px; }
-        .toast {
-            background: #1a202c; color: #fff; padding: 12px 20px; border-radius: 25px;
-            font-size: 0.82rem; box-shadow: var(--shadow-lg);
-        }
+        /* Select checkbox (admin only) */
+        .subtopic-select-checkbox { display:none; }
+        body.is-admin .subtopic-select-checkbox { display:inline-block; }
     </style>
 </head>
 <body>
@@ -273,7 +295,7 @@
     </div>
 
     <!-- Admin Login Modal -->
-    <div class="modal-overlay" id="adminModal">
+    <div class="modal-overlay" id="adminModal" style="display:none;">
         <div class="modal-dialog">
             <h3><i class="fa-solid fa-shield-halved"></i> Admin Authentication</h3>
             <p>Enter the admin password to enable editing.</p>
@@ -287,7 +309,7 @@
     </div>
 
     <!-- New Panel Modal -->
-    <div class="modal-overlay" id="newPanelModal">
+    <div class="modal-overlay" id="newPanelModal" style="display:none;">
         <div class="modal-dialog">
             <h3><i class="fa-solid fa-folder-plus"></i> Add New Panel</h3>
             <p>Enter the title for the new workflow panel.</p>
@@ -300,20 +322,6 @@
             <div class="modal-actions" style="display:flex;gap:10px;margin-top:18px;justify-content:flex-end;">
                 <button class="btn btn-outline btn-sm" id="btnCancelNewPanel">Cancel</button>
                 <button class="btn btn-admin btn-sm" id="btnConfirmNewPanel">Add Panel</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Sub‑Sub Items Modal -->
-    <div class="modal-overlay" id="subSubModal">
-        <div class="modal-dialog">
-            <h3 id="subSubModalTitle">Sub-items</h3>
-            <p>Manage detailed sub-tasks for this subtopic.</p>
-            <ul class="sub-sub-list" id="subSubList"></ul>
-            <button class="btn btn-sm btn-add-subsub admin-only-inline" id="btnAddSubSub"><i class="fa-solid fa-plus"></i> Add Sub-item</button>
-            <div class="modal-actions" style="display:flex;gap:10px;margin-top:18px;justify-content:flex-end;">
-                <button class="btn btn-outline btn-sm admin-only-inline" id="btnDeleteSelectedSubSub"><i class="fa-solid fa-check-double"></i> Delete Selected</button>
-                <button class="btn btn-outline btn-sm" id="btnCloseSubSub">Close</button>
             </div>
         </div>
     </div>
@@ -345,9 +353,9 @@
             const FIRESTORE_COLLECTION = "dashboards";
             const FIRESTORE_DOC_ID = "planning_approval_workflow";
 
-            // Default data
+            // Default panels (now include "comment" and "items" arrays)
             const defaultPanels = [
-                { id:'panel_1', title:'LAND IDENTIFICATION & INITIAL FEASIBILITY', color:'#4A90D9', progress:0, subtopics:[
+                { id:'panel_1', title:'LAND IDENTIFICATION & INITIAL FEASIBILITY', color:'#4A90D9', progress:0, comment:'', subtopics:[
                     { id:'sub_1_1', text:'Verify land ownership', completed:false, items:[] },
                     { id:'sub_1_2', text:'Check zoning regulations', completed:false, items:[] },
                     { id:'sub_1_3', text:'Review access roads', completed:false, items:[] },
@@ -356,8 +364,8 @@
                     { id:'sub_1_6', text:'Market & financial feasibility', completed:false, items:[] },
                     { id:'sub_1_7', text:'Outcome: Feasible Decision', completed:false, items:[] }
                 ], order:0 },
-                // ... (remaining 15 panels identical to previous versions)
-                { id:'panel_16', title:'COMPLETION CERTIFICATION', color:'#27AE60', progress:0, subtopics:[
+                // ... (remaining 15 panels identical to previous, but each with comment:'' and items:[] inside subtopics)
+                { id:'panel_16', title:'COMPLETION CERTIFICATION', color:'#27AE60', progress:0, comment:'', subtopics:[
                     { id:'sub_16_1', text:'Inspect completed works', completed:false, items:[] },
                     { id:'sub_16_2', text:'Verify compliance with approved plans', completed:false, items:[] },
                     { id:'sub_16_3', text:'Issue Certificate of Conformity', completed:false, items:[] },
@@ -367,15 +375,12 @@
                 ], order:15 }
             ];
 
-            // State
             let appData = { projectName:'PLANNING APPROVAL WORKFLOW', progress:0, panels: JSON.parse(JSON.stringify(defaultPanels)) };
             let isAdmin = false;
             let panelIdCounter = 17, subtopicIdCounter = 1000, subSubIdCounter = 2000;
             let saveTimeout, isSaving = false;
-            let panelSortable = null, subtopicSortables = [], subSubSortable = null;
-            let currentSubSubData = null;
+            let panelSortable = null, subtopicSortables = [];
 
-            // DOM
             const $ = (sel) => document.querySelector(sel);
             const $$ = (sel) => document.querySelectorAll(sel);
 
@@ -410,59 +415,47 @@
             }
 
             function restoreCounters() {
-                let maxPanel = 16, maxSub = 0, maxSubSub = 0;
+                let maxPanel=16, maxSub=0, maxSubSub=0;
                 appData.panels.forEach(p => {
                     let m = p.id.match(/panel_(\d+)/);
-                    if (m && +m[1] > maxPanel) maxPanel = +m[1];
+                    if(m && +m[1]>maxPanel) maxPanel=+m[1];
                     p.subtopics.forEach(s => {
                         let sm = s.id.match(/sub_\d+_(\d+)/);
-                        if (sm && +sm[1] > maxSub) maxSub = +sm[1];
-                        if (s.items) s.items.forEach(it => {
+                        if(sm && +sm[1]>maxSub) maxSub=+sm[1];
+                        if(s.items) s.items.forEach(it => {
                             let im = it.id.match(/item_(\d+)/);
-                            if (im && +im[1] > maxSubSub) maxSubSub = +im[1];
+                            if(im && +im[1]>maxSubSub) maxSubSub=+im[1];
                         });
                     });
                 });
-                panelIdCounter = maxPanel + 1;
-                subtopicIdCounter = maxSub + 1;
-                subSubIdCounter = maxSubSub + 1;
+                panelIdCounter = maxPanel+1; subtopicIdCounter = maxSub+1; subSubIdCounter = maxSubSub+1;
             }
 
             async function saveData(showToast=true) {
-                if (isSaving) return;
+                if(isSaving) return;
                 isSaving = true;
-                appData.panels.forEach((p,i) => p.order = i);
+                appData.panels.forEach((p,i)=>p.order=i);
                 appData.lastUpdated = new Date().toISOString();
                 const data = { projectName:appData.projectName, progress:appData.progress, panels:appData.panels, lastUpdated:appData.lastUpdated };
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-                if (firebaseReady && firestoreDB) {
+                if(firebaseReady && firestoreDB) {
                     try { await firestoreDB.collection(FIRESTORE_COLLECTION).doc(FIRESTORE_DOC_ID).set(data, {merge:true}); } catch(e) {}
                 }
                 isSaving = false;
-                if (showToast) showToast('Changes saved! 💾');
+                if(showToast) showToast('Changes saved! 💾');
             }
-
             function debounceSave(delay=600) {
-                if (saveTimeout) clearTimeout(saveTimeout);
-                saveTimeout = setTimeout(() => saveData(true), delay);
+                if(saveTimeout) clearTimeout(saveTimeout);
+                saveTimeout = setTimeout(()=>saveData(true), delay);
             }
-
             function showToast(msg, type='success') {
-                const t = document.createElement('div'); t.className = 'toast';
+                const t = document.createElement('div'); t.className='toast';
                 t.innerHTML = `<i class="fa-solid fa-${type==='success'?'check-circle':'exclamation-circle'}"></i> ${msg}`;
                 document.getElementById('toastContainer').appendChild(t);
-                setTimeout(() => t.remove(), 3000);
+                setTimeout(()=>t.remove(), 3000);
             }
 
-            // Render
-            function renderAll() {
-                renderHeader();
-                renderPanels();
-                updatePanelCount();
-                updateAdminUI();
-                initSortable();
-            }
-
+            function renderAll() { renderHeader(); renderPanels(); updatePanelCount(); updateAdminUI(); initSortable(); }
             function renderHeader() {
                 document.getElementById('projectNameDisplay').textContent = appData.projectName;
                 document.getElementById('projectNameInput').value = appData.projectName;
@@ -471,42 +464,41 @@
                 document.getElementById('progressSlider').value = appData.progress;
             }
 
-            function renderPanels() {
-                const grid = document.getElementById('panelsGrid');
-                grid.innerHTML = '';
-                appData.panels.forEach((panel, index) => {
-                    const card = createPanelCard(panel, index);
-                    grid.appendChild(card);
-                });
+            // Helper to check if all subtopics of a panel are completed
+            function isPanelCompleted(panel) {
+                return panel.subtopics.length > 0 && panel.subtopics.every(s => s.completed);
             }
 
+            // Create panel card
             function createPanelCard(panel, index) {
                 const card = document.createElement('div'); card.className='panel-card'; card.dataset.panelId=panel.id;
                 card.style.borderLeft = `4px solid ${panel.color}`;
-                const strip = document.createElement('div'); strip.className='panel-color-strip'; strip.style.background=panel.color; card.appendChild(strip);
+                if(isPanelCompleted(panel)) card.classList.add('panel-completed');
 
-                // Header
+                const strip = document.createElement('div'); strip.className='panel-color-strip'; strip.style.background=panel.color; card.appendChild(strip);
                 const header = document.createElement('div'); header.className='panel-card-header';
                 const badge = document.createElement('div'); badge.className='panel-number'; badge.style.background=panel.color; badge.textContent=index+1;
                 const titleWrap = document.createElement('div'); titleWrap.className='panel-title-wrap';
                 const titleDisp = document.createElement('span'); titleDisp.className='panel-title-display'; titleDisp.textContent=panel.title;
                 const titleInp = document.createElement('input'); titleInp.type='text'; titleInp.className='panel-title-input admin-only-block'; titleInp.value=panel.title;
-                titleInp.addEventListener('input', () => { panel.title=titleInp.value; titleDisp.textContent=panel.title||'(Untitled)'; debounceSave(); });
+                titleInp.addEventListener('input', ()=>{ panel.title=titleInp.value; titleDisp.textContent=panel.title||'(Untitled)'; debounceSave(); });
                 titleWrap.appendChild(titleDisp); titleWrap.appendChild(titleInp);
                 const dragHandle = document.createElement('span'); dragHandle.className='panel-drag-handle'; dragHandle.innerHTML='<i class="fa-solid fa-grip-vertical"></i>';
                 header.appendChild(badge); header.appendChild(titleWrap); header.appendChild(dragHandle); card.appendChild(header);
 
-                // Subtopic list
+                // Body – subtopic list
                 const body = document.createElement('div'); body.className='panel-card-body';
                 const subtopicList = document.createElement('ul'); subtopicList.className='subtopic-list'; subtopicList.dataset.panelId=panel.id;
-                panel.subtopics.forEach(sub => subtopicList.appendChild(createSubtopicItem(panel, sub)));
+                panel.subtopics.forEach((sub, subIndex) => subtopicList.appendChild(createSubtopicItem(panel, sub, subIndex)));
                 body.appendChild(subtopicList);
                 const addSubBtn = document.createElement('button'); addSubBtn.className='add-subtopic-btn admin-only-inline'; addSubBtn.innerHTML='<i class="fa-solid fa-plus-circle"></i> Add Sub-item';
-                addSubBtn.addEventListener('click', () => {
+                addSubBtn.addEventListener('click', ()=>{
                     const newSub = { id:`sub_${panel.id.split('_')[1]}_${subtopicIdCounter++}`, text:'New sub-item', completed:false, items:[] };
                     panel.subtopics.push(newSub);
-                    subtopicList.appendChild(createSubtopicItem(panel, newSub));
+                    const newLi = createSubtopicItem(panel, newSub, panel.subtopics.length-1);
+                    subtopicList.appendChild(newLi);
                     reinitSingleSubtopicSortable(subtopicList);
+                    checkPanelCompletion(panel.id);
                     debounceSave();
                 });
                 body.appendChild(addSubBtn);
@@ -514,25 +506,30 @@
 
                 // Per-panel progress
                 const progressWrap = document.createElement('div'); progressWrap.className='panel-progress-wrap';
-                const progressLabel = document.createElement('span'); progressLabel.textContent='Progress';
-                const progressBar = document.createElement('div'); progressBar.className='panel-progress-bar';
-                const progressFill = document.createElement('div'); progressFill.className='panel-progress-fill'; progressFill.style.width=(panel.progress||0)+'%';
-                progressBar.appendChild(progressFill);
-                const progressPct = document.createElement('span'); progressPct.className='panel-progress-percent'; progressPct.textContent=(panel.progress||0)+'%';
+                progressWrap.innerHTML = `<span>Progress</span><div class="panel-progress-bar"><div class="panel-progress-fill" style="width:${panel.progress}%;"></div></div><span class="panel-progress-percent">${panel.progress}%</span>`;
                 const progressSlider = document.createElement('input'); progressSlider.type='range'; progressSlider.className='panel-progress-slider admin-only-inline';
-                progressSlider.min=0; progressSlider.max=100; progressSlider.value=panel.progress||0;
-                progressSlider.addEventListener('input', () => {
+                progressSlider.min=0; progressSlider.max=100; progressSlider.value=panel.progress;
+                progressSlider.addEventListener('input', ()=>{
                     if(!isAdmin) return;
                     panel.progress = parseInt(progressSlider.value);
-                    progressFill.style.width=panel.progress+'%';
-                    progressPct.textContent=panel.progress+'%';
+                    progressWrap.querySelector('.panel-progress-fill').style.width = panel.progress+'%';
+                    progressWrap.querySelector('.panel-progress-percent').textContent = panel.progress+'%';
                     debounceSave(400);
                 });
-                progressWrap.appendChild(progressLabel); progressWrap.appendChild(progressBar); progressWrap.appendChild(progressPct); progressWrap.appendChild(progressSlider);
+                progressWrap.appendChild(progressSlider);
                 card.appendChild(progressWrap);
 
+                // Comment box
+                const commentWrap = document.createElement('div'); commentWrap.className='panel-comment-wrap';
+                const commentLabel = document.createElement('div'); commentLabel.className='panel-comment-label'; commentLabel.textContent='💬 Comments';
+                const commentArea = document.createElement('textarea'); commentArea.className='panel-comment-textarea'; commentArea.value = panel.comment || '';
+                commentArea.placeholder = 'Add notes about this stage...';
+                commentArea.addEventListener('input', ()=>{ panel.comment = commentArea.value; debounceSave(800); });
+                commentWrap.appendChild(commentLabel); commentWrap.appendChild(commentArea);
+                card.appendChild(commentWrap);
+
                 // Flow arrow
-                if (index < appData.panels.length-1) {
+                if(index < appData.panels.length-1){
                     const nextPanel = appData.panels[index+1];
                     const arrowDiv = document.createElement('div'); arrowDiv.className='panel-flow-arrow';
                     arrowDiv.title = `Next: ${nextPanel.title}`;
@@ -543,29 +540,26 @@
                 // Footer (admin only)
                 const footer = document.createElement('div'); footer.className='panel-card-footer admin-only';
                 const insBefore = document.createElement('button'); insBefore.className='insert-btn'; insBefore.innerHTML='<i class="fa-solid fa-arrow-up"></i> Insert Before';
-                insBefore.addEventListener('click', (e) => { e.stopPropagation(); openNewPanelModalAt(index); });
+                insBefore.addEventListener('click', (e)=>{ e.stopPropagation(); openNewPanelModalAt(index); });
                 const insAfter = document.createElement('button'); insAfter.className='insert-btn'; insAfter.innerHTML='<i class="fa-solid fa-arrow-down"></i> Insert After';
-                insAfter.addEventListener('click', (e) => { e.stopPropagation(); openNewPanelModalAt(index+1); });
+                insAfter.addEventListener('click', (e)=>{ e.stopPropagation(); openNewPanelModalAt(index+1); });
                 const delSelBtn = document.createElement('button'); delSelBtn.className='delete-selected-btn'; delSelBtn.innerHTML='<i class="fa-solid fa-check-double"></i> Delete Selected';
-                delSelBtn.addEventListener('click', (e) => {
+                delSelBtn.addEventListener('click', (e)=>{
                     e.stopPropagation();
                     const list = card.querySelector('.subtopic-list');
                     const checked = list.querySelectorAll('.subtopic-select-checkbox:checked');
-                    if (checked.length===0) { showToast('No subtopics selected.','error'); return; }
-                    const ids = new Set(); checked.forEach(cb => { const li = cb.closest('.subtopic-item'); if(li) { ids.add(li.dataset.subtopicId); li.remove(); } });
+                    if(checked.length===0) { showToast('No subtopics selected.','error'); return; }
+                    const ids = new Set(); checked.forEach(cb=>{ const li=cb.closest('.subtopic-item'); if(li){ ids.add(li.dataset.subtopicId); li.remove(); } });
                     panel.subtopics = panel.subtopics.filter(s => !ids.has(s.id));
                     reinitSingleSubtopicSortable(list);
+                    checkPanelCompletion(panel.id);
                     debounceSave();
                 });
                 const delPanel = document.createElement('button'); delPanel.className='delete-panel-btn'; delPanel.innerHTML='<i class="fa-solid fa-trash-can"></i> Delete';
-                delPanel.addEventListener('click', (e) => {
+                delPanel.addEventListener('click', (e)=>{
                     e.stopPropagation();
-                    if (appData.panels.length<=1) { showToast('Cannot delete last panel.','error'); return; }
-                    if (confirm(`Delete "${panel.title}"?`)) {
-                        appData.panels = appData.panels.filter(p => p.id!==panel.id);
-                        saveData(true);
-                        renderAll();
-                    }
+                    if(appData.panels.length<=1) { showToast('Cannot delete last panel.','error'); return; }
+                    if(confirm(`Delete "${panel.title}"?`)) { appData.panels = appData.panels.filter(p=>p.id!==panel.id); saveData(true); renderAll(); }
                 });
                 footer.appendChild(insBefore); footer.appendChild(insAfter); footer.appendChild(delSelBtn); footer.appendChild(delPanel);
                 card.appendChild(footer);
@@ -573,67 +567,164 @@
                 return card;
             }
 
-            function createSubtopicItem(panel, sub) {
+            // Create subtopic item with inline expandable sub-sub-items
+            function createSubtopicItem(panel, sub, subIndex) {
                 const li = document.createElement('li'); li.className='subtopic-item'; li.dataset.subtopicId=sub.id;
                 const dragHandle = document.createElement('span'); dragHandle.className='subtopic-drag-handle admin-only-inline'; dragHandle.innerHTML='<i class="fa-solid fa-grip-vertical"></i>';
-                const selCheck = document.createElement('input'); selCheck.type='checkbox'; selCheck.className='subtopic-select-checkbox admin-only-inline';
+                const selCheck = document.createElement('input'); selCheck.type='checkbox'; selCheck.className='subtopic-select-checkbox';
                 const checkbox = document.createElement('input'); checkbox.type='checkbox'; checkbox.className='subtopic-checkbox'; checkbox.checked=sub.completed;
-                checkbox.addEventListener('change', () => { sub.completed=checkbox.checked; updateTextStyle(); debounceSave(); });
-                const textSpan = document.createElement('span'); textSpan.className='subtopic-text'; textSpan.textContent=sub.text;
+                checkbox.addEventListener('change', ()=>{ sub.completed=checkbox.checked; updateTextStyle(); checkPanelCompletion(panel.id); debounceSave(); });
+                const textSpan = document.createElement('span'); textSpan.className='subtopic-text';
+                textSpan.innerHTML = `<span class="item-number">${subIndex+1}.</span> ${sub.text}`;
                 const inputEl = document.createElement('input'); inputEl.type='text'; inputEl.className='subtopic-input admin-only-block'; inputEl.value=sub.text;
-                inputEl.addEventListener('input', () => { sub.text=inputEl.value; textSpan.textContent=sub.text||'(empty)'; debounceSave(); });
+                inputEl.addEventListener('input', ()=>{ sub.text=inputEl.value; textSpan.innerHTML = `<span class="item-number">${subIndex+1}.</span> ${sub.text||'(empty)'}`; debounceSave(); });
                 const expandIcon = document.createElement('span'); expandIcon.className='subtopic-expand-icon'; expandIcon.innerHTML='<i class="fa-solid fa-list-ul"></i>';
-                expandIcon.title='View sub-items';
-                expandIcon.addEventListener('click', (e) => { e.stopPropagation(); openSubSubModal(panel, sub); });
+                expandIcon.title='Toggle sub-items';
                 const deleteBtn = document.createElement('button'); deleteBtn.className='subtopic-delete-btn admin-only-inline'; deleteBtn.innerHTML='<i class="fa-solid fa-xmark"></i>';
-                deleteBtn.addEventListener('click', (e) => { e.stopPropagation(); li.remove(); panel.subtopics=panel.subtopics.filter(s => s.id!==sub.id); debounceSave(); });
+                deleteBtn.addEventListener('click', (e)=>{ e.stopPropagation(); li.remove(); panel.subtopics=panel.subtopics.filter(s=>s.id!==sub.id); checkPanelCompletion(panel.id); debounceSave(); });
 
-                textSpan.addEventListener('dblclick', () => { if(isAdmin) { textSpan.style.display='none'; inputEl.style.display='block'; inputEl.focus(); } });
-                inputEl.addEventListener('blur', () => { textSpan.style.display='inline'; inputEl.style.display='none'; });
+                textSpan.addEventListener('dblclick', ()=>{ if(isAdmin){ textSpan.style.display='none'; inputEl.style.display='block'; inputEl.focus(); } });
+                inputEl.addEventListener('blur', ()=>{ textSpan.style.display='inline'; inputEl.style.display='none'; });
 
-                function updateTextStyle() { if(sub.completed) { textSpan.style.textDecoration='line-through'; textSpan.style.opacity='0.6'; } else { textSpan.style.textDecoration='none'; textSpan.style.opacity='1'; } }
+                function updateTextStyle() {
+                    if(sub.completed) { textSpan.style.textDecoration='line-through'; textSpan.style.opacity='0.6'; }
+                    else { textSpan.style.textDecoration='none'; textSpan.style.opacity='1'; }
+                }
                 updateTextStyle();
 
                 li.appendChild(dragHandle); li.appendChild(selCheck); li.appendChild(checkbox);
                 li.appendChild(textSpan); li.appendChild(inputEl); li.appendChild(expandIcon); li.appendChild(deleteBtn);
+
+                // Sub-sub wrapper
+                const subSubWrapper = document.createElement('div'); subSubWrapper.className='sub-sub-wrapper';
+                const subSubList = document.createElement('ul'); subSubList.className='sub-sub-list';
+                if(!sub.items) sub.items = [];
+                renderSubSubList(subSubList, sub, subIndex);
+                subSubWrapper.appendChild(subSubList);
+                const addSubSubBtn = document.createElement('button'); addSubSubBtn.className='add-subsub-btn admin-only-inline'; addSubSubBtn.innerHTML='<i class="fa-solid fa-plus"></i> Add Sub-item';
+                addSubSubBtn.addEventListener('click', (e)=>{
+                    e.stopPropagation();
+                    const newItem = { id:`item_${subSubIdCounter++}`, text:'New sub-item', completed:false };
+                    sub.items.push(newItem);
+                    renderSubSubList(subSubList, sub, subIndex);
+                    if(isAdmin && typeof Sortable !== 'undefined') initSubSubSortable(subSubList);
+                    debounceSave();
+                });
+                subSubWrapper.appendChild(addSubSubBtn);
+                const delSelSubSubBtn = document.createElement('button'); delSelSubSubBtn.className='delete-selected-btn admin-only-inline'; delSelSubSubBtn.style.marginLeft='8px'; delSelSubSubBtn.innerHTML='<i class="fa-solid fa-check-double"></i> Del Selected';
+                delSelSubSubBtn.addEventListener('click', (e)=>{
+                    e.stopPropagation();
+                    const checked = subSubList.querySelectorAll('.sub-sub-select:checked');
+                    if(checked.length===0) { showToast('No sub-items selected.','error'); return; }
+                    const ids = new Set(); checked.forEach(cb=>{ const li=cb.closest('.sub-sub-item'); if(li){ ids.add(li.dataset.itemId); li.remove(); } });
+                    sub.items = sub.items.filter(it => !ids.has(it.id));
+                    renderSubSubList(subSubList, sub, subIndex);
+                    if(isAdmin && typeof Sortable !== 'undefined') initSubSubSortable(subSubList);
+                    debounceSave();
+                });
+                subSubWrapper.appendChild(delSelSubSubBtn);
+                li.appendChild(subSubWrapper);
+
+                // Toggle expand
+                expandIcon.addEventListener('click', (e)=>{
+                    e.stopPropagation();
+                    subSubWrapper.classList.toggle('open');
+                    if(subSubWrapper.classList.contains('open')) {
+                        if(isAdmin && typeof Sortable !== 'undefined') initSubSubSortable(subSubList);
+                    } else {
+                        // destroy sortable if exists
+                        if(subSubWrapper._sortable) { subSubWrapper._sortable.destroy(); subSubWrapper._sortable = null; }
+                    }
+                });
+
                 return li;
             }
 
-            function updatePanelCount() {
-                document.getElementById('panelCount').textContent = `(${appData.panels.length} Panels)`;
+            function renderSubSubList(listEl, subtopic, parentIndex) {
+                listEl.innerHTML = '';
+                (subtopic.items || []).forEach((item, idx) => {
+                    const li = document.createElement('li'); li.className='sub-sub-item'; li.dataset.itemId=item.id;
+                    const drag = document.createElement('span'); drag.className='sub-sub-drag'; drag.innerHTML='<i class="fa-solid fa-grip-vertical"></i>';
+                    const sel = document.createElement('input'); sel.type='checkbox'; sel.className='sub-sub-select';
+                    const cb = document.createElement('input'); cb.type='checkbox'; cb.className='sub-sub-checkbox'; cb.checked=item.completed||false;
+                    cb.addEventListener('change', ()=>{ item.completed=cb.checked; debounceSave(); });
+                    const text = document.createElement('span'); text.className='sub-sub-text';
+                    text.innerHTML = `<span class="item-number">${parentIndex+1}.${idx+1}</span> ${item.text}`;
+                    const del = document.createElement('button'); del.className='sub-sub-delete'; del.innerHTML='<i class="fa-solid fa-xmark"></i>';
+                    del.addEventListener('click', (e)=>{
+                        e.stopPropagation();
+                        li.remove();
+                        subtopic.items = subtopic.items.filter(it => it.id!==item.id);
+                        debounceSave();
+                        renderSubSubList(listEl, subtopic, parentIndex);
+                        if(isAdmin && typeof Sortable !== 'undefined') initSubSubSortable(listEl);
+                    });
+                    li.appendChild(drag); li.appendChild(sel); li.appendChild(cb); li.appendChild(text); li.appendChild(del);
+                    listEl.appendChild(li);
+                });
             }
 
+            function initSubSubSortable(listEl) {
+                if(!isAdmin || typeof Sortable === 'undefined') return;
+                const wrapper = listEl.closest('.sub-sub-wrapper');
+                if(!wrapper) return;
+                if(wrapper._sortable) wrapper._sortable.destroy();
+                wrapper._sortable = new Sortable(listEl, {
+                    animation:150, handle:'.sub-sub-drag',
+                    onEnd: function() {
+                        const panelId = listEl.closest('.panel-card')?.dataset.panelId;
+                        const subtopicId = listEl.closest('.subtopic-item')?.dataset.subtopicId;
+                        if(!panelId || !subtopicId) return;
+                        const panel = appData.panels.find(p=>p.id===panelId);
+                        if(!panel) return;
+                        const subtopic = panel.subtopics.find(s=>s.id===subtopicId);
+                        if(!subtopic) return;
+                        const newOrder = Array.from(listEl.querySelectorAll('.sub-sub-item')).map(li=>li.dataset.itemId);
+                        subtopic.items = newOrder.map(id=>subtopic.items.find(it=>it.id===id)).filter(it=>it);
+                        debounceSave();
+                    }
+                });
+            }
+
+            function checkPanelCompletion(panelId) {
+                const card = document.querySelector(`.panel-card[data-panel-id="${panelId}"]`);
+                if(!card) return;
+                const panel = appData.panels.find(p=>p.id===panelId);
+                if(!panel) return;
+                if(isPanelCompleted(panel)) card.classList.add('panel-completed');
+                else card.classList.remove('panel-completed');
+            }
+
+            function updatePanelCount() { document.getElementById('panelCount').textContent = `(${appData.panels.length} Panels)`; }
+
             function updateAdminUI() {
-                const body = document.body;
-                if (isAdmin) {
-                    body.classList.add('is-admin');
+                if(isAdmin) {
+                    document.body.classList.add('is-admin');
                     document.getElementById('btnAdminText').textContent = 'Exit Admin';
                     document.getElementById('btnAdminToggle').classList.add('active');
                 } else {
-                    body.classList.remove('is-admin');
+                    document.body.classList.remove('is-admin');
                     document.getElementById('btnAdminText').textContent = 'Admin Mode';
                     document.getElementById('btnAdminToggle').classList.remove('active');
-                    // Hide all subtopic inputs when leaving admin mode
-                    $$('.subtopic-input').forEach(el => el.style.display = 'none');
-                    $$('.subtopic-text').forEach(el => el.style.display = 'inline');
+                    $$('.subtopic-input').forEach(el=>el.style.display='none');
+                    $$('.subtopic-text').forEach(el=>el.style.display='inline');
                 }
                 initSortable();
             }
 
-            // Sortable
+            // Sortable (panels & subtopics)
             function destroyAllSortables() {
-                if (panelSortable) { panelSortable.destroy(); panelSortable=null; }
-                subtopicSortables.forEach(s => s.destroy()); subtopicSortables = [];
-                if (subSubSortable) { subSubSortable.destroy(); subSubSortable=null; }
+                if(panelSortable) { panelSortable.destroy(); panelSortable=null; }
+                subtopicSortables.forEach(s=>s.destroy()); subtopicSortables=[];
+                $$('.sub-sub-wrapper').forEach(w=>{ if(w._sortable) { w._sortable.destroy(); w._sortable=null; } });
             }
-
             function initSortable() {
                 destroyAllSortables();
-                if (typeof Sortable === 'undefined') return;
-                if (isAdmin && document.getElementById('panelsGrid') && appData.panels.length>0) {
+                if(typeof Sortable==='undefined') return;
+                if(isAdmin && document.getElementById('panelsGrid') && appData.panels.length>0){
                     panelSortable = new Sortable(document.getElementById('panelsGrid'), {
                         animation:200, handle:'.panel-drag-handle',
-                        onEnd: function(evt) {
+                        onEnd: function(evt){
                             const moved = appData.panels.splice(evt.oldIndex,1)[0];
                             appData.panels.splice(evt.newIndex,0,moved);
                             appData.panels.forEach((p,i)=>p.order=i);
@@ -642,236 +733,105 @@
                         }
                     });
                 }
-                if (isAdmin) {
+                if(isAdmin){
                     $$('.subtopic-list').forEach(list => initSingleSubtopicSortable(list));
                 }
             }
-
             function initSingleSubtopicSortable(listEl) {
-                if (!isAdmin || subtopicSortables.some(s => s.el === listEl)) return;
+                if(!isAdmin || subtopicSortables.some(s=>s.el===listEl)) return;
                 const sortable = new Sortable(listEl, {
                     animation:150, handle:'.subtopic-drag-handle',
-                    onEnd: function() {
+                    onEnd: function(){
                         const panelId = listEl.dataset.panelId;
-                        const panel = appData.panels.find(p => p.id === panelId);
-                        if (!panel) return;
-                        const ids = Array.from(listEl.querySelectorAll('.subtopic-item')).map(li => li.dataset.subtopicId);
-                        panel.subtopics = ids.map(id => panel.subtopics.find(s => s.id===id)).filter(s => s);
+                        const panel = appData.panels.find(p=>p.id===panelId);
+                        if(!panel) return;
+                        const ids = Array.from(listEl.querySelectorAll('.subtopic-item')).map(li=>li.dataset.subtopicId);
+                        panel.subtopics = ids.map(id=>panel.subtopics.find(s=>s.id===id)).filter(s=>s);
                         debounceSave();
+                        // re-render the whole panel to update numbers? We'll just re-render all panels.
+                        renderAll();
                     }
                 });
                 subtopicSortables.push(sortable);
             }
-
             function reinitSingleSubtopicSortable(listEl) {
-                subtopicSortables = subtopicSortables.filter(s => { if(s.el===listEl) { s.destroy(); return false; } return true; });
+                subtopicSortables = subtopicSortables.filter(s=>{ if(s.el===listEl){ s.destroy(); return false; } return true; });
                 initSingleSubtopicSortable(listEl);
             }
 
-            // Sub‑sub items modal
-            function openSubSubModal(panel, subtopic) {
-                currentSubSubData = { panelId: panel.id, subtopicId: subtopic.id };
-                if (!subtopic.items) subtopic.items = [];
-                document.getElementById('subSubModalTitle').textContent = `Sub-items: ${subtopic.text}`;
-                renderSubSubList(subtopic.items);
-                document.getElementById('subSubModal').style.display = 'flex';
-            }
-
-            function closeSubSubModal() {
-                document.getElementById('subSubModal').style.display = 'none';
-                if (subSubSortable) { subSubSortable.destroy(); subSubSortable=null; }
-                currentSubSubData = null;
-            }
-
-            function renderSubSubList(items) {
-                const list = document.getElementById('subSubList');
-                list.innerHTML = '';
-                items.forEach(item => {
-                    const li = document.createElement('li'); li.className='sub-sub-item'; li.dataset.itemId=item.id;
-                    const drag = document.createElement('span'); drag.className='sub-sub-drag'; drag.innerHTML='<i class="fa-solid fa-grip-vertical"></i>';
-                    const sel = document.createElement('input'); sel.type='checkbox'; sel.className='sub-sub-select';
-                    const cb = document.createElement('input'); cb.type='checkbox'; cb.className='sub-sub-checkbox'; cb.checked=item.completed||false;
-                    cb.addEventListener('change', () => { item.completed=cb.checked; debounceSave(); });
-                    const text = document.createElement('span'); text.className='sub-sub-text'; text.textContent=item.text;
-                    const del = document.createElement('button'); del.className='sub-sub-delete'; del.innerHTML='<i class="fa-solid fa-xmark"></i>';
-                    del.addEventListener('click', () => { li.remove(); const idx = items.indexOf(item); if(idx>-1) items.splice(idx,1); debounceSave(); });
-                    li.appendChild(drag); li.appendChild(sel); li.appendChild(cb); li.appendChild(text); li.appendChild(del);
-                    list.appendChild(li);
-                });
-                if (isAdmin && typeof Sortable !== 'undefined') {
-                    if (subSubSortable) subSubSortable.destroy();
-                    subSubSortable = new Sortable(list, {
-                        animation:150, handle:'.sub-sub-drag',
-                        onEnd: function() {
-                            if (!currentSubSubData) return;
-                            const panel = appData.panels.find(p => p.id===currentSubSubData.panelId);
-                            if (!panel) return;
-                            const subtopic = panel.subtopics.find(s => s.id===currentSubSubData.subtopicId);
-                            if (!subtopic || !subtopic.items) return;
-                            const newOrder = Array.from(list.querySelectorAll('.sub-sub-item')).map(li => li.dataset.itemId);
-                            subtopic.items = newOrder.map(id => subtopic.items.find(it => it.id===id)).filter(it => it);
-                            debounceSave();
-                        }
-                    });
-                }
-            }
-
-            document.getElementById('btnAddSubSub').addEventListener('click', () => {
-                if (!isAdmin || !currentSubSubData) return;
-                const panel = appData.panels.find(p => p.id===currentSubSubData.panelId);
-                if (!panel) return;
-                const subtopic = panel.subtopics.find(s => s.id===currentSubSubData.subtopicId);
-                if (!subtopic) return;
-                if (!subtopic.items) subtopic.items = [];
-                const newItem = { id:`item_${subSubIdCounter++}`, text:'New sub-item', completed:false };
-                subtopic.items.push(newItem);
-                renderSubSubList(subtopic.items);
-                debounceSave();
-            });
-
-            document.getElementById('btnDeleteSelectedSubSub').addEventListener('click', () => {
-                if (!isAdmin || !currentSubSubData) return;
-                const panel = appData.panels.find(p => p.id===currentSubSubData.panelId);
-                if (!panel) return;
-                const subtopic = panel.subtopics.find(s => s.id===currentSubSubData.subtopicId);
-                if (!subtopic || !subtopic.items) return;
-                const checked = $$('.sub-sub-select:checked');
-                if (checked.length===0) { showToast('No items selected.','error'); return; }
-                const ids = new Set(); checked.forEach(cb => { const li = cb.closest('.sub-sub-item'); if(li) { ids.add(li.dataset.itemId); li.remove(); } });
-                subtopic.items = subtopic.items.filter(it => !ids.has(it.id));
-                debounceSave();
-                renderSubSubList(subtopic.items);
-            });
-
-            document.getElementById('btnCloseSubSub').addEventListener('click', closeSubSubModal);
-            document.getElementById('subSubModal').addEventListener('click', (e) => { if (e.target === document.getElementById('subSubModal')) closeSubSubModal(); });
-
             // Admin Auth
-            function openAdminModal() {
-                document.getElementById('adminModal').style.display='flex';
-                document.getElementById('adminPasswordInput').value='';
-            }
-            function closeAdminModal() {
-                document.getElementById('adminModal').style.display='none';
-            }
+            function openAdminModal() { document.getElementById('adminModal').style.display='flex'; }
+            function closeAdminModal() { document.getElementById('adminModal').style.display='none'; }
             document.getElementById('btnCancelAdmin').addEventListener('click', closeAdminModal);
-            document.getElementById('btnConfirmAdmin').addEventListener('click', () => {
-                if (document.getElementById('adminPasswordInput').value === ADMIN_PASSWORD) {
-                    isAdmin = true;
-                    updateAdminUI();
-                    renderAll();
-                    closeAdminModal();
-                    showToast('Admin mode activated! 🔓');
+            document.getElementById('btnConfirmAdmin').addEventListener('click', ()=>{
+                if(document.getElementById('adminPasswordInput').value === ADMIN_PASSWORD) {
+                    isAdmin = true; updateAdminUI(); renderAll(); closeAdminModal(); showToast('Admin mode activated! 🔓');
                 } else {
                     document.getElementById('adminModalError').style.display='block';
                 }
             });
-            document.getElementById('btnAdminToggle').addEventListener('click', () => {
-                if (isAdmin) exitAdminMode();
-                else openAdminModal();
-            });
-            function exitAdminMode() {
-                isAdmin = false;
-                updateAdminUI();
-                renderAll();
-                showToast('Admin mode deactivated. 🔒');
-            }
+            document.getElementById('btnAdminToggle').addEventListener('click', ()=> isAdmin ? exitAdminMode() : openAdminModal());
+            function exitAdminMode() { isAdmin=false; updateAdminUI(); renderAll(); showToast('Admin mode deactivated. 🔒'); }
 
             // New Panel Modal
             let pendingInsertIndex = null;
-            function openNewPanelModalAt(idx) {
-                if (!isAdmin) return;
-                pendingInsertIndex = idx;
-                document.getElementById('newPanelTitleInput').value = '';
-                document.getElementById('newPanelPosition').value = (idx===0 ? 'start' : 'end');
-                document.getElementById('newPanelModal').style.display = 'flex';
-            }
-            document.getElementById('btnAddPanelTop').addEventListener('click', () => openNewPanelModalGeneric('start'));
-            document.getElementById('btnAddPanelBottom').addEventListener('click', () => openNewPanelModalGeneric('end'));
-            function openNewPanelModalGeneric(pos='end') {
-                if (!isAdmin) return;
-                pendingInsertIndex = (pos==='start' ? 0 : appData.panels.length);
-                document.getElementById('newPanelTitleInput').value = '';
-                document.getElementById('newPanelPosition').value = pos;
-                document.getElementById('newPanelModal').style.display = 'flex';
-            }
-            document.getElementById('btnCancelNewPanel').addEventListener('click', () => {
-                document.getElementById('newPanelModal').style.display = 'none';
-                pendingInsertIndex = null;
-            });
-            document.getElementById('btnConfirmNewPanel').addEventListener('click', () => {
+            function openNewPanelModalAt(idx) { if(!isAdmin) return; pendingInsertIndex=idx; document.getElementById('newPanelModal').style.display='flex'; }
+            document.getElementById('btnAddPanelTop').addEventListener('click', ()=> openNewPanelModalGeneric('start'));
+            document.getElementById('btnAddPanelBottom').addEventListener('click', ()=> openNewPanelModalGeneric('end'));
+            function openNewPanelModalGeneric(pos='end') { if(!isAdmin) return; pendingInsertIndex = (pos==='start'?0:appData.panels.length); document.getElementById('newPanelModal').style.display='flex'; }
+            document.getElementById('btnCancelNewPanel').addEventListener('click', ()=>{ document.getElementById('newPanelModal').style.display='none'; pendingInsertIndex=null; });
+            document.getElementById('btnConfirmNewPanel').addEventListener('click', ()=>{
                 const title = document.getElementById('newPanelTitleInput').value.trim();
-                if (!title) return;
-                let insertAt = pendingInsertIndex !== null ? pendingInsertIndex : (document.getElementById('newPanelPosition').value==='start' ? 0 : appData.panels.length);
+                if(!title) return;
+                let insertAt = pendingInsertIndex !== null ? pendingInsertIndex : (document.getElementById('newPanelPosition').value==='start'?0:appData.panels.length);
                 insertAt = Math.max(0, Math.min(insertAt, appData.panels.length));
-                const colors = ['#4A90D9','#5BA0D0','#6CB4A1','#F5A623','#E8833A','#9B59B6','#4ECDC4','#2ECC71','#E67E22','#27AE60'];
                 const newPanel = {
-                    id: `panel_${panelIdCounter++}`, title,
-                    color: colors[Math.floor(Math.random()*colors.length)],
-                    subtopics: [{ id:`sub_new_${subtopicIdCounter++}`, text:'New sub-item', completed:false, items:[] }],
-                    progress: 0, order: insertAt
+                    id:`panel_${panelIdCounter++}`, title,
+                    color:['#4A90D9','#5BA0D0','#6CB4A1','#F5A623','#E8833A','#9B59B6','#4ECDC4','#2ECC71','#E67E22','#27AE60'][Math.floor(Math.random()*10)],
+                    subtopics:[{ id:`sub_new_${subtopicIdCounter++}`, text:'New sub-item', completed:false, items:[] }],
+                    progress:0, comment:'', order:insertAt
                 };
                 appData.panels.splice(insertAt,0,newPanel);
-                appData.panels.forEach((p,i) => p.order=i);
-                document.getElementById('newPanelModal').style.display = 'none';
-                pendingInsertIndex = null;
-                saveData(true);
-                renderAll();
+                appData.panels.forEach((p,i)=>p.order=i);
+                document.getElementById('newPanelModal').style.display='none'; pendingInsertIndex=null;
+                saveData(true); renderAll();
             });
 
-            // Reset
-            document.getElementById('btnResetAll').addEventListener('click', () => {
-                if (!isAdmin) return;
-                if (confirm('Reset all data to default workflow?')) {
+            document.getElementById('btnResetAll').addEventListener('click', ()=>{
+                if(!isAdmin) return;
+                if(confirm('Reset all data?')) {
                     appData.panels = JSON.parse(JSON.stringify(defaultPanels));
-                    appData.progress = 0;
-                    appData.projectName = 'PLANNING APPROVAL WORKFLOW';
+                    appData.progress=0; appData.projectName='PLANNING APPROVAL WORKFLOW';
                     panelIdCounter=17; subtopicIdCounter=1000; subSubIdCounter=2000;
-                    saveData(true);
-                    renderAll();
+                    saveData(true); renderAll();
                 }
             });
 
-            // Progress slider (overall)
-            document.getElementById('progressSlider').addEventListener('input', () => {
-                if (!isAdmin) { document.getElementById('progressSlider').value = appData.progress; return; }
+            document.getElementById('progressSlider').addEventListener('input', ()=>{
+                if(!isAdmin) { document.getElementById('progressSlider').value=appData.progress; return; }
                 appData.progress = parseInt(document.getElementById('progressSlider').value);
                 document.getElementById('progressBarFill').style.width = appData.progress+'%';
                 document.getElementById('progressPercent').textContent = appData.progress+'%';
                 debounceSave(400);
             });
-
-            document.getElementById('projectNameInput').addEventListener('input', () => {
+            document.getElementById('projectNameInput').addEventListener('input', ()=>{
                 appData.projectName = document.getElementById('projectNameInput').value;
-                document.getElementById('projectNameDisplay').textContent = appData.projectName || 'PLANNING APPROVAL WORKFLOW';
+                document.getElementById('projectNameDisplay').textContent = appData.projectName||'PLANNING APPROVAL WORKFLOW';
                 debounceSave();
             });
 
-            // Global escape handler
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape') {
-                    closeAdminModal();
-                    closeSubSubModal();
-                    document.getElementById('newPanelModal').style.display = 'none';
-                }
-                if (e.ctrlKey && e.shiftKey && e.key === 'A') {
-                    e.preventDefault();
-                    if (isAdmin) exitAdminMode(); else openAdminModal();
-                }
+            document.addEventListener('keydown', (e)=>{
+                if(e.key==='Escape') { closeAdminModal(); document.getElementById('newPanelModal').style.display='none'; }
+                if(e.ctrlKey && e.shiftKey && e.key==='A') { e.preventDefault(); isAdmin ? exitAdminMode() : openAdminModal(); }
             });
 
-            // Init
-            (async function init() {
+            (async function init(){
                 await loadData();
-                appData.panels.forEach((p,i) => { if(p.order===undefined) p.order=i; });
-                appData.panels.sort((a,b) => (a.order||0)-(b.order||0));
+                appData.panels.forEach((p,i)=>{ if(p.order===undefined) p.order=i; });
+                appData.panels.sort((a,b)=>(a.order||0)-(b.order||0));
                 renderAll();
                 console.log('Dashboard ready – admin password: Dlns@4512#');
-            })().catch(e => {
-                console.error(e);
-                appData.panels = JSON.parse(JSON.stringify(defaultPanels));
-                renderAll();
-            });
+            })().catch(e=>{ console.error(e); appData.panels=JSON.parse(JSON.stringify(defaultPanels)); renderAll(); });
         })();
     </script>
 </body>
