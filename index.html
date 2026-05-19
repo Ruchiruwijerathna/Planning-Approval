@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Planning Approval Workflow Dashboard</title>
 
-    <!-- Firebase SDKs -->
+    <!-- Firebase SDKs (compat) -->
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 
@@ -20,7 +20,7 @@
             --bg: #f0f4f8;
             --surface: #ffffff;
             --surface-alt: #f8fafb;
-            --text: #0a0a0a;               /* darker for visibility */
+            --text: #0a0a0a;
             --text-secondary: #2d3748;
             --border: #cbd5e0;
             --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
@@ -34,10 +34,8 @@
             --progress-bg: #e2e8f0;
             --progress-fill: linear-gradient(90deg, #4f6ef7, #38a169);
         }
-
         * { margin:0; padding:0; box-sizing:border-box; }
 
-        /* animated background */
         body::before {
             content: '';
             position: fixed;
@@ -119,12 +117,10 @@
         @media (max-width:1050px) { .panels-grid { grid-template-columns:repeat(2,1fr); } }
         @media (max-width:650px) { .panels-grid { grid-template-columns:1fr; } }
 
-        /* Panel Card */
         .panel-card {
             background:var(--surface); border-radius:var(--radius);
             box-shadow:var(--shadow); border:1.5px solid var(--border);
             transition:0.2s; overflow:hidden; display:flex; flex-direction:column;
-            position:relative;
         }
         .panel-card.panel-completed {
             opacity:0.7; filter:grayscale(20%);
@@ -163,7 +159,7 @@
             flex:1; font-size:0.8rem; border:1.5px dashed #cbd5e0;
             border-radius:5px; padding:3px 7px; background:#fff; display:none;
         }
-        body.is-admin .subtopic-input { display:none; } /* shown when editing */
+        body.is-admin .subtopic-input { display:none; }
         .subtopic-expand-icon {
             cursor:pointer; color:var(--accent); font-size:0.9rem;
             transition:0.2s; flex-shrink:0;
@@ -177,9 +173,7 @@
         body.is-admin .subtopic-delete-btn { display:flex; }
         .subtopic-delete-btn:hover { color:var(--danger); background:#fff5f5; }
 
-        .sub-sub-wrapper {
-            display:none; margin:4px 0 2px 28px; /* indented */
-        }
+        .sub-sub-wrapper { display:none; margin:4px 0 2px 28px; }
         .sub-sub-wrapper.open { display:block; }
         .sub-sub-list { list-style:none; display:flex; flex-direction:column; gap:4px; }
         .sub-sub-item {
@@ -221,7 +215,6 @@
         .delete-panel-btn, .delete-selected-btn { border-color:#fed7d7; color:#c53030; }
         .delete-panel-btn:hover, .delete-selected-btn:hover { background:#fff5f5; }
 
-        /* Per-panel progress */
         .panel-progress-wrap {
             display:flex; align-items:center; gap:8px; padding:4px 16px 8px;
             font-size:0.7rem; color:var(--text-secondary);
@@ -232,14 +225,12 @@
         body.is-admin .panel-progress-slider { display:inline-block; }
         .panel-progress-percent { font-weight:600; min-width:32px; text-align:right; }
 
-        /* Flow arrow */
         .panel-flow-arrow {
             text-align:right; font-size:0.7rem; color:#a0aec0;
             padding:0 16px 6px; cursor:default;
         }
         .panel-flow-arrow i { font-size:0.9rem; margin-left:4px; }
 
-        /* Comment box */
         .panel-comment-wrap { padding:0 16px 10px; }
         .panel-comment-label { font-size:0.7rem; font-weight:600; color:var(--text-secondary); margin-bottom:4px; }
         .panel-comment-textarea {
@@ -248,17 +239,37 @@
             font-family:inherit; color:var(--text);
         }
 
-        /* Admin visibility helpers */
         .admin-only { display:none; }
         body.is-admin .admin-only { display:flex; }
         .admin-only-inline { display:none; }
         body.is-admin .admin-only-inline { display:inline-flex; }
         .admin-only-block { display:none; }
         body.is-admin .admin-only-block { display:block; }
-
-        /* Select checkbox (admin only) */
         .subtopic-select-checkbox { display:none; }
         body.is-admin .subtopic-select-checkbox { display:inline-block; }
+
+        .modal-overlay {
+            position:fixed; top:0; left:0; width:100%; height:100%;
+            background:rgba(15,20,30,0.55); z-index:999; display:none;
+            align-items:center; justify-content:center; backdrop-filter:blur(3px);
+        }
+        .modal-dialog {
+            background:#fff; border-radius:var(--radius); padding:24px;
+            width:450px; max-width:92vw; box-shadow:var(--shadow-lg);
+            max-height:80vh; overflow-y:auto;
+        }
+        .modal-dialog h3 { margin-bottom:6px; font-size:1.1rem; }
+        .modal-input {
+            width:100%; padding:11px 14px; border:2px solid var(--border);
+            border-radius:var(--radius-sm); font-size:0.9rem; outline:none; font-family:inherit;
+        }
+        .modal-input:focus { border-color:var(--accent); }
+        .modal-actions { display:flex; gap:10px; margin-top:18px; justify-content:flex-end; }
+        .toast-container { position:fixed; bottom:24px; right:24px; z-index:1000; display:flex; flex-direction:column; gap:8px; }
+        .toast {
+            background:#1a202c; color:#fff; padding:12px 20px; border-radius:25px;
+            font-size:0.82rem; box-shadow:var(--shadow-lg);
+        }
     </style>
 </head>
 <body>
@@ -295,13 +306,13 @@
     </div>
 
     <!-- Admin Login Modal -->
-    <div class="modal-overlay" id="adminModal" style="display:none;">
+    <div class="modal-overlay" id="adminModal">
         <div class="modal-dialog">
             <h3><i class="fa-solid fa-shield-halved"></i> Admin Authentication</h3>
             <p>Enter the admin password to enable editing.</p>
             <input type="password" class="modal-input" id="adminPasswordInput" placeholder="Password..." autocomplete="off">
             <div class="modal-error" id="adminModalError" style="display:none;color:var(--danger);margin-top:6px;"></div>
-            <div class="modal-actions" style="display:flex;gap:10px;margin-top:18px;justify-content:flex-end;">
+            <div class="modal-actions">
                 <button class="btn btn-outline btn-sm" id="btnCancelAdmin">Cancel</button>
                 <button class="btn btn-admin btn-sm" id="btnConfirmAdmin">Unlock</button>
             </div>
@@ -309,7 +320,7 @@
     </div>
 
     <!-- New Panel Modal -->
-    <div class="modal-overlay" id="newPanelModal" style="display:none;">
+    <div class="modal-overlay" id="newPanelModal">
         <div class="modal-dialog">
             <h3><i class="fa-solid fa-folder-plus"></i> Add New Panel</h3>
             <p>Enter the title for the new workflow panel.</p>
@@ -319,7 +330,7 @@
                 <option value="end">At the End</option>
                 <option value="start">At the Beginning</option>
             </select>
-            <div class="modal-actions" style="display:flex;gap:10px;margin-top:18px;justify-content:flex-end;">
+            <div class="modal-actions">
                 <button class="btn btn-outline btn-sm" id="btnCancelNewPanel">Cancel</button>
                 <button class="btn btn-admin btn-sm" id="btnConfirmNewPanel">Add Panel</button>
             </div>
@@ -353,7 +364,7 @@
             const FIRESTORE_COLLECTION = "dashboards";
             const FIRESTORE_DOC_ID = "planning_approval_workflow";
 
-            // Default panels (now include "comment" and "items" arrays)
+            // FULL 16-PANEL DEFAULT DATA (all panels included)
             const defaultPanels = [
                 { id:'panel_1', title:'LAND IDENTIFICATION & INITIAL FEASIBILITY', color:'#4A90D9', progress:0, comment:'', subtopics:[
                     { id:'sub_1_1', text:'Verify land ownership', completed:false, items:[] },
@@ -364,7 +375,109 @@
                     { id:'sub_1_6', text:'Market & financial feasibility', completed:false, items:[] },
                     { id:'sub_1_7', text:'Outcome: Feasible Decision', completed:false, items:[] }
                 ], order:0 },
-                // ... (remaining 15 panels identical to previous, but each with comment:'' and items:[] inside subtopics)
+                { id:'panel_2', title:'CONCEPT DEVELOPMENT / PRELIMINARY LAYOUT', color:'#5BA0D0', progress:0, comment:'', subtopics:[
+                    { id:'sub_2_1', text:'Prepare initial layout', completed:false, items:[] },
+                    { id:'sub_2_2', text:'Road network planning', completed:false, items:[] },
+                    { id:'sub_2_3', text:'Drainage concept', completed:false, items:[] },
+                    { id:'sub_2_4', text:'Open spaces allocation', completed:false, items:[] },
+                    { id:'sub_2_5', text:'Utility allocation', completed:false, items:[] },
+                    { id:'sub_2_6', text:'Reservation areas', completed:false, items:[] },
+                    { id:'sub_2_7', text:'Outcome: Draft Layout', completed:false, items:[] }
+                ], order:1 },
+                { id:'panel_3', title:'PRE-CONSULTATION WITH AUTHORITIES', color:'#6CB4A1', progress:0, comment:'', subtopics:[
+                    { id:'sub_3_1', text:'Discuss concept with key authorities', completed:false, items:[] },
+                    { id:'sub_3_2', text:'Identify potential issues', completed:false, items:[] },
+                    { id:'sub_3_3', text:'Understand requirements', completed:false, items:[] },
+                    { id:'sub_3_4', text:'Reduce rejection risk', completed:false, items:[] },
+                    { id:'sub_3_5', text:'Outcome: Guidance & Early Feedback', completed:false, items:[] }
+                ], order:2 },
+                { id:'panel_4', title:'DETAILED TECHNICAL PREPARATION', color:'#7BC8A4', progress:0, comment:'', subtopics:[
+                    { id:'sub_4_1', text:'Survey & legal documents', completed:false, items:[] },
+                    { id:'sub_4_2', text:'Planning drawings', completed:false, items:[] },
+                    { id:'sub_4_3', text:'Engineering drawings', completed:false, items:[] },
+                    { id:'sub_4_4', text:'Environmental reports', completed:false, items:[] },
+                    { id:'sub_4_5', text:'Supporting technical reports', completed:false, items:[] },
+                    { id:'sub_4_6', text:'Outcome: Complete Technical Documents', completed:false, items:[] }
+                ], order:3 },
+                { id:'panel_5', title:'FORMAL SUBMISSION OF APPLICATION', color:'#F5A623', progress:0, comment:'', subtopics:[
+                    { id:'sub_5_1', text:'Submit application forms', completed:false, items:[] },
+                    { id:'sub_5_2', text:'Submit technical drawings', completed:false, items:[] },
+                    { id:'sub_5_3', text:'Submit reports & documents', completed:false, items:[] },
+                    { id:'sub_5_4', text:'Pay required fees', completed:false, items:[] },
+                    { id:'sub_5_5', text:'Outcome: Application Registered', completed:false, items:[] }
+                ], order:4 },
+                { id:'panel_6', title:'INITIAL TECHNICAL SCREENING', color:'#F7B84E', progress:0, comment:'', subtopics:[
+                    { id:'sub_6_1', text:'Check completeness', completed:false, items:[] },
+                    { id:'sub_6_2', text:'Verify documents', completed:false, items:[] },
+                    { id:'sub_6_3', text:'Check drawing standards', completed:false, items:[] },
+                    { id:'sub_6_4', text:'Verify payments', completed:false, items:[] },
+                    { id:'sub_6_5', text:'Outcome: Accepted for Review or Returned', completed:false, items:[] }
+                ], order:5 },
+                { id:'panel_7', title:'CIRCULATION TO RELEVANT DEPARTMENTS', color:'#E8833A', progress:0, comment:'', subtopics:[
+                    { id:'sub_7_1', text:'Planning: Zoning, land use, layout', completed:false, items:[] },
+                    { id:'sub_7_2', text:'Engineering: Roads, drainage, infrastructure', completed:false, items:[] },
+                    { id:'sub_7_3', text:'Water Board: Water supply requirements', completed:false, items:[] },
+                    { id:'sub_7_4', text:'Electricity Board: Power supply', completed:false, items:[] },
+                    { id:'sub_7_5', text:'Environmental: Impact assessment', completed:false, items:[] },
+                    { id:'sub_7_6', text:'Fire Department: Fire safety', completed:false, items:[] },
+                    { id:'sub_7_7', text:'RDA / Other: Road access & links', completed:false, items:[] },
+                    { id:'sub_7_8', text:'Outcome: Technical Comments from Each Dept', completed:false, items:[] }
+                ], order:6 },
+                { id:'panel_8', title:'TECHNICAL COMMITTEE MEETING', color:'#D97471', progress:0, comment:'', subtopics:[
+                    { id:'sub_8_1', text:'All stakeholders review the project', completed:false, items:[] },
+                    { id:'sub_8_2', text:'Discuss technical aspects', completed:false, items:[] },
+                    { id:'sub_8_3', text:'Evaluate compliance & impacts', completed:false, items:[] },
+                    { id:'sub_8_4', text:'Suggest modifications / conditions', completed:false, items:[] },
+                    { id:'sub_8_5', text:'Outcome A: APPROVED', completed:false, items:[] },
+                    { id:'sub_8_6', text:'Outcome B: APPROVED WITH CONDITIONS', completed:false, items:[] },
+                    { id:'sub_8_7', text:'Outcome C: DEFERRED', completed:false, items:[] },
+                    { id:'sub_8_8', text:'Outcome D: REJECTED', completed:false, items:[] }
+                ], order:7 },
+                { id:'panel_9', title:'ISSUING COMMENTS', color:'#9B59B6', progress:0, comment:'', subtopics:[
+                    { id:'sub_9_1', text:'Official comments issued', completed:false, items:[] },
+                    { id:'sub_9_2', text:'List of required revisions', completed:false, items:[] },
+                    { id:'sub_9_3', text:'Additional studies if needed', completed:false, items:[] },
+                    { id:'sub_9_4', text:'Outcome: Comments to Developer', completed:false, items:[] }
+                ], order:8 },
+                { id:'panel_10', title:'REVISION & RESUBMISSION CYCLE', color:'#8E6BB8', progress:0, comment:'', subtopics:[
+                    { id:'sub_10_1', text:'Revise plans & reports', completed:false, items:[] },
+                    { id:'sub_10_2', text:'Address all comments', completed:false, items:[] },
+                    { id:'sub_10_3', text:'Provide clarifications', completed:false, items:[] },
+                    { id:'sub_10_4', text:'Resubmit for review (repeat if needed)', completed:false, items:[] },
+                    { id:'sub_10_5', text:'Outcome: All Comments Resolved', completed:false, items:[] }
+                ], order:9 },
+                { id:'panel_11', title:'FINAL TECHNICAL CLEARANCE', color:'#4ECDC4', progress:0, comment:'', subtopics:[
+                    { id:'sub_11_1', text:'All departments issue clearance', completed:false, items:[] },
+                    { id:'sub_11_2', text:'Engineers sign off', completed:false, items:[] },
+                    { id:'sub_11_3', text:'Technical committee recommendations finalized', completed:false, items:[] },
+                    { id:'sub_11_4', text:'Outcome: Technical Clearance Issued', completed:false, items:[] }
+                ], order:10 },
+                { id:'panel_12', title:'FINAL APPROVAL BY AUTHORITY', color:'#2ECC71', progress:0, comment:'', subtopics:[
+                    { id:'sub_12_1', text:'Review final recommendation', completed:false, items:[] },
+                    { id:'sub_12_2', text:'Grant official approval', completed:false, items:[] },
+                    { id:'sub_12_3', text:'Approval may include specific conditions', completed:false, items:[] },
+                    { id:'sub_12_4', text:'Outcome: Official Approval Granted', completed:false, items:[] }
+                ], order:11 },
+                { id:'panel_13', title:'PAYMENT OF APPROVAL CHARGES', color:'#3498DB', progress:0, comment:'', subtopics:[
+                    { id:'sub_13_1', text:'Pay approval fees', completed:false, items:[] },
+                    { id:'sub_13_2', text:'Development charges', completed:false, items:[] },
+                    { id:'sub_13_3', text:'Infrastructure levies', completed:false, items:[] },
+                    { id:'sub_13_4', text:'Security deposits (if any)', completed:false, items:[] },
+                    { id:'sub_13_5', text:'Outcome: Payments Completed', completed:false, items:[] }
+                ], order:12 },
+                { id:'panel_14', title:'PERMIT ISSUANCE', color:'#1ABC9C', progress:0, comment:'', subtopics:[
+                    { id:'sub_14_1', text:'Development / Building permit', completed:false, items:[] },
+                    { id:'sub_14_2', text:'Subdivision permit', completed:false, items:[] },
+                    { id:'sub_14_3', text:'Other required permits', completed:false, items:[] },
+                    { id:'sub_14_4', text:'Outcome: Permit Issued - Project Can Commence', completed:false, items:[] }
+                ], order:13 },
+                { id:'panel_15', title:'CONSTRUCTION & COMPLIANCE MONITORING', color:'#E67E22', progress:0, comment:'', subtopics:[
+                    { id:'sub_15_1', text:'Commence construction as per approved plans', completed:false, items:[] },
+                    { id:'sub_15_2', text:'Inspections during construction', completed:false, items:[] },
+                    { id:'sub_15_3', text:'Monitor compliance with conditions', completed:false, items:[] },
+                    { id:'sub_15_4', text:'Ensure quality & safety standards', completed:false, items:[] },
+                    { id:'sub_15_5', text:'Outcome: Work in Progress with Compliance', completed:false, items:[] }
+                ], order:14 },
                 { id:'panel_16', title:'COMPLETION CERTIFICATION', color:'#27AE60', progress:0, comment:'', subtopics:[
                     { id:'sub_16_1', text:'Inspect completed works', completed:false, items:[] },
                     { id:'sub_16_2', text:'Verify compliance with approved plans', completed:false, items:[] },
@@ -464,12 +577,10 @@
                 document.getElementById('progressSlider').value = appData.progress;
             }
 
-            // Helper to check if all subtopics of a panel are completed
             function isPanelCompleted(panel) {
                 return panel.subtopics.length > 0 && panel.subtopics.every(s => s.completed);
             }
 
-            // Create panel card
             function createPanelCard(panel, index) {
                 const card = document.createElement('div'); card.className='panel-card'; card.dataset.panelId=panel.id;
                 card.style.borderLeft = `4px solid ${panel.color}`;
@@ -486,7 +597,6 @@
                 const dragHandle = document.createElement('span'); dragHandle.className='panel-drag-handle'; dragHandle.innerHTML='<i class="fa-solid fa-grip-vertical"></i>';
                 header.appendChild(badge); header.appendChild(titleWrap); header.appendChild(dragHandle); card.appendChild(header);
 
-                // Body – subtopic list
                 const body = document.createElement('div'); body.className='panel-card-body';
                 const subtopicList = document.createElement('ul'); subtopicList.className='subtopic-list'; subtopicList.dataset.panelId=panel.id;
                 panel.subtopics.forEach((sub, subIndex) => subtopicList.appendChild(createSubtopicItem(panel, sub, subIndex)));
@@ -504,7 +614,6 @@
                 body.appendChild(addSubBtn);
                 card.appendChild(body);
 
-                // Per-panel progress
                 const progressWrap = document.createElement('div'); progressWrap.className='panel-progress-wrap';
                 progressWrap.innerHTML = `<span>Progress</span><div class="panel-progress-bar"><div class="panel-progress-fill" style="width:${panel.progress}%;"></div></div><span class="panel-progress-percent">${panel.progress}%</span>`;
                 const progressSlider = document.createElement('input'); progressSlider.type='range'; progressSlider.className='panel-progress-slider admin-only-inline';
@@ -519,7 +628,6 @@
                 progressWrap.appendChild(progressSlider);
                 card.appendChild(progressWrap);
 
-                // Comment box
                 const commentWrap = document.createElement('div'); commentWrap.className='panel-comment-wrap';
                 const commentLabel = document.createElement('div'); commentLabel.className='panel-comment-label'; commentLabel.textContent='💬 Comments';
                 const commentArea = document.createElement('textarea'); commentArea.className='panel-comment-textarea'; commentArea.value = panel.comment || '';
@@ -528,7 +636,6 @@
                 commentWrap.appendChild(commentLabel); commentWrap.appendChild(commentArea);
                 card.appendChild(commentWrap);
 
-                // Flow arrow
                 if(index < appData.panels.length-1){
                     const nextPanel = appData.panels[index+1];
                     const arrowDiv = document.createElement('div'); arrowDiv.className='panel-flow-arrow';
@@ -537,7 +644,6 @@
                     card.appendChild(arrowDiv);
                 }
 
-                // Footer (admin only)
                 const footer = document.createElement('div'); footer.className='panel-card-footer admin-only';
                 const insBefore = document.createElement('button'); insBefore.className='insert-btn'; insBefore.innerHTML='<i class="fa-solid fa-arrow-up"></i> Insert Before';
                 insBefore.addEventListener('click', (e)=>{ e.stopPropagation(); openNewPanelModalAt(index); });
@@ -567,7 +673,6 @@
                 return card;
             }
 
-            // Create subtopic item with inline expandable sub-sub-items
             function createSubtopicItem(panel, sub, subIndex) {
                 const li = document.createElement('li'); li.className='subtopic-item'; li.dataset.subtopicId=sub.id;
                 const dragHandle = document.createElement('span'); dragHandle.className='subtopic-drag-handle admin-only-inline'; dragHandle.innerHTML='<i class="fa-solid fa-grip-vertical"></i>';
@@ -595,7 +700,6 @@
                 li.appendChild(dragHandle); li.appendChild(selCheck); li.appendChild(checkbox);
                 li.appendChild(textSpan); li.appendChild(inputEl); li.appendChild(expandIcon); li.appendChild(deleteBtn);
 
-                // Sub-sub wrapper
                 const subSubWrapper = document.createElement('div'); subSubWrapper.className='sub-sub-wrapper';
                 const subSubList = document.createElement('ul'); subSubList.className='sub-sub-list';
                 if(!sub.items) sub.items = [];
@@ -625,14 +729,12 @@
                 subSubWrapper.appendChild(delSelSubSubBtn);
                 li.appendChild(subSubWrapper);
 
-                // Toggle expand
                 expandIcon.addEventListener('click', (e)=>{
                     e.stopPropagation();
                     subSubWrapper.classList.toggle('open');
                     if(subSubWrapper.classList.contains('open')) {
                         if(isAdmin && typeof Sortable !== 'undefined') initSubSubSortable(subSubList);
                     } else {
-                        // destroy sortable if exists
                         if(subSubWrapper._sortable) { subSubWrapper._sortable.destroy(); subSubWrapper._sortable = null; }
                     }
                 });
@@ -696,7 +798,6 @@
             }
 
             function updatePanelCount() { document.getElementById('panelCount').textContent = `(${appData.panels.length} Panels)`; }
-
             function updateAdminUI() {
                 if(isAdmin) {
                     document.body.classList.add('is-admin');
@@ -712,7 +813,6 @@
                 initSortable();
             }
 
-            // Sortable (panels & subtopics)
             function destroyAllSortables() {
                 if(panelSortable) { panelSortable.destroy(); panelSortable=null; }
                 subtopicSortables.forEach(s=>s.destroy()); subtopicSortables=[];
@@ -748,7 +848,6 @@
                         const ids = Array.from(listEl.querySelectorAll('.subtopic-item')).map(li=>li.dataset.subtopicId);
                         panel.subtopics = ids.map(id=>panel.subtopics.find(s=>s.id===id)).filter(s=>s);
                         debounceSave();
-                        // re-render the whole panel to update numbers? We'll just re-render all panels.
                         renderAll();
                     }
                 });
@@ -759,7 +858,6 @@
                 initSingleSubtopicSortable(listEl);
             }
 
-            // Admin Auth
             function openAdminModal() { document.getElementById('adminModal').style.display='flex'; }
             function closeAdminModal() { document.getElementById('adminModal').style.display='none'; }
             document.getElementById('btnCancelAdmin').addEventListener('click', closeAdminModal);
@@ -773,7 +871,6 @@
             document.getElementById('btnAdminToggle').addEventListener('click', ()=> isAdmin ? exitAdminMode() : openAdminModal());
             function exitAdminMode() { isAdmin=false; updateAdminUI(); renderAll(); showToast('Admin mode deactivated. 🔒'); }
 
-            // New Panel Modal
             let pendingInsertIndex = null;
             function openNewPanelModalAt(idx) { if(!isAdmin) return; pendingInsertIndex=idx; document.getElementById('newPanelModal').style.display='flex'; }
             document.getElementById('btnAddPanelTop').addEventListener('click', ()=> openNewPanelModalGeneric('start'));
