@@ -23,12 +23,12 @@
             --text: #1a202c;
             --text-secondary: #5a6577;
             --border: #e2e8f0;
-            --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
-            --shadow: 0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
-            --shadow-lg: 0 12px 32px rgba(0,0,0,0.12), 0 4px 8px rgba(0,0,0,0.06);
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.04);
+            --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.12), 0 4px 8px rgba(0, 0, 0, 0.06);
             --radius: 14px;
             --radius-sm: 8px;
-            --transition: 0.2s cubic-bezier(0.4,0,0.2,1);
+            --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
             --accent: #4f6ef7;
             --accent-hover: #3b54db;
             --danger: #e53e3e;
@@ -38,262 +38,834 @@
             --progress-bg: #e2e8f0;
             --progress-fill: linear-gradient(90deg, #4f6ef7, #6c8cff, #38a169);
         }
-        * { margin:0; padding:0; box-sizing:border-box; }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            font-family:'Segoe UI','Inter',system-ui,-apple-system,sans-serif;
-            background:var(--bg); color:var(--text); line-height:1.6; min-height:100vh; -webkit-font-smoothing:antialiased;
+            font-family: 'Segoe UI', 'Inter', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
         }
 
-        /* HEADER */
+        /* ── HEADER ─────────────────────── */
         .dashboard-header {
-            background:var(--surface); border-bottom:1px solid var(--border);
-            padding:16px 28px; position:sticky; top:0; z-index:100;
-            box-shadow:var(--shadow-sm); display:flex; flex-wrap:wrap; align-items:center; gap:16px; justify-content:space-between;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 16px 28px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 16px;
+            justify-content: space-between;
         }
-        .header-left { display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
         .header-logo {
-            width:44px; height:44px; border-radius:12px; background:var(--accent);
-            display:flex; align-items:center; justify-content:center; color:#fff; font-size:20px; flex-shrink:0;
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 20px;
+            flex-shrink: 0;
         }
-        .project-name-display { font-size:1.25rem; font-weight:700; color:var(--text); letter-spacing:-0.3px; }
+        .project-name-display {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text);
+            letter-spacing: -0.3px;
+            cursor: default;
+        }
         .project-name-input {
-            font-size:1.25rem; font-weight:700; color:var(--text); letter-spacing:-0.3px;
-            border:2px dashed var(--accent); border-radius:var(--radius-sm); padding:4px 10px; background:#fefefe; outline:none; width:360px; max-width:100%;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text);
+            letter-spacing: -0.3px;
+            border: 2px dashed var(--accent);
+            border-radius: var(--radius-sm);
+            padding: 4px 10px;
+            background: #fefefe;
+            outline: none;
+            width: 360px;
+            max-width: 100%;
+            transition: var(--transition);
         }
-        .project-name-input:focus { border-style:solid; box-shadow:0 0 0 3px rgba(79,110,247,0.12); }
+        .project-name-input:focus {
+            border-style: solid;
+            box-shadow: 0 0 0 3px rgba(79, 110, 247, 0.12);
+        }
 
-        .progress-section { display:flex; align-items:center; gap:12px; flex-shrink:0; }
-        .progress-label { font-size:0.82rem; font-weight:600; color:var(--text-secondary); white-space:nowrap; text-transform:uppercase; letter-spacing:0.4px; }
-        .progress-bar-wrap { width:180px; height:10px; background:var(--progress-bg); border-radius:20px; overflow:hidden; }
-        .progress-bar-fill { height:100%; background:var(--progress-fill); border-radius:20px; transition:width 0.5s; }
-        .progress-bar-fill::after { content:''; position:absolute; right:0; top:0; width:20px; height:100%; background:rgba(255,255,255,0.35); border-radius:20px; }
-        .progress-percent { font-weight:700; font-size:0.9rem; color:var(--accent); min-width:38px; text-align:center; }
-        .progress-slider { width:100px; cursor:pointer; accent-color:var(--accent); }
+        /* Progress Section */
+        .progress-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-shrink: 0;
+        }
+        .progress-label {
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            white-space: nowrap;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+        .progress-bar-wrap {
+            width: 180px;
+            height: 10px;
+            background: var(--progress-bg);
+            border-radius: 20px;
+            overflow: hidden;
+            position: relative;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            background: var(--progress-fill);
+            border-radius: 20px;
+            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+        .progress-bar-fill::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 0;
+            width: 20px;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.35);
+            border-radius: 20px;
+        }
+        .progress-percent {
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: var(--accent);
+            min-width: 38px;
+            text-align: center;
+        }
+        .progress-slider {
+            width: 100px;
+            cursor: pointer;
+            accent-color: var(--accent);
+        }
 
+        /* Buttons */
         .btn {
-            padding:9px 18px; border-radius:25px; border:none; font-weight:600; font-size:0.85rem; cursor:pointer;
-            transition:var(--transition); display:inline-flex; align-items:center; gap:7px; white-space:nowrap; font-family:inherit;
+            padding: 9px 18px;
+            border-radius: 25px;
+            border: none;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            letter-spacing: 0.2px;
+            white-space: nowrap;
+            font-family: inherit;
         }
-        .btn-admin { background:var(--accent); color:#fff; box-shadow:0 2px 8px rgba(79,110,247,0.3); }
-        .btn-admin:hover { background:var(--accent-hover); transform:translateY(-1px); box-shadow:0 4px 14px rgba(79,110,247,0.4); }
-        .btn-admin.active { background:#1a202c; box-shadow:0 2px 8px rgba(26,32,44,0.35); }
-        .btn-outline { background:transparent; border:2px solid var(--border); color:var(--text); }
-        .btn-outline:hover { border-color:var(--accent); color:var(--accent); background:#f7f8ff; }
-        .btn-sm { padding:5px 12px; font-size:0.75rem; border-radius:18px; }
+        .btn-admin {
+            background: var(--accent);
+            color: #fff;
+            box-shadow: 0 2px 8px rgba(79, 110, 247, 0.3);
+        }
+        .btn-admin:hover {
+            background: var(--accent-hover);
+            box-shadow: 0 4px 14px rgba(79, 110, 247, 0.4);
+            transform: translateY(-1px);
+        }
+        .btn-admin.active {
+            background: #1a202c;
+            box-shadow: 0 2px 8px rgba(26, 32, 44, 0.35);
+        }
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--border);
+            color: var(--text);
+        }
+        .btn-outline:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: #f7f8ff;
+        }
+        .btn-sm {
+            padding: 5px 12px;
+            font-size: 0.75rem;
+            border-radius: 18px;
+        }
+        .btn-danger-sm {
+            background: transparent;
+            border: 1.5px solid #fed7d7;
+            color: var(--danger);
+            padding: 4px 10px;
+            font-size: 0.7rem;
+            border-radius: 14px;
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 600;
+            font-family: inherit;
+        }
+        .btn-danger-sm:hover {
+            background: #fff5f5;
+            border-color: var(--danger);
+        }
+        .btn-icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 1.5px solid var(--border);
+            background: var(--surface);
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            transition: var(--transition);
+            color: var(--text-secondary);
+            font-family: inherit;
+        }
+        .btn-icon:hover {
+            background: #f7f8ff;
+            border-color: var(--accent);
+            color: var(--accent);
+        }
         .btn-add-panel {
-            background:#fff; border:2px dashed #cbd5e0; color:#718096; padding:10px 20px; border-radius:25px;
-            font-weight:600; font-size:0.85rem; transition:var(--transition); font-family:inherit; display:inline-flex; align-items:center; gap:6px; cursor:pointer;
+            background: #fff;
+            border: 2px dashed #cbd5e0;
+            color: #718096;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: var(--transition);
+            font-family: inherit;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
         }
-        .btn-add-panel:hover { border-color:var(--accent); color:var(--accent); background:#fafbff; }
+        .btn-add-panel:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: #fafbff;
+        }
 
-        /* GRID */
-        .main-container { max-width:1500px; margin:0 auto; padding:24px 20px 60px; }
-        .panels-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:18px; align-items:start; }
-        @media (max-width:1400px) { .panels-grid { grid-template-columns:repeat(3,1fr); } }
-        @media (max-width:1050px) { .panels-grid { grid-template-columns:repeat(2,1fr); } }
-        @media (max-width:650px) { .panels-grid { grid-template-columns:1fr; } }
+        /* ── MAIN GRID ─────────────────── */
+        .main-container {
+            max-width: 1500px;
+            margin: 0 auto;
+            padding: 24px 20px 60px;
+        }
+        .panels-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 18px;
+            align-items: start;
+        }
+        @media (max-width: 1400px) {
+            .panels-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        @media (max-width: 1050px) {
+            .panels-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        @media (max-width: 650px) {
+            .panels-grid {
+                grid-template-columns: 1fr;
+            }
+            .dashboard-header {
+                padding: 12px 14px;
+                gap: 10px;
+            }
+            .project-name-input {
+                width: 200px;
+            }
+            .progress-bar-wrap {
+                width: 100px;
+            }
+        }
 
-        /* PANEL */
+        /* ── PANEL CARD ────────────────── */
         .panel-card {
-            background:var(--surface); border-radius:var(--radius); box-shadow:var(--shadow); border:1.5px solid var(--border);
-            transition:var(--transition); position:relative; overflow:hidden; display:flex; flex-direction:column;
+            background: var(--surface);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            border: 1.5px solid var(--border);
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+            cursor: default;
+            display: flex;
+            flex-direction: column;
         }
-        .panel-card:hover { box-shadow:var(--shadow-lg); transform:translateY(-2px); }
-        .panel-card.drag-over { border-color:var(--accent)!important; box-shadow:0 0 0 4px rgba(79,110,247,0.15)!important; }
-        .panel-card.sortable-ghost { opacity:0.4; background:#e8ecf8; border-style:dashed; }
-        .panel-card.sortable-chosen { box-shadow:var(--shadow-lg); transform:scale(1.02); z-index:50; }
-
-        .panel-color-strip { height:6px; width:100%; flex-shrink:0; }
-        .panel-card-header { padding:14px 16px 10px; display:flex; align-items:flex-start; gap:10px; }
-        .panel-number { width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:0.8rem; color:#fff; flex-shrink:0; }
-        .panel-title-wrap { flex:1; min-width:0; }
-        .panel-title-display { font-weight:700; font-size:0.9rem; color:var(--text); line-height:1.35; word-break:break-word; }
+        .panel-card:hover {
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-2px);
+        }
+        .panel-card.drag-over {
+            border-color: var(--accent) !important;
+            box-shadow: 0 0 0 4px rgba(79, 110, 247, 0.15) !important;
+        }
+        .panel-card.sortable-ghost {
+            opacity: 0.4;
+            background: #e8ecf8;
+            border-style: dashed;
+        }
+        .panel-card.sortable-chosen {
+            box-shadow: var(--shadow-lg);
+            transform: scale(1.02);
+            z-index: 50;
+        }
+        .panel-color-strip {
+            height: 6px;
+            width: 100%;
+            flex-shrink: 0;
+        }
+        .panel-card-header {
+            padding: 14px 16px 10px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+        .panel-number {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.8rem;
+            color: #fff;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+        .panel-title-wrap {
+            flex: 1;
+            min-width: 0;
+        }
+        .panel-title-display {
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: var(--text);
+            line-height: 1.35;
+            word-break: break-word;
+        }
         .panel-title-input {
-            font-weight:700; font-size:0.9rem; color:var(--text); border:2px dashed var(--accent); border-radius:6px;
-            padding:3px 8px; background:#fefefe; outline:none; width:100%; font-family:inherit; line-height:1.35;
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: var(--text);
+            border: 2px dashed var(--accent);
+            border-radius: 6px;
+            padding: 3px 8px;
+            background: #fefefe;
+            outline: none;
+            width: 100%;
+            font-family: inherit;
+            line-height: 1.35;
+            transition: var(--transition);
         }
-        .panel-title-input:focus { border-style:solid; box-shadow:0 0 0 3px rgba(79,110,247,0.1); }
-        .panel-drag-handle { cursor:grab; color:#cbd5e0; font-size:1rem; padding:4px 2px; transition:var(--transition); flex-shrink:0; user-select:none; display:none; }
-        body.is-admin .panel-drag-handle { display:block; }
-        .panel-drag-handle:active { cursor:grabbing; color:var(--accent); }
-
-        .panel-card-body { padding:4px 16px 14px; flex:1; }
-        .subtopic-list { list-style:none; display:flex; flex-direction:column; gap:5px; }
-        .subtopic-item { display:flex; align-items:center; gap:8px; font-size:0.8rem; color:var(--text-secondary); padding:5px 8px; border-radius:6px; transition:var(--transition); background:var(--surface-alt); border:1px solid transparent; }
-        .subtopic-item:hover { background:#f7faff; border-color:#e8ecf8; }
-        .subtopic-checkbox { width:16px; height:16px; accent-color:var(--accent); cursor:pointer; flex-shrink:0; }
-        .subtopic-select-checkbox { width:14px; height:14px; cursor:pointer; flex-shrink:0; accent-color:var(--danger); display:none; }
-        body.is-admin .subtopic-select-checkbox { display:inline-block; }
-        .subtopic-drag-handle { cursor:grab; color:#cbd5e0; font-size:0.9rem; padding:2px; transition:var(--transition); flex-shrink:0; user-select:none; display:none; }
-        body.is-admin .subtopic-drag-handle { display:flex; }
-        .subtopic-drag-handle:active { cursor:grabbing; color:var(--accent); }
-        .subtopic-text { flex:1; word-break:break-word; }
-        .subtopic-input { flex:1; font-size:0.8rem; border:1.5px dashed #cbd5e0; border-radius:5px; padding:3px 7px; background:#fff; outline:none; font-family:inherit; display:none; }
-        body.is-admin .subtopic-input { display:none; } /* shown when editing */
+        .panel-title-input:focus {
+            border-style: solid;
+            box-shadow: 0 0 0 3px rgba(79, 110, 247, 0.1);
+        }
+        .panel-drag-handle {
+            cursor: grab;
+            color: #cbd5e0;
+            font-size: 1rem;
+            padding: 4px 2px;
+            transition: var(--transition);
+            flex-shrink: 0;
+            user-select: none;
+        }
+        .panel-drag-handle:active {
+            cursor: grabbing;
+            color: var(--accent);
+        }
+        .panel-card-body {
+            padding: 4px 16px 14px;
+            flex: 1;
+        }
+        .subtopic-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .subtopic-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            padding: 5px 8px;
+            border-radius: 6px;
+            transition: var(--transition);
+            background: var(--surface-alt);
+            border: 1px solid transparent;
+        }
+        .subtopic-item:hover {
+            background: #f7faff;
+            border-color: #e8ecf8;
+        }
+        .subtopic-checkbox {
+            width: 16px;
+            height: 16px;
+            accent-color: var(--accent);
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+        /* New selection checkbox and drag handle styles */
+        .subtopic-select-checkbox {
+            width: 14px;
+            height: 14px;
+            cursor: pointer;
+            flex-shrink: 0;
+            accent-color: var(--danger);
+        }
+        .subtopic-drag-handle {
+            cursor: grab;
+            color: #cbd5e0;
+            font-size: 0.9rem;
+            padding: 2px;
+            transition: var(--transition);
+            flex-shrink: 0;
+            user-select: none;
+            display: flex;
+            align-items: center;
+        }
+        .subtopic-drag-handle:active {
+            cursor: grabbing;
+            color: var(--accent);
+        }
+        .subtopic-text {
+            flex: 1;
+            word-break: break-word;
+        }
+        .subtopic-input {
+            flex: 1;
+            font-size: 0.8rem;
+            border: 1.5px dashed #cbd5e0;
+            border-radius: 5px;
+            padding: 3px 7px;
+            background: #fff;
+            outline: none;
+            font-family: inherit;
+            transition: var(--transition);
+        }
+        .subtopic-input:focus {
+            border-style: solid;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px rgba(79, 110, 247, 0.08);
+        }
         .subtopic-delete-btn {
-            width:22px; height:22px; border-radius:50%; border:none; background:transparent; color:#cbd5e0; cursor:pointer; font-size:11px; transition:var(--transition); flex-shrink:0; display:none;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            border: none;
+            background: transparent;
+            color: #cbd5e0;
+            cursor: pointer;
+            font-size: 11px;
+            transition: var(--transition);
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-        body.is-admin .subtopic-delete-btn { display:flex; }
-        .subtopic-delete-btn:hover { color:var(--danger); background:#fff5f5; }
-
-        .subtopic-expand-icon {
-            cursor:pointer; color:var(--accent); font-size:0.9rem; transition:var(--transition); flex-shrink:0;
+        .subtopic-delete-btn:hover {
+            color: var(--danger);
+            background: #fff5f5;
         }
-        .subtopic-expand-icon:hover { transform:scale(1.2); }
-
-        .add-subtopic-btn { margin-top:6px; font-size:0.72rem; color:var(--accent); cursor:pointer; background:none; border:1.5px dashed #d0d7f0; border-radius:16px; padding:5px 12px; font-weight:600; transition:var(--transition); font-family:inherit; display:none; }
-        body.is-admin .add-subtopic-btn { display:inline-flex; }
-
-        .panel-card-footer { padding:8px 16px 12px; display:flex; gap:6px; flex-wrap:wrap; border-top:1px solid #f7fafc; }
-        .insert-btn, .delete-panel-btn, .delete-selected-btn {
-            font-size:0.68rem; background:transparent; border:1px solid #e8ecf8; color:#718096; cursor:pointer; padding:4px 10px; border-radius:12px; transition:var(--transition); font-weight:500; font-family:inherit;
+        .add-subtopic-btn {
+            margin-top: 6px;
+            font-size: 0.72rem;
+            color: var(--accent);
+            cursor: pointer;
+            background: none;
+            border: 1.5px dashed #d0d7f0;
+            border-radius: 16px;
+            padding: 5px 12px;
+            font-weight: 600;
+            transition: var(--transition);
+            font-family: inherit;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
         }
-        .delete-panel-btn, .delete-selected-btn { border-color:#fed7d7; color:#c53030; }
-        .delete-panel-btn:hover, .delete-selected-btn:hover { background:#fff5f5; border-color:#e53e3e; }
-
-        /* Per-panel progress */
-        .panel-progress-wrap {
-            display:flex; align-items:center; gap:8px; padding:4px 16px 8px; font-size:0.7rem; color:var(--text-secondary);
+        .add-subtopic-btn:hover {
+            background: #f7f8ff;
+            border-color: var(--accent);
         }
-        .panel-progress-bar {
-            flex:1; height:6px; background:var(--progress-bg); border-radius:10px; overflow:hidden;
+        .panel-card-footer {
+            padding: 8px 16px 12px;
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            border-top: 1px solid #f7fafc;
         }
-        .panel-progress-fill { height:100%; background:var(--progress-fill); border-radius:10px; transition:width 0.3s; }
-        .panel-progress-slider { width:60px; accent-color:var(--accent); display:none; }
-        body.is-admin .panel-progress-slider { display:inline-block; }
-        .panel-progress-percent { font-weight:600; min-width:32px; text-align:right; }
-
-        /* Flow arrow */
-        .panel-flow-arrow {
-            text-align:right; font-size:0.7rem; color:#a0aec0; padding:0 16px 6px; cursor:default;
+        .insert-btn {
+            font-size: 0.68rem;
+            background: transparent;
+            border: 1px solid #e8ecf8;
+            color: #718096;
+            cursor: pointer;
+            padding: 4px 10px;
+            border-radius: 12px;
+            transition: var(--transition);
+            font-weight: 500;
+            font-family: inherit;
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
         }
-        .panel-flow-arrow i { font-size:0.9rem; margin-left:4px; }
-        .panel-flow-arrow:hover { color:var(--accent); }
+        .insert-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: #fafbff;
+        }
+        .delete-panel-btn {
+            font-size: 0.68rem;
+            background: transparent;
+            border: 1px solid #fed7d7;
+            color: #c53030;
+            cursor: pointer;
+            padding: 4px 10px;
+            border-radius: 12px;
+            transition: var(--transition);
+            font-weight: 500;
+            font-family: inherit;
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            margin-left: auto;
+        }
+        .delete-panel-btn:hover {
+            background: #fff5f5;
+            border-color: #e53e3e;
+        }
+        .delete-selected-btn {
+            font-size: 0.68rem;
+            background: transparent;
+            border: 1px solid #fed7d7;
+            color: #c53030;
+            cursor: pointer;
+            padding: 4px 10px;
+            border-radius: 12px;
+            transition: var(--transition);
+            font-weight: 500;
+            font-family: inherit;
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+        }
+        .delete-selected-btn:hover {
+            background: #fff5f5;
+            border-color: #e53e3e;
+        }
 
-        /* Admin visibility */
-        .admin-only { display:none; }
-        body.is-admin .admin-only { display:flex; }
-        body.is-admin .admin-only-inline { display:inline-flex; }
-        body.is-admin .admin-only-block { display:block; }
-        .admin-only-inline { display:none; }
-        .admin-only-block { display:none; }
+        /* Admin-only visibility */
+        .admin-only {
+            display: none;
+        }
+        body.is-admin .admin-only {
+            display: flex;
+        }
+        body.is-admin .admin-only-inline {
+            display: inline-flex;
+        }
+        body.is-admin .admin-only-block {
+            display: block;
+        }
+        .admin-only-inline {
+            display: none;
+        }
+        .admin-only-block {
+            display: none;
+        }
+        body.is-admin .panel-drag-handle {
+            display: block;
+        }
+        .panel-drag-handle {
+            display: none;
+        }
+        body.is-admin .subtopic-drag-handle {
+            display: flex;
+        }
+        .subtopic-drag-handle {
+            display: none;
+        }
+        body.is-admin .subtopic-select-checkbox {
+            display: inline-block;
+        }
+        .subtopic-select-checkbox {
+            display: none;
+        }
+        body.is-admin .panel-card {
+            cursor: default;
+        }
+        body.is-admin .subtopic-item {
+            cursor: default;
+        }
 
-        /* MODALS */
-        .modal-overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,20,30,0.55); z-index:999; display:flex; align-items:center; justify-content:center; backdrop-filter:blur(3px); animation:fadeIn 0.2s; }
-        @keyframes fadeIn { from{opacity:0;} to{opacity:1;} }
+        /* ── MODAL ─────────────────────── */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 20, 30, 0.55);
+            z-index: 999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(3px);
+            animation: fadeIn 0.2s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
         .modal-dialog {
-            background:#fff; border-radius:var(--radius); padding:24px; width:450px; max-width:92vw; box-shadow:var(--shadow-lg); animation:slideUp 0.25s; max-height:80vh; overflow-y:auto;
+            background: #fff;
+            border-radius: var(--radius);
+            padding: 28px 24px;
+            width: 400px;
+            max-width: 92vw;
+            box-shadow: var(--shadow-lg);
+            animation: slideUp 0.25s ease;
         }
-        @keyframes slideUp { from{transform:translateY(30px);opacity:0;} to{transform:translateY(0);opacity:1;} }
-        .modal-dialog h3 { margin-bottom:6px; font-size:1.1rem; }
-        .modal-dialog p { font-size:0.82rem; color:var(--text-secondary); margin-bottom:12px; }
-        .modal-input { width:100%; padding:11px 14px; border:2px solid var(--border); border-radius:var(--radius-sm); font-size:0.9rem; outline:none; font-family:inherit; }
-        .modal-input:focus { border-color:var(--accent); box-shadow:0 0 0 3px rgba(79,110,247,0.1); }
-        .modal-actions { display:flex; gap:10px; margin-top:18px; justify-content:flex-end; }
-        .modal-error { color:var(--danger); font-size:0.78rem; margin-top:6px; font-weight:500; }
+        @keyframes slideUp {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .modal-dialog h3 {
+            margin-bottom: 6px;
+            font-size: 1.15rem;
+            letter-spacing: -0.2px;
+        }
+        .modal-dialog p {
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+        }
+        .modal-input {
+            width: 100%;
+            padding: 11px 14px;
+            border: 2px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 0.9rem;
+            outline: none;
+            transition: var(--transition);
+            font-family: inherit;
+        }
+        .modal-input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(79, 110, 247, 0.1);
+        }
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 18px;
+            justify-content: flex-end;
+        }
+        .modal-error {
+            color: var(--danger);
+            font-size: 0.78rem;
+            margin-top: 6px;
+            font-weight: 500;
+        }
 
-        /* Sub-sub-topic list inside modal */
-        .sub-sub-list { list-style:none; display:flex; flex-direction:column; gap:4px; margin:10px 0; }
-        .sub-sub-item { display:flex; align-items:center; gap:8px; font-size:0.78rem; padding:5px 8px; border-radius:6px; background:#f8fafb; border:1px solid transparent; }
-        .sub-sub-item:hover { background:#f0f4ff; border-color:#d0d7f0; }
-        .sub-sub-checkbox { width:15px; height:15px; accent-color:var(--accent); cursor:pointer; flex-shrink:0; }
-        .sub-sub-select { width:13px; height:13px; accent-color:var(--danger); flex-shrink:0; display:none; }
-        body.is-admin .sub-sub-select { display:inline-block; }
-        .sub-sub-drag { cursor:grab; color:#cbd5e0; font-size:0.8rem; display:none; }
-        body.is-admin .sub-sub-drag { display:flex; }
-        .sub-sub-text { flex:1; word-break:break-word; }
-        .sub-sub-delete { background:none; border:none; color:#cbd5e0; cursor:pointer; font-size:11px; display:none; }
-        body.is-admin .sub-sub-delete { display:inline-block; }
-        .sub-sub-delete:hover { color:var(--danger); }
+        /* ── TOAST ─────────────────────── */
+        .toast-container {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            pointer-events: none;
+        }
+        .toast {
+            background: #1a202c;
+            color: #fff;
+            padding: 12px 20px;
+            border-radius: 25px;
+            font-size: 0.82rem;
+            font-weight: 500;
+            box-shadow: var(--shadow-lg);
+            animation: toastIn 0.35s ease, toastOut 0.35s ease 2.5s forwards;
+            pointer-events: auto;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .toast.success {
+            border-left: 4px solid var(--success);
+        }
+        .toast.error {
+            border-left: 4px solid var(--danger);
+        }
+        @keyframes toastIn {
+            from { transform: translateX(120px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes toastOut {
+            from { opacity: 1; }
+            to { opacity: 0; transform: translateY(-10px); }
+        }
 
-        .btn-add-subsub { font-size:0.7rem; margin-top:6px; }
+        /* ── STATUS BADGE ──────────────── */
+        .status-badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.68rem;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+            text-transform: uppercase;
+        }
+        .status-pending { background: #fefcbf; color: #975a16; }
+        .status-in-progress { background: #bee3f8; color: #2a4365; }
+        .status-completed { background: #c6f6d5; color: #22543d; }
+
+        /* ── UTILITY ───────────────────── */
+        .text-center { text-align: center; }
+        .mb-16 { margin-bottom: 16px; }
+        .gap-8 { gap: 8px; }
+        .flex-wrap { display: flex; flex-wrap: wrap; }
     </style>
 </head>
 <body>
 
+    <!-- ═══════════════ HEADER ═══════════════ -->
     <header class="dashboard-header" id="dashboardHeader">
         <div class="header-left">
-            <div class="header-logo"><i class="fa-solid fa-building-columns"></i></div>
+            <div class="header-logo">
+                <i class="fa-solid fa-building-columns"></i>
+            </div>
             <div>
                 <span class="project-name-display" id="projectNameDisplay">PLANNING APPROVAL WORKFLOW</span>
-                <input type="text" class="project-name-input admin-only-block" id="projectNameInput" placeholder="Enter project name..." value="PLANNING APPROVAL WORKFLOW">
+                <input type="text" class="project-name-input admin-only-block" id="projectNameInput"
+                placeholder="Enter project name..." value="PLANNING APPROVAL WORKFLOW">
             </div>
         </div>
         <div class="progress-section">
             <span class="progress-label">📊 Overall Progress</span>
-            <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progressBarFill" style="width:0%;"></div></div>
+            <div class="progress-bar-wrap" title="Drag slider in admin mode to adjust progress">
+                <div class="progress-bar-fill" id="progressBarFill" style="width: 0%;"></div>
+            </div>
             <span class="progress-percent" id="progressPercent">0%</span>
-            <input type="range" class="progress-slider admin-only-inline" id="progressSlider" min="0" max="100" value="0">
+            <input type="range" class="progress-slider admin-only-inline" id="progressSlider"
+            min="0" max="100" value="0" title="Adjust overall project progress">
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;">
-            <button class="btn btn-outline btn-sm" id="btnResetAll"><i class="fa-solid fa-rotate-left"></i> Reset</button>
-            <button class="btn btn-admin" id="btnAdminToggle"><i class="fa-solid fa-lock"></i> <span id="btnAdminText">Admin Mode</span></button>
+            <button class="btn btn-outline btn-sm" id="btnResetAll" title="Reset all data to defaults">
+                <i class="fa-solid fa-rotate-left"></i> Reset
+            </button>
+            <button class="btn btn-admin" id="btnAdminToggle">
+                <i class="fa-solid fa-lock"></i> <span id="btnAdminText">Admin Mode</span>
+            </button>
         </div>
     </header>
 
+    <!-- ═══════════════ MAIN CONTENT ═══════════════ -->
     <div class="main-container">
         <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:18px;">
-            <h2 style="font-size:1.05rem;font-weight:600;color:var(--text-secondary);">
-                <i class="fa-solid fa-diagram-project"></i> Workflow Stages <span style="font-weight:400;font-size:0.78rem;color:#a0aec0;" id="panelCount">(16 Panels)</span>
+            <h2 style="font-size:1.05rem;font-weight:600;color:var(--text-secondary);letter-spacing:-0.2px;">
+                <i class="fa-solid fa-diagram-project"></i> Workflow Stages
+                <span style="font-weight:400;font-size:0.78rem;color:#a0aec0;" id="panelCount">(16 Panels)</span>
             </h2>
-            <button class="btn-add-panel admin-only-inline" id="btnAddPanelTop"><i class="fa-solid fa-plus"></i> Add New Panel</button>
+            <button class="btn-add-panel admin-only-inline" id="btnAddPanelTop">
+                <i class="fa-solid fa-plus"></i> Add New Panel
+            </button>
         </div>
-        <div class="panels-grid" id="panelsGrid"></div>
+
+        <!-- Panels Grid -->
+        <div class="panels-grid" id="panelsGrid">
+            <!-- Dynamically rendered -->
+        </div>
+
         <div style="text-align:center;margin-top:24px;">
-            <button class="btn-add-panel admin-only-inline" id="btnAddPanelBottom"><i class="fa-solid fa-plus"></i> Add New Panel at End</button>
+            <button class="btn-add-panel admin-only-inline" id="btnAddPanelBottom">
+                <i class="fa-solid fa-plus"></i> Add New Panel at End
+            </button>
         </div>
     </div>
 
-    <!-- Admin Login Modal -->
+    <!-- ═══════════════ ADMIN LOGIN MODAL ═══════════════ -->
     <div class="modal-overlay" id="adminModal" style="display:none;">
         <div class="modal-dialog">
             <h3><i class="fa-solid fa-shield-halved"></i> Admin Authentication</h3>
-            <p>Enter the admin password to enable editing.</p>
-            <input type="password" class="modal-input" id="adminPasswordInput" placeholder="Password..." autocomplete="off">
+            <p>Enter the admin password to enable editing capabilities.</p>
+            <input type="password" class="modal-input" id="adminPasswordInput"
+            placeholder="Enter admin password..." autocomplete="off">
             <div class="modal-error" id="adminModalError" style="display:none;"></div>
             <div class="modal-actions">
                 <button class="btn btn-outline btn-sm" id="btnCancelAdmin">Cancel</button>
-                <button class="btn btn-admin btn-sm" id="btnConfirmAdmin"><i class="fa-solid fa-right-to-bracket"></i> Unlock</button>
+                <button class="btn btn-admin btn-sm" id="btnConfirmAdmin">
+                    <i class="fa-solid fa-right-to-bracket"></i> Unlock
+                </button>
             </div>
         </div>
     </div>
 
-    <!-- New Panel Modal -->
+    <!-- ═══════════════ NEW PANEL MODAL ═══════════════ -->
     <div class="modal-overlay" id="newPanelModal" style="display:none;">
         <div class="modal-dialog">
             <h3><i class="fa-solid fa-folder-plus"></i> Add New Panel</h3>
             <p>Enter the title for the new workflow panel.</p>
-            <input type="text" class="modal-input" id="newPanelTitleInput" placeholder="e.g., LEGAL REVIEW & COMPLIANCE" maxlength="80">
-            <label style="display:block;margin-top:10px;font-size:0.78rem;font-weight:600;color:var(--text-secondary);">Insert Position:</label>
+            <input type="text" class="modal-input" id="newPanelTitleInput"
+            placeholder="e.g., LEGAL REVIEW & COMPLIANCE" maxlength="80">
+            <label style="display:block;margin-top:10px;font-size:0.78rem;font-weight:600;color:var(--text-secondary);">
+                Insert Position:
+            </label>
             <select class="modal-input" id="newPanelPosition" style="margin-top:4px;">
                 <option value="end">At the End</option>
                 <option value="start">At the Beginning</option>
             </select>
             <div class="modal-actions">
                 <button class="btn btn-outline btn-sm" id="btnCancelNewPanel">Cancel</button>
-                <button class="btn btn-admin btn-sm" id="btnConfirmNewPanel"><i class="fa-solid fa-plus"></i> Add Panel</button>
+                <button class="btn btn-admin btn-sm" id="btnConfirmNewPanel">
+                    <i class="fa-solid fa-plus"></i> Add Panel
+                </button>
             </div>
         </div>
     </div>
 
-    <!-- Sub-Sub-Items Modal -->
-    <div class="modal-overlay" id="subSubModal" style="display:none;">
-        <div class="modal-dialog" id="subSubModalDialog">
-            <h3 id="subSubModalTitle">Sub-items</h3>
-            <p>Manage detailed sub-tasks for this subtopic.</p>
-            <ul class="sub-sub-list" id="subSubList"></ul>
-            <button class="btn btn-sm btn-add-subsub admin-only-inline" id="btnAddSubSub"><i class="fa-solid fa-plus"></i> Add Sub-item</button>
-            <div class="modal-actions">
-                <button class="btn btn-outline btn-sm admin-only-inline" id="btnDeleteSelectedSubSub"><i class="fa-solid fa-check-double"></i> Delete Selected</button>
-                <button class="btn btn-outline btn-sm" id="btnCloseSubSub">Close</button>
-            </div>
-        </div>
-    </div>
-
+    <!-- ═══════════════ TOAST CONTAINER ═══════════════ -->
     <div class="toast-container" id="toastContainer"></div>
 
+    <!-- ═══════════════ SCRIPTS ═══════════════ -->
     <script>
         (function() {
+            // ─────────────────────────────────────
+            // FIREBASE CONFIGURATION
+            // ⚠️ REPLACE THESE WITH YOUR FIREBASE PROJECT CREDENTIALS
+            // ─────────────────────────────────────
             const firebaseConfig = {
                 apiKey: "YOUR_API_KEY",
                 authDomain: "YOUR_PROJECT.firebaseapp.com",
@@ -302,149 +874,259 @@
                 messagingSenderId: "YOUR_SENDER_ID",
                 appId: "YOUR_APP_ID"
             };
-            let firestoreDB = null, firebaseReady = false;
+
+            let firestoreDB = null;
+            let firebaseReady = false;
+
+            // Try to initialize Firebase
             try {
                 if (firebaseConfig.apiKey && firebaseConfig.apiKey !== "YOUR_API_KEY") {
                     firebase.initializeApp(firebaseConfig);
                     firestoreDB = firebase.firestore();
                     firebaseReady = true;
+                    console.log("✅ Firebase Firestore initialized.");
+                } else {
+                    console.warn("⚠️ Firebase not configured. Using localStorage fallback.");
                 }
-            } catch(e) { console.warn("Firebase init error."); }
+            } catch (e) {
+                console.warn("⚠️ Firebase init error. Using localStorage fallback.", e.message);
+            }
 
+            // ─────────────────────────────────────
+            // CONSTANTS
+            // ─────────────────────────────────────
             const ADMIN_PASSWORD = "Dlns@4512#";
             const STORAGE_KEY = "planning_approval_dashboard_data";
             const FIRESTORE_COLLECTION = "dashboards";
             const FIRESTORE_DOC_ID = "planning_approval_workflow";
 
-            const defaultPanels = [
-                { id:'panel_1', title:'LAND IDENTIFICATION & INITIAL FEASIBILITY', color:'#4A90D9', progress:0, subtopics:[
-                    { id:'sub_1_1', text:'Verify land ownership', completed:false, items:[] },
-                    { id:'sub_1_2', text:'Check zoning regulations', completed:false, items:[] },
-                    { id:'sub_1_3', text:'Review access roads', completed:false, items:[] },
-                    { id:'sub_1_4', text:'Check utilities availability', completed:false, items:[] },
-                    { id:'sub_1_5', text:'Environmental & flood risk review', completed:false, items:[] },
-                    { id:'sub_1_6', text:'Market & financial feasibility', completed:false, items:[] },
-                    { id:'sub_1_7', text:'Outcome: Feasible Decision', completed:false, items:[] }
-                ], order:0 },
-                { id:'panel_2', title:'CONCEPT DEVELOPMENT / PRELIMINARY LAYOUT', color:'#5BA0D0', progress:0, subtopics:[
-                    { id:'sub_2_1', text:'Prepare initial layout', completed:false, items:[] },
-                    { id:'sub_2_2', text:'Road network planning', completed:false, items:[] },
-                    { id:'sub_2_3', text:'Drainage concept', completed:false, items:[] },
-                    { id:'sub_2_4', text:'Open spaces allocation', completed:false, items:[] },
-                    { id:'sub_2_5', text:'Utility allocation', completed:false, items:[] },
-                    { id:'sub_2_6', text:'Reservation areas', completed:false, items:[] },
-                    { id:'sub_2_7', text:'Outcome: Draft Layout', completed:false, items:[] }
-                ], order:1 },
-                { id:'panel_3', title:'PRE-CONSULTATION WITH AUTHORITIES', color:'#6CB4A1', progress:0, subtopics:[
-                    { id:'sub_3_1', text:'Discuss concept with key authorities', completed:false, items:[] },
-                    { id:'sub_3_2', text:'Identify potential issues', completed:false, items:[] },
-                    { id:'sub_3_3', text:'Understand requirements', completed:false, items:[] },
-                    { id:'sub_3_4', text:'Reduce rejection risk', completed:false, items:[] },
-                    { id:'sub_3_5', text:'Outcome: Guidance & Early Feedback', completed:false, items:[] }
-                ], order:2 },
-                { id:'panel_4', title:'DETAILED TECHNICAL PREPARATION', color:'#7BC8A4', progress:0, subtopics:[
-                    { id:'sub_4_1', text:'Survey & legal documents', completed:false, items:[] },
-                    { id:'sub_4_2', text:'Planning drawings', completed:false, items:[] },
-                    { id:'sub_4_3', text:'Engineering drawings', completed:false, items:[] },
-                    { id:'sub_4_4', text:'Environmental reports', completed:false, items:[] },
-                    { id:'sub_4_5', text:'Supporting technical reports', completed:false, items:[] },
-                    { id:'sub_4_6', text:'Outcome: Complete Technical Documents', completed:false, items:[] }
-                ], order:3 },
-                { id:'panel_5', title:'FORMAL SUBMISSION OF APPLICATION', color:'#F5A623', progress:0, subtopics:[
-                    { id:'sub_5_1', text:'Submit application forms', completed:false, items:[] },
-                    { id:'sub_5_2', text:'Submit technical drawings', completed:false, items:[] },
-                    { id:'sub_5_3', text:'Submit reports & documents', completed:false, items:[] },
-                    { id:'sub_5_4', text:'Pay required fees', completed:false, items:[] },
-                    { id:'sub_5_5', text:'Outcome: Application Registered', completed:false, items:[] }
-                ], order:4 },
-                { id:'panel_6', title:'INITIAL TECHNICAL SCREENING', color:'#F7B84E', progress:0, subtopics:[
-                    { id:'sub_6_1', text:'Check completeness', completed:false, items:[] },
-                    { id:'sub_6_2', text:'Verify documents', completed:false, items:[] },
-                    { id:'sub_6_3', text:'Check drawing standards', completed:false, items:[] },
-                    { id:'sub_6_4', text:'Verify payments', completed:false, items:[] },
-                    { id:'sub_6_5', text:'Outcome: Accepted for Review or Returned', completed:false, items:[] }
-                ], order:5 },
-                { id:'panel_7', title:'CIRCULATION TO RELEVANT DEPARTMENTS', color:'#E8833A', progress:0, subtopics:[
-                    { id:'sub_7_1', text:'Planning: Zoning, land use, layout', completed:false, items:[] },
-                    { id:'sub_7_2', text:'Engineering: Roads, drainage, infrastructure', completed:false, items:[] },
-                    { id:'sub_7_3', text:'Water Board: Water supply requirements', completed:false, items:[] },
-                    { id:'sub_7_4', text:'Electricity Board: Power supply', completed:false, items:[] },
-                    { id:'sub_7_5', text:'Environmental: Impact assessment', completed:false, items:[] },
-                    { id:'sub_7_6', text:'Fire Department: Fire safety', completed:false, items:[] },
-                    { id:'sub_7_7', text:'RDA / Other: Road access & links', completed:false, items:[] },
-                    { id:'sub_7_8', text:'Outcome: Technical Comments from Each Dept', completed:false, items:[] }
-                ], order:6 },
-                { id:'panel_8', title:'TECHNICAL COMMITTEE MEETING', color:'#D97471', progress:0, subtopics:[
-                    { id:'sub_8_1', text:'All stakeholders review the project', completed:false, items:[] },
-                    { id:'sub_8_2', text:'Discuss technical aspects', completed:false, items:[] },
-                    { id:'sub_8_3', text:'Evaluate compliance & impacts', completed:false, items:[] },
-                    { id:'sub_8_4', text:'Suggest modifications / conditions', completed:false, items:[] },
-                    { id:'sub_8_5', text:'Outcome A: APPROVED', completed:false, items:[] },
-                    { id:'sub_8_6', text:'Outcome B: APPROVED WITH CONDITIONS', completed:false, items:[] },
-                    { id:'sub_8_7', text:'Outcome C: DEFERRED', completed:false, items:[] },
-                    { id:'sub_8_8', text:'Outcome D: REJECTED', completed:false, items:[] }
-                ], order:7 },
-                { id:'panel_9', title:'ISSUING COMMENTS', color:'#9B59B6', progress:0, subtopics:[
-                    { id:'sub_9_1', text:'Official comments issued', completed:false, items:[] },
-                    { id:'sub_9_2', text:'List of required revisions', completed:false, items:[] },
-                    { id:'sub_9_3', text:'Additional studies if needed', completed:false, items:[] },
-                    { id:'sub_9_4', text:'Outcome: Comments to Developer', completed:false, items:[] }
-                ], order:8 },
-                { id:'panel_10', title:'REVISION & RESUBMISSION CYCLE', color:'#8E6BB8', progress:0, subtopics:[
-                    { id:'sub_10_1', text:'Revise plans & reports', completed:false, items:[] },
-                    { id:'sub_10_2', text:'Address all comments', completed:false, items:[] },
-                    { id:'sub_10_3', text:'Provide clarifications', completed:false, items:[] },
-                    { id:'sub_10_4', text:'Resubmit for review (repeat if needed)', completed:false, items:[] },
-                    { id:'sub_10_5', text:'Outcome: All Comments Resolved', completed:false, items:[] }
-                ], order:9 },
-                { id:'panel_11', title:'FINAL TECHNICAL CLEARANCE', color:'#4ECDC4', progress:0, subtopics:[
-                    { id:'sub_11_1', text:'All departments issue clearance', completed:false, items:[] },
-                    { id:'sub_11_2', text:'Engineers sign off', completed:false, items:[] },
-                    { id:'sub_11_3', text:'Technical committee recommendations finalized', completed:false, items:[] },
-                    { id:'sub_11_4', text:'Outcome: Technical Clearance Issued', completed:false, items:[] }
-                ], order:10 },
-                { id:'panel_12', title:'FINAL APPROVAL BY AUTHORITY', color:'#2ECC71', progress:0, subtopics:[
-                    { id:'sub_12_1', text:'Review final recommendation', completed:false, items:[] },
-                    { id:'sub_12_2', text:'Grant official approval', completed:false, items:[] },
-                    { id:'sub_12_3', text:'Approval may include specific conditions', completed:false, items:[] },
-                    { id:'sub_12_4', text:'Outcome: Official Approval Granted', completed:false, items:[] }
-                ], order:11 },
-                { id:'panel_13', title:'PAYMENT OF APPROVAL CHARGES', color:'#3498DB', progress:0, subtopics:[
-                    { id:'sub_13_1', text:'Pay approval fees', completed:false, items:[] },
-                    { id:'sub_13_2', text:'Development charges', completed:false, items:[] },
-                    { id:'sub_13_3', text:'Infrastructure levies', completed:false, items:[] },
-                    { id:'sub_13_4', text:'Security deposits (if any)', completed:false, items:[] },
-                    { id:'sub_13_5', text:'Outcome: Payments Completed', completed:false, items:[] }
-                ], order:12 },
-                { id:'panel_14', title:'PERMIT ISSUANCE', color:'#1ABC9C', progress:0, subtopics:[
-                    { id:'sub_14_1', text:'Development / Building permit', completed:false, items:[] },
-                    { id:'sub_14_2', text:'Subdivision permit', completed:false, items:[] },
-                    { id:'sub_14_3', text:'Other required permits', completed:false, items:[] },
-                    { id:'sub_14_4', text:'Outcome: Permit Issued - Project Can Commence', completed:false, items:[] }
-                ], order:13 },
-                { id:'panel_15', title:'CONSTRUCTION & COMPLIANCE MONITORING', color:'#E67E22', progress:0, subtopics:[
-                    { id:'sub_15_1', text:'Commence construction as per approved plans', completed:false, items:[] },
-                    { id:'sub_15_2', text:'Inspections during construction', completed:false, items:[] },
-                    { id:'sub_15_3', text:'Monitor compliance with conditions', completed:false, items:[] },
-                    { id:'sub_15_4', text:'Ensure quality & safety standards', completed:false, items:[] },
-                    { id:'sub_15_5', text:'Outcome: Work in Progress with Compliance', completed:false, items:[] }
-                ], order:14 },
-                { id:'panel_16', title:'COMPLETION CERTIFICATION', color:'#27AE60', progress:0, subtopics:[
-                    { id:'sub_16_1', text:'Inspect completed works', completed:false, items:[] },
-                    { id:'sub_16_2', text:'Verify compliance with approved plans', completed:false, items:[] },
-                    { id:'sub_16_3', text:'Issue Certificate of Conformity', completed:false, items:[] },
-                    { id:'sub_16_4', text:'Issue Completion Certificate / Occupancy Certificate', completed:false, items:[] },
-                    { id:'sub_16_5', text:'Outcome: Project Completed & Certified', completed:false, items:[] },
-                    { id:'sub_16_6', text:'FINAL STATUS: LEGALLY APPROVED & COMPLETE ✅', completed:false, items:[] }
-                ], order:15 }
-            ];
+            // ─────────────────────────────────────
+            // DEFAULT PANEL DATA (16 Panels)
+            // ─────────────────────────────────────
+            const defaultPanels = [{
+                id: 'panel_1',
+                title: 'LAND IDENTIFICATION & INITIAL FEASIBILITY',
+                color: '#4A90D9',
+                subtopics: [
+                    { id: 'sub_1_1', text: 'Verify land ownership', completed: false },
+                    { id: 'sub_1_2', text: 'Check zoning regulations', completed: false },
+                    { id: 'sub_1_3', text: 'Review access roads', completed: false },
+                    { id: 'sub_1_4', text: 'Check utilities availability', completed: false },
+                    { id: 'sub_1_5', text: 'Environmental & flood risk review', completed: false },
+                    { id: 'sub_1_6', text: 'Market & financial feasibility', completed: false },
+                    { id: 'sub_1_7', text: 'Outcome: Feasible Decision', completed: false },
+                ],
+                order: 0
+            }, {
+                id: 'panel_2',
+                title: 'CONCEPT DEVELOPMENT / PRELIMINARY LAYOUT',
+                color: '#5BA0D0',
+                subtopics: [
+                    { id: 'sub_2_1', text: 'Prepare initial layout', completed: false },
+                    { id: 'sub_2_2', text: 'Road network planning', completed: false },
+                    { id: 'sub_2_3', text: 'Drainage concept', completed: false },
+                    { id: 'sub_2_4', text: 'Open spaces allocation', completed: false },
+                    { id: 'sub_2_5', text: 'Utility allocation', completed: false },
+                    { id: 'sub_2_6', text: 'Reservation areas', completed: false },
+                    { id: 'sub_2_7', text: 'Outcome: Draft Layout', completed: false },
+                ],
+                order: 1
+            }, {
+                id: 'panel_3',
+                title: 'PRE-CONSULTATION WITH AUTHORITIES',
+                color: '#6CB4A1',
+                subtopics: [
+                    { id: 'sub_3_1', text: 'Discuss concept with key authorities', completed: false },
+                    { id: 'sub_3_2', text: 'Identify potential issues', completed: false },
+                    { id: 'sub_3_3', text: 'Understand requirements', completed: false },
+                    { id: 'sub_3_4', text: 'Reduce rejection risk', completed: false },
+                    { id: 'sub_3_5', text: 'Outcome: Guidance & Early Feedback', completed: false },
+                ],
+                order: 2
+            }, {
+                id: 'panel_4',
+                title: 'DETAILED TECHNICAL PREPARATION',
+                color: '#7BC8A4',
+                subtopics: [
+                    { id: 'sub_4_1', text: 'Survey & legal documents', completed: false },
+                    { id: 'sub_4_2', text: 'Planning drawings', completed: false },
+                    { id: 'sub_4_3', text: 'Engineering drawings', completed: false },
+                    { id: 'sub_4_4', text: 'Environmental reports', completed: false },
+                    { id: 'sub_4_5', text: 'Supporting technical reports', completed: false },
+                    { id: 'sub_4_6', text: 'Outcome: Complete Technical Documents', completed: false },
+                ],
+                order: 3
+            }, {
+                id: 'panel_5',
+                title: 'FORMAL SUBMISSION OF APPLICATION',
+                color: '#F5A623',
+                subtopics: [
+                    { id: 'sub_5_1', text: 'Submit application forms', completed: false },
+                    { id: 'sub_5_2', text: 'Submit technical drawings', completed: false },
+                    { id: 'sub_5_3', text: 'Submit reports & documents', completed: false },
+                    { id: 'sub_5_4', text: 'Pay required fees', completed: false },
+                    { id: 'sub_5_5', text: 'Outcome: Application Registered', completed: false },
+                ],
+                order: 4
+            }, {
+                id: 'panel_6',
+                title: 'INITIAL TECHNICAL SCREENING',
+                color: '#F7B84E',
+                subtopics: [
+                    { id: 'sub_6_1', text: 'Check completeness', completed: false },
+                    { id: 'sub_6_2', text: 'Verify documents', completed: false },
+                    { id: 'sub_6_3', text: 'Check drawing standards', completed: false },
+                    { id: 'sub_6_4', text: 'Verify payments', completed: false },
+                    { id: 'sub_6_5', text: 'Outcome: Accepted for Review or Returned', completed: false },
+                ],
+                order: 5
+            }, {
+                id: 'panel_7',
+                title: 'CIRCULATION TO RELEVANT DEPARTMENTS',
+                color: '#E8833A',
+                subtopics: [
+                    { id: 'sub_7_1', text: 'Planning: Zoning, land use, layout', completed: false },
+                    { id: 'sub_7_2', text: 'Engineering: Roads, drainage, infrastructure', completed: false },
+                    { id: 'sub_7_3', text: 'Water Board: Water supply requirements', completed: false },
+                    { id: 'sub_7_4', text: 'Electricity Board: Power supply', completed: false },
+                    { id: 'sub_7_5', text: 'Environmental: Impact assessment', completed: false },
+                    { id: 'sub_7_6', text: 'Fire Department: Fire safety', completed: false },
+                    { id: 'sub_7_7', text: 'RDA / Other: Road access & links', completed: false },
+                    { id: 'sub_7_8', text: 'Outcome: Technical Comments from Each Dept', completed: false },
+                ],
+                order: 6
+            }, {
+                id: 'panel_8',
+                title: 'TECHNICAL COMMITTEE MEETING',
+                color: '#D97471',
+                subtopics: [
+                    { id: 'sub_8_1', text: 'All stakeholders review the project', completed: false },
+                    { id: 'sub_8_2', text: 'Discuss technical aspects', completed: false },
+                    { id: 'sub_8_3', text: 'Evaluate compliance & impacts', completed: false },
+                    { id: 'sub_8_4', text: 'Suggest modifications / conditions', completed: false },
+                    { id: 'sub_8_5', text: 'Outcome A: APPROVED', completed: false },
+                    { id: 'sub_8_6', text: 'Outcome B: APPROVED WITH CONDITIONS', completed: false },
+                    { id: 'sub_8_7', text: 'Outcome C: DEFERRED', completed: false },
+                    { id: 'sub_8_8', text: 'Outcome D: REJECTED', completed: false },
+                ],
+                order: 7
+            }, {
+                id: 'panel_9',
+                title: 'ISSUING COMMENTS',
+                color: '#9B59B6',
+                subtopics: [
+                    { id: 'sub_9_1', text: 'Official comments issued', completed: false },
+                    { id: 'sub_9_2', text: 'List of required revisions', completed: false },
+                    { id: 'sub_9_3', text: 'Additional studies if needed', completed: false },
+                    { id: 'sub_9_4', text: 'Outcome: Comments to Developer', completed: false },
+                ],
+                order: 8
+            }, {
+                id: 'panel_10',
+                title: 'REVISION & RESUBMISSION CYCLE',
+                color: '#8E6BB8',
+                subtopics: [
+                    { id: 'sub_10_1', text: 'Revise plans & reports', completed: false },
+                    { id: 'sub_10_2', text: 'Address all comments', completed: false },
+                    { id: 'sub_10_3', text: 'Provide clarifications', completed: false },
+                    { id: 'sub_10_4', text: 'Resubmit for review (repeat if needed)', completed: false },
+                    { id: 'sub_10_5', text: 'Outcome: All Comments Resolved', completed: false },
+                ],
+                order: 9
+            }, {
+                id: 'panel_11',
+                title: 'FINAL TECHNICAL CLEARANCE',
+                color: '#4ECDC4',
+                subtopics: [
+                    { id: 'sub_11_1', text: 'All departments issue clearance', completed: false },
+                    { id: 'sub_11_2', text: 'Engineers sign off', completed: false },
+                    { id: 'sub_11_3', text: 'Technical committee recommendations finalized', completed: false },
+                    { id: 'sub_11_4', text: 'Outcome: Technical Clearance Issued', completed: false },
+                ],
+                order: 10
+            }, {
+                id: 'panel_12',
+                title: 'FINAL APPROVAL BY AUTHORITY',
+                color: '#2ECC71',
+                subtopics: [
+                    { id: 'sub_12_1', text: 'Review final recommendation', completed: false },
+                    { id: 'sub_12_2', text: 'Grant official approval', completed: false },
+                    { id: 'sub_12_3', text: 'Approval may include specific conditions', completed: false },
+                    { id: 'sub_12_4', text: 'Outcome: Official Approval Granted', completed: false },
+                ],
+                order: 11
+            }, {
+                id: 'panel_13',
+                title: 'PAYMENT OF APPROVAL CHARGES',
+                color: '#3498DB',
+                subtopics: [
+                    { id: 'sub_13_1', text: 'Pay approval fees', completed: false },
+                    { id: 'sub_13_2', text: 'Development charges', completed: false },
+                    { id: 'sub_13_3', text: 'Infrastructure levies', completed: false },
+                    { id: 'sub_13_4', text: 'Security deposits (if any)', completed: false },
+                    { id: 'sub_13_5', text: 'Outcome: Payments Completed', completed: false },
+                ],
+                order: 12
+            }, {
+                id: 'panel_14',
+                title: 'PERMIT ISSUANCE',
+                color: '#1ABC9C',
+                subtopics: [
+                    { id: 'sub_14_1', text: 'Development / Building permit', completed: false },
+                    { id: 'sub_14_2', text: 'Subdivision permit', completed: false },
+                    { id: 'sub_14_3', text: 'Other required permits', completed: false },
+                    { id: 'sub_14_4', text: 'Outcome: Permit Issued - Project Can Commence', completed: false },
+                ],
+                order: 13
+            }, {
+                id: 'panel_15',
+                title: 'CONSTRUCTION & COMPLIANCE MONITORING',
+                color: '#E67E22',
+                subtopics: [
+                    { id: 'sub_15_1', text: 'Commence construction as per approved plans', completed: false },
+                    { id: 'sub_15_2', text: 'Inspections during construction', completed: false },
+                    { id: 'sub_15_3', text: 'Monitor compliance with conditions', completed: false },
+                    { id: 'sub_15_4', text: 'Ensure quality & safety standards', completed: false },
+                    { id: 'sub_15_5', text: 'Outcome: Work in Progress with Compliance', completed: false },
+                ],
+                order: 14
+            }, {
+                id: 'panel_16',
+                title: 'COMPLETION CERTIFICATION',
+                color: '#27AE60',
+                subtopics: [
+                    { id: 'sub_16_1', text: 'Inspect completed works', completed: false },
+                    { id: 'sub_16_2', text: 'Verify compliance with approved plans', completed: false },
+                    { id: 'sub_16_3', text: 'Issue Certificate of Conformity', completed: false },
+                    { id: 'sub_16_4', text: 'Issue Completion Certificate / Occupancy Certificate', completed: false },
+                    { id: 'sub_16_5', text: 'Outcome: Project Completed & Certified', completed: false },
+                    { id: 'sub_16_6', text: 'FINAL STATUS: LEGALLY APPROVED & COMPLETE ✅', completed: false },
+                ],
+                order: 15
+            }];
 
-            let appData = { projectName:'PLANNING APPROVAL WORKFLOW', progress:0, panels: JSON.parse(JSON.stringify(defaultPanels)) };
-            let isAdmin = false, panelIdCounter = 17, subtopicIdCounter = 1000, subSubIdCounter = 2000;
-            let saveTimeout = null, isSaving = false;
-            let panelSortable = null, subtopicSortables = [];
-            let currentSubSubData = null; // { panelId, subtopicId } for the open modal
+            // ─────────────────────────────────────
+            // STATE
+            // ─────────────────────────────────────
+            let appData = {
+                projectName: 'PLANNING APPROVAL WORKFLOW',
+                progress: 0,
+                panels: JSON.parse(JSON.stringify(defaultPanels)),
+                lastUpdated: null,
+            };
+            let isAdmin = false;
+            let panelIdCounter = 17;
+            let subtopicIdCounter = 1000;
+            let saveTimeout = null;
+            let isSaving = false;
 
+            // Sortable instances
+            let panelSortable = null;
+            let subtopicSortables = [];  // Array to hold Sortable instances for subtopic lists
+
+            // ─────────────────────────────────────
+            // DOM REFERENCES
+            // ─────────────────────────────────────
             const $panelsGrid = document.getElementById('panelsGrid');
             const $projectNameDisplay = document.getElementById('projectNameDisplay');
             const $projectNameInput = document.getElementById('projectNameInput');
@@ -461,388 +1143,820 @@
             const $newPanelTitleInput = document.getElementById('newPanelTitleInput');
             const $newPanelPosition = document.getElementById('newPanelPosition');
             const $toastContainer = document.getElementById('toastContainer');
-            const $subSubModal = document.getElementById('subSubModal');
-            const $subSubList = document.getElementById('subSubList');
-            const $subSubModalTitle = document.getElementById('subSubModalTitle');
 
+            // ─────────────────────────────────────
+            // PERSISTENCE: Load & Save
+            // ─────────────────────────────────────
             async function loadData() {
+                // Try Firestore first
                 if (firebaseReady && firestoreDB) {
                     try {
-                        const snap = await firestoreDB.collection(FIRESTORE_COLLECTION).doc(FIRESTORE_DOC_ID).get();
-                        if (snap.exists) {
-                            const d = snap.data();
-                            appData.projectName = d.projectName || 'PLANNING APPROVAL WORKFLOW';
-                            appData.progress = d.progress || 0;
-                            appData.panels = d.panels || JSON.parse(JSON.stringify(defaultPanels));
-                            appData.lastUpdated = d.lastUpdated || null;
+                        const docRef = firestoreDB.collection(FIRESTORE_COLLECTION).doc(FIRESTORE_DOC_ID);
+                        const docSnap = await docRef.get();
+                        if (docSnap.exists) {
+                            const data = docSnap.data();
+                            appData.projectName = data.projectName || 'PLANNING APPROVAL WORKFLOW';
+                            appData.progress = data.progress || 0;
+                            appData.panels = data.panels || JSON.parse(JSON.stringify(defaultPanels));
+                            appData.lastUpdated = data.lastUpdated || null;
                             restoreCounters();
+                            console.log('✅ Data loaded from Firestore.');
                             return;
+                        } else {
+                            console.log('ℹ️ No Firestore document found. Using defaults.');
                         }
-                    } catch(e) { console.warn("Firestore load error", e); }
+                    } catch (e) {
+                        console.warn('⚠️ Firestore load error. Trying localStorage...', e.message);
+                    }
                 }
+                // Fallback: localStorage
                 const stored = localStorage.getItem(STORAGE_KEY);
                 if (stored) {
                     try {
-                        const p = JSON.parse(stored);
-                        appData.projectName = p.projectName || 'PLANNING APPROVAL WORKFLOW';
-                        appData.progress = p.progress || 0;
-                        appData.panels = p.panels || JSON.parse(JSON.stringify(defaultPanels));
+                        const parsed = JSON.parse(stored);
+                        appData.projectName = parsed.projectName || 'PLANNING APPROVAL WORKFLOW';
+                        appData.progress = parsed.progress || 0;
+                        appData.panels = parsed.panels || JSON.parse(JSON.stringify(defaultPanels));
+                        appData.lastUpdated = parsed.lastUpdated || null;
                         restoreCounters();
+                        console.log('✅ Data loaded from localStorage.');
                         return;
-                    } catch(e) {}
+                    } catch (e) {
+                        console.warn('⚠️ localStorage parse error.', e.message);
+                    }
                 }
+                // Ultimate fallback
                 appData.panels = JSON.parse(JSON.stringify(defaultPanels));
                 appData.progress = 0;
+                appData.projectName = 'PLANNING APPROVAL WORKFLOW';
                 restoreCounters();
+                console.log('ℹ️ Loaded default data.');
             }
 
             function restoreCounters() {
-                let maxPanel = 16, maxSub = 0, maxSubSub = 0;
+                let maxPanelNum = 16;
+                let maxSubNum = 0;
                 appData.panels.forEach(p => {
-                    let m = p.id.match(/panel_(\d+)/);
-                    if (m && +m[1] > maxPanel) maxPanel = +m[1];
+                    const match = p.id.match(/panel_(\d+)/);
+                    if (match && parseInt(match[1]) > maxPanelNum) maxPanelNum = parseInt(match[1]);
                     p.subtopics.forEach(s => {
-                        let sm = s.id.match(/sub_\d+_(\d+)/);
-                        if (sm && +sm[1] > maxSub) maxSub = +sm[1];
-                        if (s.items) s.items.forEach(it => {
-                            let im = it.id.match(/item_(\d+)/);
-                            if (im && +im[1] > maxSubSub) maxSubSub = +im[1];
-                        });
+                        const smatch = s.id.match(/sub_\d+_(\d+)/);
+                        if (smatch && parseInt(smatch[1]) > maxSubNum) maxSubNum = parseInt(smatch[1]);
                     });
                 });
-                panelIdCounter = maxPanel + 1;
-                subtopicIdCounter = maxSub + 1;
-                subSubIdCounter = maxSubSub + 1;
+                panelIdCounter = maxPanelNum + 1;
+                subtopicIdCounter = maxSubNum + 1;
             }
 
-            async function saveData(showToast=true) {
+            async function saveData(showToast = true) {
                 if (isSaving) return;
                 isSaving = true;
-                appData.panels.forEach((p,i) => p.order = i);
+
+                // Update order fields
+                appData.panels.forEach((p, i) => { p.order = i; });
                 appData.lastUpdated = new Date().toISOString();
-                const data = { projectName:appData.projectName, progress:appData.progress, panels:appData.panels, lastUpdated:appData.lastUpdated };
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+
+                const dataToSave = {
+                    projectName: appData.projectName,
+                    progress: appData.progress,
+                    panels: appData.panels,
+                    lastUpdated: appData.lastUpdated,
+                };
+
+                // Save to localStorage always
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
+
+                // Save to Firestore if available
                 if (firebaseReady && firestoreDB) {
-                    try { await firestoreDB.collection(FIRESTORE_COLLECTION).doc(FIRESTORE_DOC_ID).set(data, {merge:true}); } catch(e) {}
+                    try {
+                        const docRef = firestoreDB.collection(FIRESTORE_COLLECTION).doc(FIRESTORE_DOC_ID);
+                        await docRef.set(dataToSave, { merge: true });
+                        console.log('✅ Saved to Firestore.');
+                    } catch (e) {
+                        console.warn('⚠️ Firestore save error. Saved to localStorage only.', e.message);
+                    }
                 }
+
                 isSaving = false;
-                if (showToast) showToastMessage('Changes saved! 💾', 'success');
+                if (showToast) showToastMessage('Changes saved successfully! 💾', 'success');
             }
 
-            function debounceSave(delay=600) {
+            function debounceSave(delay = 600) {
                 if (saveTimeout) clearTimeout(saveTimeout);
                 saveTimeout = setTimeout(() => saveData(true), delay);
             }
 
-            function showToastMessage(msg, type='success') {
-                const t = document.createElement('div'); t.className = `toast ${type}`;
-                t.innerHTML = `<i class="fa-solid fa-${type==='success'?'check-circle':'exclamation-circle'}"></i> ${msg}`;
-                $toastContainer.appendChild(t);
-                setTimeout(() => t.remove(), 3000);
+            // ─────────────────────────────────────
+            // TOAST
+            // ─────────────────────────────────────
+            function showToastMessage(message, type = 'success') {
+                const toast = document.createElement('div');
+                toast.className = `toast ${type}`;
+                toast.innerHTML = `<i class="fa-solid fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i> ${message}`;
+                $toastContainer.appendChild(toast);
+                setTimeout(() => {
+                    if (toast.parentNode) toast.parentNode.removeChild(toast);
+                }, 3000);
             }
 
-            function renderAll() { renderHeader(); renderPanels(); updatePanelCount(); updateAdminUI(); initSortable(); }
+            // ─────────────────────────────────────
+            // RENDER
+            // ─────────────────────────────────────
+            function renderAll() {
+                renderHeader();
+                renderPanels();
+                updatePanelCount();
+                updateAdminUI();
+                initSortable(); // This will also init subtopic sortables
+            }
+
             function renderHeader() {
                 $projectNameDisplay.textContent = appData.projectName;
                 $projectNameInput.value = appData.projectName;
-                $progressBarFill.style.width = appData.progress+'%';
-                $progressPercent.textContent = appData.progress+'%';
+                $progressBarFill.style.width = appData.progress + '%';
+                $progressPercent.textContent = appData.progress + '%';
                 $progressSlider.value = appData.progress;
-                if (isAdmin) { $projectNameDisplay.style.display='none'; $projectNameInput.style.display='inline-block'; }
-                else { $projectNameDisplay.style.display='inline'; $projectNameInput.style.display='none'; }
+                if (isAdmin) {
+                    $projectNameDisplay.style.display = 'none';
+                    $projectNameInput.style.display = 'inline-block';
+                } else {
+                    $projectNameDisplay.style.display = 'inline';
+                    $projectNameInput.style.display = 'none';
+                }
+            }
+
+            function renderPanels() {
+                $panelsGrid.innerHTML = '';
+                appData.panels.forEach((panel, index) => {
+                    const card = createPanelCard(panel, index);
+                    $panelsGrid.appendChild(card);
+                });
             }
 
             function createPanelCard(panel, index) {
-                const card = document.createElement('div'); card.className='panel-card'; card.dataset.panelId=panel.id; card.dataset.order=index;
+                const card = document.createElement('div');
+                card.className = 'panel-card';
+                card.setAttribute('data-panel-id', panel.id);
+                card.setAttribute('data-order', index);
                 card.style.borderLeft = `4px solid ${panel.color}`;
-                const strip = document.createElement('div'); strip.className='panel-color-strip'; strip.style.background=panel.color; card.appendChild(strip);
-                const header = document.createElement('div'); header.className='panel-card-header';
-                const badge = document.createElement('div'); badge.className='panel-number'; badge.style.background=panel.color; badge.textContent=index+1;
-                const titleWrap = document.createElement('div'); titleWrap.className='panel-title-wrap';
-                const titleDisp = document.createElement('span'); titleDisp.className='panel-title-display'; titleDisp.textContent=panel.title;
-                const titleInp = document.createElement('input'); titleInp.type='text'; titleInp.className='panel-title-input admin-only-block'; titleInp.value=panel.title;
-                titleInp.addEventListener('input', ()=>{ panel.title=titleInp.value; titleDisp.textContent=panel.title||'(Untitled)'; debounceSave(); });
-                titleWrap.appendChild(titleDisp); titleWrap.appendChild(titleInp);
-                const dragHandle = document.createElement('span'); dragHandle.className='panel-drag-handle'; dragHandle.innerHTML='<i class="fa-solid fa-grip-vertical"></i>';
-                header.appendChild(badge); header.appendChild(titleWrap); header.appendChild(dragHandle); card.appendChild(header);
 
-                const body = document.createElement('div'); body.className='panel-card-body';
-                const subtopicList = document.createElement('ul'); subtopicList.className='subtopic-list'; subtopicList.dataset.panelId=panel.id;
-                panel.subtopics.forEach(sub => subtopicList.appendChild(createSubtopicItem(panel, sub)));
+                // Color strip
+                const strip = document.createElement('div');
+                strip.className = 'panel-color-strip';
+                strip.style.background = panel.color;
+                card.appendChild(strip);
+
+                // Header
+                const header = document.createElement('div');
+                header.className = 'panel-card-header';
+
+                const numberBadge = document.createElement('div');
+                numberBadge.className = 'panel-number';
+                numberBadge.style.background = panel.color;
+                numberBadge.textContent = index + 1;
+
+                const titleWrap = document.createElement('div');
+                titleWrap.className = 'panel-title-wrap';
+
+                const titleDisplay = document.createElement('span');
+                titleDisplay.className = 'panel-title-display';
+                titleDisplay.textContent = panel.title;
+
+                const titleInput = document.createElement('input');
+                titleInput.type = 'text';
+                titleInput.className = 'panel-title-input admin-only-block';
+                titleInput.value = panel.title;
+                titleInput.addEventListener('input', () => {
+                    panel.title = titleInput.value;
+                    titleDisplay.textContent = panel.title || '(Untitled Panel)';
+                    debounceSave();
+                });
+                titleInput.addEventListener('blur', () => {
+                    if (!panel.title.trim()) {
+                        panel.title = '(Untitled Panel)';
+                        titleInput.value = panel.title;
+                        titleDisplay.textContent = panel.title;
+                        debounceSave();
+                    }
+                });
+
+                titleWrap.appendChild(titleDisplay);
+                titleWrap.appendChild(titleInput);
+
+                const dragHandle = document.createElement('span');
+                dragHandle.className = 'panel-drag-handle';
+                dragHandle.innerHTML = '<i class="fa-solid fa-grip-vertical"></i>';
+                dragHandle.title = 'Drag to reorder';
+
+                header.appendChild(numberBadge);
+                header.appendChild(titleWrap);
+                header.appendChild(dragHandle);
+                card.appendChild(header);
+
+                // Body - Subtopic list
+                const body = document.createElement('div');
+                body.className = 'panel-card-body';
+                const subtopicList = document.createElement('ul');
+                subtopicList.className = 'subtopic-list';
+                subtopicList.setAttribute('data-panel-id', panel.id);
+
+                panel.subtopics.forEach(sub => {
+                    const li = createSubtopicItem(panel, sub);
+                    subtopicList.appendChild(li);
+                });
+
                 body.appendChild(subtopicList);
-                const addSubBtn = document.createElement('button'); addSubBtn.className='add-subtopic-btn admin-only-inline'; addSubBtn.innerHTML='<i class="fa-solid fa-plus-circle"></i> Add Sub-item';
-                addSubBtn.addEventListener('click', ()=>{
-                    const newSub = { id:`sub_${panel.id.split('_')[1]}_${subtopicIdCounter++}`, text:'New sub-item', completed:false, items:[] };
+
+                // Add subtopic button (admin only)
+                const addSubBtn = document.createElement('button');
+                addSubBtn.className = 'add-subtopic-btn admin-only-inline';
+                addSubBtn.innerHTML = '<i class="fa-solid fa-plus-circle"></i> Add Sub-item';
+                addSubBtn.addEventListener('click', () => {
+                    const newSub = {
+                        id: `sub_${panel.id.split('_')[1]}_${subtopicIdCounter++}`,
+                        text: 'New sub-item',
+                        completed: false,
+                    };
                     panel.subtopics.push(newSub);
-                    subtopicList.appendChild(createSubtopicItem(panel, newSub));
+                    const newLi = createSubtopicItem(panel, newSub);
+                    subtopicList.appendChild(newLi);
+                    setTimeout(() => {
+                        const input = newLi.querySelector('.subtopic-input');
+                        if (input) { input.focus(); input.select(); }
+                    }, 100);
+                    // Re-initialize sortable for this list after adding
                     reinitSingleSubtopicSortable(subtopicList);
                     debounceSave();
                 });
                 body.appendChild(addSubBtn);
                 card.appendChild(body);
 
-                // Per-panel progress
-                const progressWrap = document.createElement('div'); progressWrap.className='panel-progress-wrap';
-                const progressLabel = document.createElement('span'); progressLabel.textContent='Progress';
-                const progressBar = document.createElement('div'); progressBar.className='panel-progress-bar';
-                const progressFill = document.createElement('div'); progressFill.className='panel-progress-fill'; progressFill.style.width=(panel.progress||0)+'%';
-                progressBar.appendChild(progressFill);
-                const progressPct = document.createElement('span'); progressPct.className='panel-progress-percent'; progressPct.textContent=(panel.progress||0)+'%';
-                const progressSlider = document.createElement('input'); progressSlider.type='range'; progressSlider.className='panel-progress-slider admin-only-inline';
-                progressSlider.min=0; progressSlider.max=100; progressSlider.value=panel.progress||0;
-                progressSlider.addEventListener('input', ()=>{
-                    if(!isAdmin) { progressSlider.value=panel.progress||0; return; }
-                    panel.progress = parseInt(progressSlider.value);
-                    progressFill.style.width=panel.progress+'%';
-                    progressPct.textContent=panel.progress+'%';
-                    debounceSave(400);
+                // Footer with insert/delete/select-delete buttons (admin only)
+                const footer = document.createElement('div');
+                footer.className = 'panel-card-footer admin-only';
+
+                const insertBeforeBtn = document.createElement('button');
+                insertBeforeBtn.className = 'insert-btn';
+                insertBeforeBtn.innerHTML = '<i class="fa-solid fa-arrow-up"></i> Insert Before';
+                insertBeforeBtn.title = 'Add new panel before this one';
+                insertBeforeBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    openNewPanelModalAt(index);
                 });
-                progressWrap.appendChild(progressLabel); progressWrap.appendChild(progressBar); progressWrap.appendChild(progressPct); progressWrap.appendChild(progressSlider);
-                card.appendChild(progressWrap);
 
-                // Flow arrow
-                if (index < appData.panels.length-1) {
-                    const nextPanel = appData.panels[index+1];
-                    const arrowDiv = document.createElement('div'); arrowDiv.className='panel-flow-arrow';
-                    arrowDiv.title = `Next: ${nextPanel.title}`;
-                    arrowDiv.innerHTML = `<span>Next stage</span> <i class="fa-solid fa-arrow-right"></i>`;
-                    card.appendChild(arrowDiv);
-                }
+                const insertAfterBtn = document.createElement('button');
+                insertAfterBtn.className = 'insert-btn';
+                insertAfterBtn.innerHTML = '<i class="fa-solid fa-arrow-down"></i> Insert After';
+                insertAfterBtn.title = 'Add new panel after this one';
+                insertAfterBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    openNewPanelModalAt(index + 1);
+                });
 
-                const footer = document.createElement('div'); footer.className='panel-card-footer admin-only';
-                const insBefore = document.createElement('button'); insBefore.className='insert-btn'; insBefore.innerHTML='<i class="fa-solid fa-arrow-up"></i> Insert Before';
-                insBefore.addEventListener('click', (e)=>{ e.stopPropagation(); openNewPanelModalAt(index); });
-                const insAfter = document.createElement('button'); insAfter.className='insert-btn'; insAfter.innerHTML='<i class="fa-solid fa-arrow-down"></i> Insert After';
-                insAfter.addEventListener('click', (e)=>{ e.stopPropagation(); openNewPanelModalAt(index+1); });
-                const delSelBtn = document.createElement('button'); delSelBtn.className='delete-selected-btn'; delSelBtn.innerHTML='<i class="fa-solid fa-check-double"></i> Delete Selected';
-                delSelBtn.addEventListener('click', (e)=>{
+                const deletePanelBtn = document.createElement('button');
+                deletePanelBtn.className = 'delete-panel-btn';
+                deletePanelBtn.innerHTML = '<i class="fa-solid fa-trash-can"></i> Delete';
+                deletePanelBtn.title = 'Delete this panel';
+                deletePanelBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    if (appData.panels.length <= 1) {
+                        showToastMessage('Cannot delete the last panel! ❌', 'error');
+                        return;
+                    }
+                    if (confirm(`Are you sure you want to delete "${panel.title}"? This action cannot be undone.`)) {
+                        appData.panels = appData.panels.filter(p => p.id !== panel.id);
+                        saveData(true);
+                        renderAll();
+                        showToastMessage('Panel deleted successfully.', 'success');
+                    }
+                });
+
+                // New: Delete Selected Subtopics button
+                const deleteSelectedBtn = document.createElement('button');
+                deleteSelectedBtn.className = 'delete-selected-btn';
+                deleteSelectedBtn.innerHTML = '<i class="fa-solid fa-check-double"></i> Delete Selected';
+                deleteSelectedBtn.title = 'Delete all selected subtopics';
+                deleteSelectedBtn.addEventListener('click', (e) => {
                     e.stopPropagation();
                     const list = card.querySelector('.subtopic-list');
-                    const checked = list.querySelectorAll('.subtopic-select-checkbox:checked');
-                    if (checked.length===0) { showToastMessage('No subtopics selected.','error'); return; }
-                    const ids = new Set(); checked.forEach(cb=>{ const li=cb.closest('.subtopic-item'); if(li){ ids.add(li.dataset.subtopicId); li.remove(); } });
-                    panel.subtopics = panel.subtopics.filter(s => !ids.has(s.id));
+                    const checkedBoxes = list.querySelectorAll('.subtopic-select-checkbox:checked');
+                    if (checkedBoxes.length === 0) {
+                        showToastMessage('No subtopics selected.', 'error');
+                        return;
+                    }
+                    const idsToDelete = new Set();
+                    checkedBoxes.forEach(cb => {
+                        const li = cb.closest('.subtopic-item');
+                        if (li) {
+                            idsToDelete.add(li.getAttribute('data-subtopic-id'));
+                            li.remove();  // Remove from DOM
+                        }
+                    });
+                    // Update data array
+                    panel.subtopics = panel.subtopics.filter(s => !idsToDelete.has(s.id));
+                    // Re-initialize the subtopic sortable for this list
                     reinitSingleSubtopicSortable(list);
                     debounceSave();
+                    showToastMessage(`${idsToDelete.size} subtopic(s) deleted.`, 'success');
                 });
-                const delPanel = document.createElement('button'); delPanel.className='delete-panel-btn'; delPanel.innerHTML='<i class="fa-solid fa-trash-can"></i> Delete';
-                delPanel.addEventListener('click', (e)=>{
-                    e.stopPropagation();
-                    if (appData.panels.length<=1) { showToastMessage('Cannot delete last panel.','error'); return; }
-                    if (confirm(`Delete "${panel.title}"?`)) { appData.panels = appData.panels.filter(p=>p.id!==panel.id); saveData(true); renderAll(); }
-                });
-                footer.appendChild(insBefore); footer.appendChild(insAfter); footer.appendChild(delSelBtn); footer.appendChild(delPanel);
+
+                footer.appendChild(insertBeforeBtn);
+                footer.appendChild(insertAfterBtn);
+                footer.appendChild(deleteSelectedBtn);
+                footer.appendChild(deletePanelBtn);
                 card.appendChild(footer);
+
                 return card;
             }
 
             function createSubtopicItem(panel, sub) {
-                const li = document.createElement('li'); li.className='subtopic-item'; li.dataset.subtopicId=sub.id;
-                const dragHandle = document.createElement('span'); dragHandle.className='subtopic-drag-handle admin-only-inline'; dragHandle.innerHTML='<i class="fa-solid fa-grip-vertical"></i>';
-                const selCheck = document.createElement('input'); selCheck.type='checkbox'; selCheck.className='subtopic-select-checkbox admin-only-inline';
-                const checkbox = document.createElement('input'); checkbox.type='checkbox'; checkbox.className='subtopic-checkbox'; checkbox.checked=sub.completed;
-                checkbox.addEventListener('change', ()=>{ sub.completed=checkbox.checked; updateTextStyle(); debounceSave(); });
-                const textSpan = document.createElement('span'); textSpan.className='subtopic-text'; textSpan.textContent=sub.text;
-                const inputEl = document.createElement('input'); inputEl.type='text'; inputEl.className='subtopic-input admin-only-block'; inputEl.value=sub.text;
-                inputEl.addEventListener('input', ()=>{ sub.text=inputEl.value; textSpan.textContent=sub.text||'(empty)'; debounceSave(); });
-                const expandIcon = document.createElement('span'); expandIcon.className='subtopic-expand-icon'; expandIcon.innerHTML='<i class="fa-solid fa-list-ul"></i>';
-                expandIcon.title='View sub-items';
-                expandIcon.addEventListener('click', (e)=>{ e.stopPropagation(); openSubSubModal(panel, sub); });
-                const deleteBtn = document.createElement('button'); deleteBtn.className='subtopic-delete-btn admin-only-inline'; deleteBtn.innerHTML='<i class="fa-solid fa-xmark"></i>';
-                deleteBtn.addEventListener('click', (e)=>{ e.stopPropagation(); li.remove(); panel.subtopics=panel.subtopics.filter(s=>s.id!==sub.id); debounceSave(); });
-                textSpan.addEventListener('dblclick', ()=>{ if(isAdmin){ textSpan.style.display='none'; inputEl.style.display='block'; inputEl.focus(); } });
-                inputEl.addEventListener('blur', ()=>{ textSpan.style.display='inline'; inputEl.style.display='none'; });
-                function updateTextStyle() { if(sub.completed){ textSpan.style.textDecoration='line-through'; textSpan.style.opacity='0.6'; } else { textSpan.style.textDecoration='none'; textSpan.style.opacity='1'; } }
-                updateTextStyle();
-                li.appendChild(dragHandle); li.appendChild(selCheck); li.appendChild(checkbox); li.appendChild(textSpan); li.appendChild(inputEl); li.appendChild(expandIcon); li.appendChild(deleteBtn);
+                const li = document.createElement('li');
+                li.className = 'subtopic-item';
+                li.setAttribute('data-subtopic-id', sub.id);
+
+                // Drag handle (admin only)
+                const dragHandle = document.createElement('span');
+                dragHandle.className = 'subtopic-drag-handle admin-only-inline';
+                dragHandle.innerHTML = '<i class="fa-solid fa-grip-vertical"></i>';
+                dragHandle.title = 'Drag to reorder subtopics';
+
+                // Select checkbox (admin only)
+                const selectCheck = document.createElement('input');
+                selectCheck.type = 'checkbox';
+                selectCheck.className = 'subtopic-select-checkbox admin-only-inline';
+                selectCheck.title = 'Select for bulk delete';
+
+                // Completion checkbox
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.className = 'subtopic-checkbox';
+                checkbox.checked = sub.completed;
+                checkbox.addEventListener('change', () => {
+                    sub.completed = checkbox.checked;
+                    // Update text style
+                    const textSpan = li.querySelector('.subtopic-text');
+                    if (textSpan) {
+                        if (sub.completed) {
+                            textSpan.style.textDecoration = 'line-through';
+                            textSpan.style.opacity = '0.6';
+                        } else {
+                            textSpan.style.textDecoration = 'none';
+                            textSpan.style.opacity = '1';
+                        }
+                    }
+                    debounceSave();
+                });
+
+                const textSpan = document.createElement('span');
+                textSpan.className = 'subtopic-text';
+                textSpan.textContent = sub.text;
+                if (sub.completed) {
+                    textSpan.style.textDecoration = 'line-through';
+                    textSpan.style.opacity = '0.6';
+                }
+
+                const inputEl = document.createElement('input');
+                inputEl.type = 'text';
+                inputEl.className = 'subtopic-input admin-only-block';
+                inputEl.value = sub.text;
+                inputEl.addEventListener('input', () => {
+                    sub.text = inputEl.value;
+                    textSpan.textContent = sub.text || '(empty)';
+                    debounceSave();
+                });
+                inputEl.addEventListener('blur', () => {
+                    if (!sub.text.trim()) {
+                        sub.text = '(empty)';
+                        inputEl.value = sub.text;
+                        textSpan.textContent = sub.text;
+                        debounceSave();
+                    }
+                });
+
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'subtopic-delete-btn admin-only-inline';
+                deleteBtn.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+                deleteBtn.title = 'Remove this sub-item';
+                deleteBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    // Remove the li and update data array
+                    li.remove();
+                    panel.subtopics = panel.subtopics.filter(s => s.id !== sub.id);
+                    // If the list is now empty, maybe handle? No need.
+                    // Re-initialize the parent list's sortable (it will auto-detect removal)
+                    // But we can just let Sortable handle it automatically since we removed from DOM.
+                    // Actually, after removal, Sortable might still work fine. We'll just save.
+                    debounceSave();
+                });
+
+                // Click on text to edit in admin mode (double-click)
+                textSpan.addEventListener('dblclick', () => {
+                    if (isAdmin) {
+                        textSpan.style.display = 'none';
+                        inputEl.style.display = 'block';
+                        inputEl.focus();
+                        inputEl.select();
+                    }
+                });
+                inputEl.addEventListener('blur', () => {
+                    textSpan.style.display = 'inline';
+                    inputEl.style.display = 'none';
+                });
+                inputEl.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        inputEl.blur();
+                    }
+                });
+
+                // Append in order: drag handle, select checkbox, completion checkbox, text, input, delete
+                li.appendChild(dragHandle);
+                li.appendChild(selectCheck);
+                li.appendChild(checkbox);
+                li.appendChild(textSpan);
+                li.appendChild(inputEl);
+                li.appendChild(deleteBtn);
+
                 return li;
             }
 
-            function updatePanelCount() { $panelCount.textContent = `(${appData.panels.length} Panels)`; }
+            function updatePanelCount() {
+                $panelCount.textContent = `(${appData.panels.length} Panels)`;
+            }
+
             function updateAdminUI() {
-                if (isAdmin) { document.body.classList.add('is-admin'); $btnAdminText.textContent='Exit Admin'; $btnAdminToggle.classList.add('active'); }
-                else { document.body.classList.remove('is-admin'); $btnAdminText.textContent='Admin Mode'; $btnAdminToggle.classList.remove('active'); }
+                if (isAdmin) {
+                    document.body.classList.add('is-admin');
+                    $btnAdminText.textContent = 'Exit Admin';
+                    $btnAdminToggle.classList.add('active');
+                    $projectNameDisplay.style.display = 'none';
+                    $projectNameInput.style.display = 'inline-block';
+                } else {
+                    document.body.classList.remove('is-admin');
+                    $btnAdminText.textContent = 'Admin Mode';
+                    $btnAdminToggle.classList.remove('active');
+                    $projectNameDisplay.style.display = 'inline';
+                    $projectNameInput.style.display = 'none';
+                    // Hide all subtopic inputs and show texts
+                    document.querySelectorAll('.subtopic-input').forEach(el => el.style.display = 'none');
+                    document.querySelectorAll('.subtopic-text').forEach(el => el.style.display = 'inline');
+                }
+                // Re-init all sortables when admin state changes
                 initSortable();
             }
 
+            // ─────────────────────────────────────
+            // SORTABLE (Drag & Drop) for panels and subtopics
+            // ─────────────────────────────────────
             function destroyAllSortables() {
-                if (panelSortable) { panelSortable.destroy(); panelSortable=null; }
-                subtopicSortables.forEach(s=>s.destroy()); subtopicSortables=[];
+                if (panelSortable) {
+                    panelSortable.destroy();
+                    panelSortable = null;
+                }
+                subtopicSortables.forEach(s => s.destroy());
+                subtopicSortables = [];
             }
+
             function initSortable() {
+                // Destroy existing
                 destroyAllSortables();
-                if (isAdmin && $panelsGrid && appData.panels.length>0) {
+
+                // Panel sortable (only if admin)
+                if (isAdmin && $panelsGrid && appData.panels.length > 0) {
                     panelSortable = new Sortable($panelsGrid, {
-                        animation:200, handle:'.panel-drag-handle',
-                        onEnd: function(evt){
-                            const moved = appData.panels.splice(evt.oldIndex,1)[0];
-                            appData.panels.splice(evt.newIndex,0,moved);
-                            appData.panels.forEach((p,i)=>p.order=i);
-                            saveData(true); renderAll();
-                        }
+                        animation: 200,
+                        easing: 'cubic-bezier(0.4, 0, 0.2, 1)',
+                        ghostClass: 'sortable-ghost',
+                        chosenClass: 'sortable-chosen',
+                        dragClass: 'sortable-drag',
+                        handle: '.panel-drag-handle',
+                        onEnd: function(evt) {
+                            const oldIndex = evt.oldIndex;
+                            const newIndex = evt.newIndex;
+                            if (oldIndex !== newIndex && oldIndex !== undefined && newIndex !== undefined) {
+                                const movedPanel = appData.panels.splice(oldIndex, 1)[0];
+                                appData.panels.splice(newIndex, 0, movedPanel);
+                                appData.panels.forEach((p, i) => { p.order = i; });
+                                saveData(true);
+                                renderAll();  // Re-render to update numbers
+                                showToastMessage('Panel order updated! 🔄', 'success');
+                            }
+                        },
                     });
                 }
+
+                // Subtopic sortables (only if admin)
                 if (isAdmin) {
-                    document.querySelectorAll('.subtopic-list').forEach(list => initSingleSubtopicSortable(list));
+                    document.querySelectorAll('.subtopic-list').forEach(list => {
+                        initSingleSubtopicSortable(list);
+                    });
                 }
             }
+
             function initSingleSubtopicSortable(listEl) {
-                if (!isAdmin || subtopicSortables.some(s=>s.el===listEl)) return;
+                if (!isAdmin) return;
+                // Avoid duplicate instances
+                if (subtopicSortables.some(s => s.el === listEl)) {
+                    // Already initialized
+                    return;
+                }
                 const sortable = new Sortable(listEl, {
-                    animation:150, handle:'.subtopic-drag-handle',
-                    onEnd: function(evt){
-                        const panelId = listEl.dataset.panelId;
-                        const panel = appData.panels.find(p=>p.id===panelId); if(!panel) return;
-                        const ids = Array.from(listEl.querySelectorAll('.subtopic-item')).map(li=>li.dataset.subtopicId);
-                        const newSubs = ids.map(id=>panel.subtopics.find(s=>s.id===id)).filter(s=>s);
-                        panel.subtopics = newSubs;
+                    animation: 150,
+                    handle: '.subtopic-drag-handle',
+                    ghostClass: 'sortable-ghost',
+                    onEnd: function(evt) {
+                        const panelId = listEl.getAttribute('data-panel-id');
+                        const panel = appData.panels.find(p => p.id === panelId);
+                        if (!panel) return;
+                        // Get new order of subtopic IDs from the DOM
+                        const items = listEl.querySelectorAll('.subtopic-item');
+                        const newOrderIds = Array.from(items).map(item => item.getAttribute('data-subtopic-id'));
+                        // Reorder panel.subtopics to match newOrderIds
+                        const newSubtopics = [];
+                        newOrderIds.forEach(id => {
+                            const sub = panel.subtopics.find(s => s.id === id);
+                            if (sub) newSubtopics.push(sub);
+                        });
+                        // If some IDs missing (should not happen), keep them at end?
+                        panel.subtopics = newSubtopics;
                         debounceSave();
                     }
                 });
                 subtopicSortables.push(sortable);
             }
+
             function reinitSingleSubtopicSortable(listEl) {
-                subtopicSortables = subtopicSortables.filter(s=>{ if(s.el===listEl){ s.destroy(); return false; } return true; });
+                // Remove existing sortable for this list if any
+                subtopicSortables = subtopicSortables.filter(s => {
+                    if (s.el === listEl) {
+                        s.destroy();
+                        return false;
+                    }
+                    return true;
+                });
+                // Reinitialize
                 initSingleSubtopicSortable(listEl);
             }
 
-            // Sub-Sub-Items Modal
-            let subSubSortable = null;
-            function openSubSubModal(panel, subtopic) {
-                currentSubSubData = { panelId: panel.id, subtopicId: subtopic.id };
-                if (!subtopic.items) subtopic.items = [];
-                $subSubModalTitle.textContent = `Sub-items: ${subtopic.text}`;
-                renderSubSubList(subtopic.items);
-                $subSubModal.style.display = 'flex';
-                if (isAdmin) initSubSubSortable();
-            }
-            function closeSubSubModal() {
-                $subSubModal.style.display = 'none';
-                if (subSubSortable) { subSubSortable.destroy(); subSubSortable=null; }
-                currentSubSubData = null;
-            }
-            function renderSubSubList(items) {
-                $subSubList.innerHTML = '';
-                items.forEach(item => {
-                    const li = document.createElement('li'); li.className='sub-sub-item'; li.dataset.itemId=item.id;
-                    const drag = document.createElement('span'); drag.className='sub-sub-drag'; drag.innerHTML='<i class="fa-solid fa-grip-vertical"></i>';
-                    const sel = document.createElement('input'); sel.type='checkbox'; sel.className='sub-sub-select';
-                    const cb = document.createElement('input'); cb.type='checkbox'; cb.className='sub-sub-checkbox'; cb.checked=item.completed||false;
-                    cb.addEventListener('change', ()=>{ item.completed=cb.checked; debounceSave(); });
-                    const text = document.createElement('span'); text.className='sub-sub-text'; text.textContent=item.text;
-                    const del = document.createElement('button'); del.className='sub-sub-delete'; del.innerHTML='<i class="fa-solid fa-xmark"></i>';
-                    del.addEventListener('click', ()=>{ li.remove(); const idx = items.indexOf(item); if(idx>-1) items.splice(idx,1); debounceSave(); });
-                    li.appendChild(drag); li.appendChild(sel); li.appendChild(cb); li.appendChild(text); li.appendChild(del);
-                    $subSubList.appendChild(li);
-                });
-                if (isAdmin) initSubSubSortable();
-            }
-            function initSubSubSortable() {
-                if (subSubSortable) subSubSortable.destroy();
-                if (!isAdmin || !currentSubSubData) return;
-                subSubSortable = new Sortable($subSubList, {
-                    animation:150, handle:'.sub-sub-drag',
-                    onEnd: function(evt){
-                        const panel = appData.panels.find(p=>p.id===currentSubSubData.panelId);
-                        if(!panel) return;
-                        const subtopic = panel.subtopics.find(s=>s.id===currentSubSubData.subtopicId);
-                        if(!subtopic || !subtopic.items) return;
-                        const newOrder = Array.from($subSubList.querySelectorAll('.sub-sub-item')).map(li=>li.dataset.itemId);
-                        const newItems = newOrder.map(id=>subtopic.items.find(it=>it.id===id)).filter(it=>it);
-                        subtopic.items = newItems;
-                        debounceSave();
-                    }
-                });
+            // ─────────────────────────────────────
+            // ADMIN AUTH
+            // ─────────────────────────────────────
+            function openAdminModal() {
+                $adminModal.style.display = 'flex';
+                $adminPasswordInput.value = '';
+                $adminModalError.style.display = 'none';
+                setTimeout(() => $adminPasswordInput.focus(), 150);
             }
 
-            document.getElementById('btnAddSubSub').addEventListener('click', ()=>{
-                if (!isAdmin || !currentSubSubData) return;
-                const panel = appData.panels.find(p=>p.id===currentSubSubData.panelId);
-                if(!panel) return;
-                const subtopic = panel.subtopics.find(s=>s.id===currentSubSubData.subtopicId);
-                if(!subtopic) return;
-                if(!subtopic.items) subtopic.items = [];
-                const newItem = { id:`item_${subSubIdCounter++}`, text:'New sub-item', completed:false };
-                subtopic.items.push(newItem);
-                renderSubSubList(subtopic.items);
-                debounceSave();
-            });
-            document.getElementById('btnDeleteSelectedSubSub').addEventListener('click', ()=>{
-                if (!isAdmin || !currentSubSubData) return;
-                const panel = appData.panels.find(p=>p.id===currentSubSubData.panelId);
-                if(!panel) return;
-                const subtopic = panel.subtopics.find(s=>s.id===currentSubSubData.subtopicId);
-                if(!subtopic || !subtopic.items) return;
-                const checked = $subSubList.querySelectorAll('.sub-sub-select:checked');
-                if (checked.length===0) { showToastMessage('No items selected.','error'); return; }
-                const ids = new Set(); checked.forEach(cb=>{ const li=cb.closest('.sub-sub-item'); if(li){ ids.add(li.dataset.itemId); li.remove(); } });
-                subtopic.items = subtopic.items.filter(it=>!ids.has(it.id));
-                debounceSave();
-                renderSubSubList(subtopic.items);
-            });
-            document.getElementById('btnCloseSubSub').addEventListener('click', closeSubSubModal);
-            $subSubModal.addEventListener('click', (e)=>{ if (e.target===$subSubModal) closeSubSubModal(); });
+            function closeAdminModal() {
+                $adminModal.style.display = 'none';
+                $adminPasswordInput.value = '';
+                $adminModalError.style.display = 'none';
+            }
 
-            // Admin Auth
-            function openAdminModal() { $adminModal.style.display='flex'; $adminPasswordInput.value=''; $adminModalError.style.display='none'; setTimeout(()=>$adminPasswordInput.focus(),150); }
-            function closeAdminModal() { $adminModal.style.display='none'; }
-            document.getElementById('btnCancelAdmin').addEventListener('click', closeAdminModal);
-            document.getElementById('btnConfirmAdmin').addEventListener('click', ()=>{
-                if ($adminPasswordInput.value === ADMIN_PASSWORD) { isAdmin=true; updateAdminUI(); renderAll(); closeAdminModal(); showToastMessage('Admin mode activated! 🔓','success'); }
-                else { $adminModalError.textContent='❌ Incorrect password'; $adminModalError.style.display='block'; }
-            });
-            document.getElementById('btnAdminToggle').addEventListener('click', ()=>{ if(isAdmin) exitAdminMode(); else openAdminModal(); });
-            function exitAdminMode() { isAdmin=false; updateAdminUI(); renderAll(); showToastMessage('Admin mode deactivated. 🔒','success'); }
+            function handleAdminLogin() {
+                const enteredPassword = $adminPasswordInput.value;
+                if (enteredPassword === ADMIN_PASSWORD) {
+                    isAdmin = true;
+                    updateAdminUI();
+                    renderAll();
+                    closeAdminModal();
+                    showToastMessage('Admin mode activated! 🔓 All editing features unlocked.', 'success');
+                } else {
+                    $adminModalError.textContent = '❌ Incorrect password. Please try again.';
+                    $adminModalError.style.display = 'block';
+                    $adminPasswordInput.value = '';
+                    $adminPasswordInput.focus();
+                    $adminPasswordInput.style.animation = 'none';
+                    $adminPasswordInput.offsetHeight;
+                    $adminPasswordInput.style.animation = 'shake 0.4s ease';
+                }
+            }
 
-            // New Panel
+            function exitAdminMode() {
+                isAdmin = false;
+                updateAdminUI();
+                renderAll();
+                showToastMessage('Admin mode deactivated. 🔒 Changes are still saved.', 'success');
+            }
+
+            // ─────────────────────────────────────
+            // NEW PANEL MODAL
+            // ─────────────────────────────────────
             let pendingInsertIndex = null;
-            function openNewPanelModalAt(idx) { if(!isAdmin) return; pendingInsertIndex=idx; $newPanelTitleInput.value=''; $newPanelPosition.value=(idx===0?'start':'end'); $newPanelModal.style.display='flex'; }
-            document.getElementById('btnAddPanelTop').addEventListener('click', ()=> openNewPanelModalGeneric('start'));
-            document.getElementById('btnAddPanelBottom').addEventListener('click', ()=> openNewPanelModalGeneric('end'));
-            function openNewPanelModalGeneric(pos='end') { if(!isAdmin) return; pendingInsertIndex=(pos==='start'?0:appData.panels.length); $newPanelTitleInput.value=''; $newPanelPosition.value=pos; $newPanelModal.style.display='flex'; }
-            document.getElementById('btnCancelNewPanel').addEventListener('click', ()=>{ $newPanelModal.style.display='none'; pendingInsertIndex=null; });
-            document.getElementById('btnConfirmNewPanel').addEventListener('click', ()=>{
-                const title = $newPanelTitleInput.value.trim();
-                if (!title) return;
-                let insertAt = pendingInsertIndex!==null? pendingInsertIndex : ($newPanelPosition.value==='start'?0:appData.panels.length);
-                insertAt = Math.max(0, Math.min(insertAt, appData.panels.length));
-                const newPanel = {
-                    id:`panel_${panelIdCounter++}`, title, color:['#4A90D9','#5BA0D0','#6CB4A1','#F5A623','#E8833A','#9B59B6','#4ECDC4','#2ECC71','#E67E22','#27AE60'][Math.floor(Math.random()*10)],
-                    subtopics:[{ id:`sub_new_${subtopicIdCounter++}`, text:'New sub-item', completed:false, items:[] }], progress:0, order:insertAt
-                };
-                appData.panels.splice(insertAt,0,newPanel);
-                appData.panels.forEach((p,i)=>p.order=i);
-                $newPanelModal.style.display='none'; pendingInsertIndex=null;
-                saveData(true); renderAll();
-            });
 
-            document.getElementById('btnResetAll').addEventListener('click', ()=>{
-                if(!isAdmin) return;
-                if(confirm('Reset all data to default 16-panel workflow?')) {
-                    appData.panels = JSON.parse(JSON.stringify(defaultPanels)); appData.progress=0; appData.projectName='PLANNING APPROVAL WORKFLOW';
-                    panelIdCounter=17; subtopicIdCounter=1000; subSubIdCounter=2000;
-                    saveData(true); renderAll();
+            function openNewPanelModalAt(insertIndex) {
+                if (!isAdmin) {
+                    showToastMessage('Please enable Admin mode first.', 'error');
+                    return;
+                }
+                pendingInsertIndex = insertIndex;
+                $newPanelTitleInput.value = '';
+                $newPanelPosition.value = (insertIndex === 0) ? 'start' : 'end';
+                $newPanelModal.style.display = 'flex';
+                setTimeout(() => $newPanelTitleInput.focus(), 150);
+            }
+
+            function openNewPanelModalGeneric(defaultPosition = 'end') {
+                if (!isAdmin) {
+                    showToastMessage('Please enable Admin mode first.', 'error');
+                    return;
+                }
+                pendingInsertIndex = (defaultPosition === 'start') ? 0 : appData.panels.length;
+                $newPanelTitleInput.value = '';
+                $newPanelPosition.value = defaultPosition;
+                $newPanelModal.style.display = 'flex';
+                setTimeout(() => $newPanelTitleInput.focus(), 150);
+            }
+
+            function closeNewPanelModal() {
+                $newPanelModal.style.display = 'none';
+                $newPanelTitleInput.value = '';
+                pendingInsertIndex = null;
+            }
+
+            function confirmNewPanel() {
+                const title = $newPanelTitleInput.value.trim();
+                if (!title) {
+                    $newPanelTitleInput.focus();
+                    $newPanelTitleInput.style.borderColor = '#e53e3e';
+                    setTimeout(() => { $newPanelTitleInput.style.borderColor = ''; }, 1500);
+                    return;
+                }
+                const position = $newPanelPosition.value;
+                let insertAt;
+                if (pendingInsertIndex !== null && pendingInsertIndex !== undefined) {
+                    insertAt = pendingInsertIndex;
+                } else {
+                    insertAt = (position === 'start') ? 0 : appData.panels.length;
+                }
+                insertAt = Math.max(0, Math.min(insertAt, appData.panels.length));
+
+                const colors = [
+                    '#4A90D9', '#5BA0D0', '#6CB4A1', '#7BC8A4', '#F5A623', '#F7B84E',
+                    '#E8833A', '#D97471', '#9B59B6', '#8E6BB8', '#4ECDC4', '#2ECC71',
+                    '#3498DB', '#1ABC9C', '#E67E22', '#27AE60', '#6366f1', '#8b5cf6',
+                    '#ec4899', '#f43f5e', '#14b8a6', '#f97316', '#84cc16', '#06b6d4',
+                ];
+                const randomColor = colors[Math.floor(Math.random() * colors.length)];
+
+                const newPanel = {
+                    id: `panel_${panelIdCounter++}`,
+                    title: title,
+                    color: randomColor,
+                    subtopics: [
+                        { id: `sub_new_${subtopicIdCounter++}`, text: 'New sub-item 1', completed: false },
+                    ],
+                    order: insertAt,
+                };
+
+                appData.panels.splice(insertAt, 0, newPanel);
+                appData.panels.forEach((p, i) => { p.order = i; });
+                closeNewPanelModal();
+                pendingInsertIndex = null;
+                saveData(true);
+                renderAll();
+                showToastMessage(`Panel "${title}" added successfully! ✅`, 'success');
+                setTimeout(() => {
+                    const card = document.querySelector(`[data-panel-id="${newPanel.id}"]`);
+                    if (card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 300);
+            }
+
+            // ─────────────────────────────────────
+            // RESET
+            // ─────────────────────────────────────
+            function resetAllData() {
+                if (!isAdmin) {
+                    showToastMessage('Please enable Admin mode first to reset data.', 'error');
+                    return;
+                }
+                if (confirm('⚠️ Are you sure you want to reset ALL data to the default 16-panel workflow? All custom changes will be lost. This cannot be undone.')) {
+                    appData.panels = JSON.parse(JSON.stringify(defaultPanels));
+                    appData.progress = 0;
+                    appData.projectName = 'PLANNING APPROVAL WORKFLOW';
+                    panelIdCounter = 17;
+                    subtopicIdCounter = 1000;
+                    restoreCounters();
+                    saveData(true);
+                    renderAll();
+                    showToastMessage('Dashboard reset to default workflow. 🔄', 'success');
+                }
+            }
+
+            // ─────────────────────────────────────
+            // EVENT LISTENERS
+            // ─────────────────────────────────────
+            $btnAdminToggle.addEventListener('click', () => {
+                if (isAdmin) {
+                    exitAdminMode();
+                } else {
+                    openAdminModal();
                 }
             });
 
-            $progressSlider.addEventListener('input', ()=>{
-                if(!isAdmin) { $progressSlider.value=appData.progress; return; }
-                appData.progress = parseInt($progressSlider.value); renderHeader(); debounceSave(400);
-            });
-            $projectNameInput.addEventListener('input', ()=>{ appData.projectName=$projectNameInput.value; $projectNameDisplay.textContent=appData.projectName||'PLANNING APPROVAL WORKFLOW'; debounceSave(); });
-
-            document.addEventListener('keydown', (e)=>{
-                if (e.key==='Escape') { closeAdminModal(); closeSubSubModal(); $newPanelModal.style.display='none'; }
-                if (e.ctrlKey && e.shiftKey && e.key==='A') { e.preventDefault(); if(isAdmin) exitAdminMode(); else openAdminModal(); }
+            document.getElementById('btnCancelAdmin').addEventListener('click', closeAdminModal);
+            document.getElementById('btnConfirmAdmin').addEventListener('click', handleAdminLogin);
+            $adminPasswordInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') handleAdminLogin();
+                if (e.key === 'Escape') closeAdminModal();
             });
 
+            // New panel modal
+            document.getElementById('btnAddPanelTop').addEventListener('click', () => openNewPanelModalGeneric('start'));
+            document.getElementById('btnAddPanelBottom').addEventListener('click', () => openNewPanelModalGeneric('end'));
+            document.getElementById('btnCancelNewPanel').addEventListener('click', closeNewPanelModal);
+            document.getElementById('btnConfirmNewPanel').addEventListener('click', confirmNewPanel);
+            $newPanelTitleInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') confirmNewPanel();
+                if (e.key === 'Escape') closeNewPanelModal();
+            });
+            $newPanelPosition.addEventListener('change', () => {
+                if ($newPanelPosition.value === 'start') pendingInsertIndex = 0;
+                else pendingInsertIndex = appData.panels.length;
+            });
+
+            // Reset button
+            document.getElementById('btnResetAll').addEventListener('click', resetAllData);
+
+            // Progress slider
+            $progressSlider.addEventListener('input', () => {
+                if (!isAdmin) {
+                    showToastMessage('Enable Admin mode to adjust progress.', 'error');
+                    $progressSlider.value = appData.progress;
+                    return;
+                }
+                appData.progress = parseInt($progressSlider.value);
+                $progressBarFill.style.width = appData.progress + '%';
+                $progressPercent.textContent = appData.progress + '%';
+                debounceSave(400);
+            });
+
+            // Project name input
+            $projectNameInput.addEventListener('input', () => {
+                appData.projectName = $projectNameInput.value;
+                $projectNameDisplay.textContent = appData.projectName || 'PLANNING APPROVAL WORKFLOW';
+                debounceSave();
+            });
+
+            // Close modals on overlay click
+            $adminModal.addEventListener('click', (e) => {
+                if (e.target === $adminModal) closeAdminModal();
+            });
+            $newPanelModal.addEventListener('click', (e) => {
+                if (e.target === $newPanelModal) closeNewPanelModal();
+            });
+
+            // Keyboard shortcuts
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    if ($adminModal.style.display === 'flex') closeAdminModal();
+                    if ($newPanelModal.style.display === 'flex') closeNewPanelModal();
+                }
+                if (e.ctrlKey && e.shiftKey && e.key === 'A') {
+                    e.preventDefault();
+                    if (isAdmin) exitAdminMode();
+                    else openAdminModal();
+                }
+            });
+
+            // ─────────────────────────────────────
+            // INITIALIZATION
+            // ─────────────────────────────────────
             async function init() {
                 await loadData();
-                appData.panels.forEach((p,i)=>{ if(p.order===undefined) p.order=i; });
-                appData.panels.sort((a,b)=>(a.order||0)-(b.order||0));
-                renderAll(); updateAdminUI();
+                appData.panels.forEach((p, i) => { if (p.order === undefined) p.order = i; });
+                appData.panels.sort((a, b) => (a.order || 0) - (b.order || 0));
+                renderAll();
+                updateAdminUI();
+                console.log('🚀 Planning Approval Dashboard initialized.');
+                console.log('   💡 Tip: Press Ctrl+Shift+A to toggle Admin mode.');
+                console.log('   🔑 Admin Password: Dlns@4512#');
+                console.log('   📦 Storage:', firebaseReady ? 'Firebase Firestore + localStorage' : 'localStorage (Firebase not configured)');
             }
-            init().catch(e=>{ appData.panels=JSON.parse(JSON.stringify(defaultPanels)); renderAll(); });
+
+            // Add shake animation keyframes
+            const shakeStyle = document.createElement('style');
+            shakeStyle.textContent = `
+            @keyframes shake {
+              0%, 100% { transform: translateX(0); }
+              25% { transform: translateX(-8px); }
+              50% { transform: translateX(8px); }
+              75% { transform: translateX(-5px); }
+            }
+          `;
+            document.head.appendChild(shakeStyle);
+
+            init().catch(err => {
+                console.error('Initialization error:', err);
+                appData.panels = JSON.parse(JSON.stringify(defaultPanels));
+                renderAll();
+            });
+
+            console.log('%c🏗️ Planning Approval Workflow Dashboard %cReady',
+                'font-size:1.2em;font-weight:bold;color:#4f6ef7;',
+                'font-size:0.9em;color:#38a169;');
+            console.log('%cFeatures: Drag & Drop | Firebase Sync | Admin Mode | Auto-Save | Full CRUD',
+                'color:#718096;');
         })();
     </script>
 </body>
