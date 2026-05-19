@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Planning Approval Workflow Dashboard</title>
 
-    <!-- Firebase SDKs (compat) -->
+    <!-- Firebase SDKs (optional) -->
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 
@@ -36,6 +36,7 @@
         }
         * { margin:0; padding:0; box-sizing:border-box; }
 
+        /* animated background */
         body::before {
             content: '';
             position: fixed;
@@ -117,6 +118,7 @@
         @media (max-width:1050px) { .panels-grid { grid-template-columns:repeat(2,1fr); } }
         @media (max-width:650px) { .panels-grid { grid-template-columns:1fr; } }
 
+        /* Panel Card */
         .panel-card {
             background:var(--surface); border-radius:var(--radius);
             box-shadow:var(--shadow); border:1.5px solid var(--border);
@@ -364,7 +366,7 @@
             const FIRESTORE_COLLECTION = "dashboards";
             const FIRESTORE_DOC_ID = "planning_approval_workflow";
 
-            // FULL 16-PANEL DEFAULT DATA (all panels included)
+            // Full 16-panel default data (all panels included, exactly as originally defined)
             const defaultPanels = [
                 { id:'panel_1', title:'LAND IDENTIFICATION & INITIAL FEASIBILITY', color:'#4A90D9', progress:0, comment:'', subtopics:[
                     { id:'sub_1_1', text:'Verify land ownership', completed:false, items:[] },
