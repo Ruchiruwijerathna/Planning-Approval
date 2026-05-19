@@ -6,12 +6,9 @@
     <title>Planning Approval Workflow Dashboard</title> 
     <link rel="icon" href="data:,"> 
      
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js">
-    </script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js">
-    </script>
-    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js">
-    </script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
      
     <style> 
@@ -19,8 +16,8 @@
             --bg-primary: #ffffff; 
             --bg-secondary: rgba(255, 255, 255, 0.85); 
             --text-dark: #1a1a1a;  
-            --accent-yellow: #fcc827;  
-            --accent-grey: #2d2f33;  
+            --accent-yellow: #fcc827; 
+            --accent-grey: #2d2f33; 
             --border-light: #e2e8f0;  
             --accent-blue: #007bff;  
             --success-green: #28a745;  
@@ -36,19 +33,61 @@
             line-height: 1.6; 
             min-height: 100vh;
             overflow-x: hidden; 
-            background-color: #ffffff; 
+            background-color: #f4f6f9; 
         } 
 
-        /* Canvas background stays fixed behind everything */ 
-        #bgCanvas { 
-            position: fixed; 
-            top: 0; 
-            left: 0; 
-            z-index: 0; 
-            width: 100%; 
-            height: 100%; 
-            pointer-events: none; /* allows clicks to pass through */ 
-        } 
+        /* --- SEAMLESS GLOWING NEON WAVE BACKGROUND --- */ 
+        .neon-bg-container { 
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -2; 
+            background: linear-gradient(135deg, #fdfdfd 0%, #f4f6f9 100%);
+            overflow: hidden; 
+        }
+        .neon-wave {
+            position: absolute;
+            top: -50%; left: -50%;
+            width: 200%; height: 200%;
+            background-repeat: repeat;
+            opacity: 0.35;
+            pointer-events: none;
+        }
+        /* Yellow Neon Wave */
+        .neon-wave-1 {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 400'%3E%3Cpath d='M0,200 C200,50 400,350 800,200' fill='none' stroke='%23fcc827' stroke-width='6' filter='drop-shadow(0px 0px 12px %23fcc827)'/%3E%3C/svg%3E");
+            background-size: 800px 400px;
+            animation: moveRandomNeon1 25s infinite linear;
+        }
+        /* Blue Neon Wave */
+        .neon-wave-2 {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1000 500'%3E%3Cpath d='M0,250 C250,450 500,50 1000,250' fill='none' stroke='%23007bff' stroke-width='4' filter='drop-shadow(0px 0px 10px %23007bff)'/%3E%3C/svg%3E");
+            background-size: 1000px 500px;
+            animation: moveRandomNeon2 35s infinite linear reverse;
+            opacity: 0.25;
+        }
+        /* Soft Ambient Glowing Orbs */
+        .neon-orb {
+            position: absolute; border-radius: 50%; filter: blur(90px); opacity: 0.4;
+            animation: floatOrb 20s infinite ease-in-out alternate;
+        }
+        .orb-1 { width: 40vh; height: 40vh; background: #fcc827; top: 10%; left: 10%; }
+        .orb-2 { width: 50vh; height: 50vh; background: #007bff; bottom: 10%; right: 10%; animation-delay: -5s; }
+
+        @keyframes moveRandomNeon1 {
+            0% { transform: translate(0, 0) rotate(0deg) scale(1.1); }
+            33% { transform: translate(-10%, 5%) rotate(3deg) scale(1.05); }
+            66% { transform: translate(5%, -10%) rotate(-2deg) scale(1.15); }
+            100% { transform: translate(0, 0) rotate(0deg) scale(1.1); }
+        }
+        @keyframes moveRandomNeon2 {
+            0% { transform: translate(0, 0) rotate(0deg) scale(1); }
+            33% { transform: translate(12%, -8%) rotate(-4deg) scale(1.1); }
+            66% { transform: translate(-8%, 12%) rotate(2deg) scale(1); }
+            100% { transform: translate(0, 0) rotate(0deg) scale(1); }
+        }
+        @keyframes floatOrb {
+            0% { transform: translate(0, 0); }
+            50% { transform: translate(15vw, 15vh); }
+            100% { transform: translate(-10vw, 20vh); }
+        }
 
         /* Header */ 
         .dashboard-header { 
@@ -62,15 +101,8 @@
         } 
         .header-left { display:flex; align-items:center; gap:15px; } 
          
-        .header-logo { 
-            height: 45px;  
-            display:flex; align-items:center; justify-content:center; 
-        } 
-        .header-logo img { 
-            height: 100%;  
-            width: auto;  
-            object-fit: contain;  
-        } 
+        .header-logo { height: 45px; display:flex; align-items:center; justify-content:center; } 
+        .header-logo img { height: 100%; width: auto; object-fit: contain; } 
         .project-name-display { font-size:1.3rem; font-weight:800; color:var(--accent-grey); } 
         .project-name-input { 
             font-size:1.3rem; font-weight:800; color:var(--accent-grey); 
@@ -107,8 +139,9 @@
             cursor:pointer; display:inline-flex; align-items:center; gap:6px; 
         } 
         .btn-add-panel:hover { border-color:var(--accent-yellow); color:var(--accent-grey); background:#fffef5; } 
-        .main-container { max-width:1600px; margin:0 auto; padding:30px 20px 70px; position: relative; z-index: 10; } 
+        .main-container { max-width:1600px; margin:0 auto; padding:30px 20px 70px; } 
         .panels-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:25px; align-items:start; } 
+        
         /* Panel Card */ 
         .panel-card { 
             background:var(--bg-primary); border-radius:var(--radius-md); 
@@ -117,11 +150,11 @@
             transition: opacity 0.3s ease, filter 0.3s ease, box-shadow 0.2s; 
         } 
         .panel-card:hover { box-shadow: 0 8px 24px rgba(0,0,0,0.08); } 
-         
-        .panel-card.panel-completed { 
-            opacity: 0.68; filter: grayscale(15%);  
-        } 
+        
+        /* 68% Transparency for completed panels */ 
+        .panel-card.panel-completed { opacity: 0.68; filter: grayscale(15%); } 
         .panel-card.panel-completed:hover { opacity: 1; filter: none; } 
+        
         .panel-color-strip { height:6px; } 
         .panel-card-header { padding:15px 20px 10px; display:flex; align-items:center; gap:12px; background:#fafafa; border-bottom:1px solid #eee; } 
         .panel-number { 
@@ -140,17 +173,19 @@
          
         .panel-drag-handle { cursor:grab; color:#cbd5e0; padding:4px 2px; display:none; } 
         body.is-admin .panel-drag-handle { display:block; } 
-        .panel-accordion-toggle { 
-            font-size:1.2rem; color:#888; cursor:pointer; padding:5px; transition:color 0.2s; display: none; 
-        } 
+        
+        /* Panel Expand/Collapse Control */ 
+        .panel-accordion-toggle { font-size:1.2rem; color:#888; cursor:pointer; padding:5px; transition:color 0.2s; display: none; } 
         .panel-accordion-toggle:hover { color:var(--accent-yellow); } 
         .panel-card.panel-collapsed .panel-accordion-toggle i::before { content: "\f107"; }  
         .panel-card:not(.panel-collapsed) .panel-accordion-toggle i::before { content: "\f106"; } 
+        
         .panel-card-body { padding:10px 20px 20px; flex:1; } 
         .panel-card.panel-collapsed .panel-card-body,  
         .panel-card.panel-collapsed .panel-comment-wrap, 
         .panel-card.panel-collapsed .panel-progress-wrap, 
         .panel-card.panel-collapsed .panel-card-footer { display: none !important; } 
+        
         /* Subtopics */ 
         .subtopic-list { list-style:none; display:flex; flex-direction:column; gap:8px; } 
         .subtopic-item { 
@@ -158,37 +193,43 @@
             color:var(--text-dark); padding:8px 12px; border-radius:var(--radius-sm); 
             background:#f8f9fa; border:1px solid #eee; transition: background 0.15s, opacity 0.3s, filter 0.3s; 
         } 
-        .subtopic-item:hover { background:#f2f2f2; } 
-         
+        .subtopic-item-top { 
+            display: flex; width: 100%; align-items: center; gap: 8px; cursor: pointer; 
+            border-radius: var(--radius-sm); padding: 4px;
+        } 
+        .subtopic-item-top:hover { background: #f0f0f0; }
+        
         body.unblur-on-hover .subtopic-item.completed:hover { filter: none !important; opacity: 1 !important; } 
-        .subtopic-item-top { display: flex; width: 100%; align-items: center; gap: 8px; } 
         .subtopic-checkbox { width:18px; height:18px; accent-color:var(--success-green); cursor:pointer; flex-shrink:0; } 
          
-        .subtopic-text { flex:1; word-break:break-word; font-weight: 600; } 
+        .subtopic-text { flex:1; word-break:break-word; font-weight: 600; pointer-events: none;} 
         .item-number { font-weight:800; margin-right:6px; color:var(--accent-grey); background: #e2e8f0; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem;} 
-        .subtopic-input { 
+        
+        /* Inputs */
+        .subtopic-input, .sub-sub-input { 
             flex:1; font-size:0.9rem; font-weight:600; border:1.5px dashed var(--accent-yellow); 
             border-radius:5px; padding:3px 7px; background:#fff; display:none; color:var(--text-dark); 
         } 
-        body.is-admin .subtopic-input { display:none; } 
-         
-        /* Item expand/collapse toggle always visible if items exist */ 
-        .item-accordion-toggle { 
-            font-size:1.1rem; color:#888; cursor:pointer; padding:3px; transition:color 0.2s; 
-            visibility: visible; /* Always visible, but hidden when no items via JS */ 
-        } 
-        .item-accordion-toggle:hover { color:var(--accent-yellow); } 
+        
+        /* Action Buttons */
+        .action-btn-mini {
+            width:24px; height:24px; border-radius:4px; border:none; 
+            background:transparent; color:#cbd5e0; cursor:pointer; font-size:12px; 
+            display:none; align-items:center; justify-content:center; transition: 0.2s;
+        }
+        body.is-admin .action-btn-mini { display: flex; }
+        .action-btn-mini:hover { background: #e2e8f0; color: var(--accent-grey); }
+        .action-btn-mini.delete-btn:hover { background: #fff5f5; color: var(--danger-red); }
+        .action-btn-mini.edit-btn:hover { background: #fffef5; color: var(--accent-yellow); }
+        
+        /* Item Expand/Collapse Control - ALWAYS VISIBLE if items exist */ 
+        .item-accordion-toggle { font-size:1.1rem; color:#888; cursor:pointer; padding:3px; transition:color 0.2s; pointer-events: none; } 
+        .subtopic-item-top:hover .item-accordion-toggle { color:var(--accent-yellow); } 
         .item-accordion-toggle .fa-chevron-down { display: block; } 
         .item-accordion-toggle .fa-chevron-up { display: none; } 
         .subtopic-item.item-collapsed .item-accordion-toggle .fa-chevron-down { display: none; } 
         .subtopic-item.item-collapsed .item-accordion-toggle .fa-chevron-up { display: block; } 
-        .subtopic-delete-btn { 
-            width:22px; height:22px; border-radius:50%; border:none; 
-            background:transparent; color:#cbd5e0; cursor:pointer; font-size:12px; 
-            display:none; align-items:center; justify-content:center; 
-        } 
-        body.is-admin .subtopic-delete-btn { display:flex; } 
-        .subtopic-delete-btn:hover { color:var(--danger-red); background:#fff5f5; } 
+        
         /* Sub-items (expanded section) */ 
         .sub-sub-wrapper { width: 100%; display: none; margin-top: 5px; padding-left: 32px; } 
         .subtopic-item:not(.item-collapsed) .sub-sub-wrapper { display: block; } 
@@ -197,31 +238,27 @@
         .sub-sub-item { 
             display:flex; align-items:center; gap:8px; font-size:0.85rem; 
             color:#444; padding:6px 10px; border-radius:5px; 
-            background:#ffffff; border:1px solid #e9ecef; 
+            background:#ffffff; border:1px solid #e9ecef; transition: 0.2s;
         } 
+        .sub-sub-item:hover { background: #fafafa; }
         .sub-sub-item.completed { opacity: 0.6; filter: grayscale(50%); } 
         .sub-sub-checkbox { width:16px; height:16px; accent-color:var(--success-green); cursor:pointer; flex-shrink:0; } 
          
-        .sub-sub-drag { cursor:grab; color:#cbd5e0; display:none; } 
-        body.is-admin .sub-sub-drag { display:flex; } 
+        .subtopic-drag-handle, .sub-sub-drag { cursor:grab; color:#cbd5e0; display:none; padding: 0 4px; } 
+        body.is-admin .subtopic-drag-handle, body.is-admin .sub-sub-drag { display:flex; } 
+        
         .sub-sub-select { width:14px; height:14px; accent-color:var(--danger-red); display:none; } 
         body.is-admin .sub-sub-select { display:inline-block; } 
-         
         .sub-sub-text { flex:1; word-break:break-word; font-weight: 600; } 
-        .sub-sub-input { 
-            flex:1; font-size:0.85rem; font-weight:600; border:1.5px dashed var(--accent-yellow); 
-            border-radius:5px; padding:2px 6px; background:#fff; display:none; color:var(--text-dark); 
-        } 
-        .sub-sub-delete { background:none; border:none; color:#cbd5e0; cursor:pointer; font-size:12px; display:none; } 
-        body.is-admin .sub-sub-delete { display:inline-block; } 
-        .sub-sub-delete:hover { color:var(--danger-red); } 
+        
         .add-subtopic-btn, .add-subsub-btn { 
             margin-top:6px; font-size:0.8rem; color:var(--accent-grey); 
             background:none; border:1.5px dashed var(--border-light); border-radius:16px; 
             padding:6px 14px; font-weight:700; cursor:pointer; display:none; 
         } 
         body.is-admin .add-subtopic-btn, body.is-admin .add-subsub-btn { display:inline-flex; align-items:center; gap:4px; } 
-        .add-subtopic-btn:hover, .add-subsub-btn:hover { border-color: var(--accent-yellow); } 
+        .add-subtopic-btn:hover, .add-subsub-btn:hover { border-color: var(--accent-yellow); background: #fff; } 
+        
         .panel-card-footer { padding:10px 20px 15px; display:none; gap:8px; flex-wrap:wrap; border-top:1px solid #eee; } 
         body.is-admin .panel-card-footer { display:flex; } 
         .insert-btn, .delete-panel-btn, .delete-selected-btn { 
@@ -231,6 +268,7 @@
         } 
         .delete-panel-btn, .delete-selected-btn { border-color:#fed7d7; color:#c53030; } 
         .delete-panel-btn:hover, .delete-selected-btn:hover { background:#fff5f5; } 
+        
         .panel-progress-wrap { display:flex; align-items:center; gap:10px; padding:6px 20px 10px; font-size:0.8rem; color:#777; background:#fafafa; border-top:1px solid #eee;} 
         .panel-progress-bar { flex:1; height:6px; background:var(--progress-bg); border-radius:10px; overflow:hidden; } 
         .panel-progress-fill { height:100%; background:var(--accent-yellow); border-radius:10px; } 
@@ -246,6 +284,7 @@
             font-family:inherit; color:var(--text-dark); background: #fafbff; 
         } 
         .panel-comment-textarea:focus { outline: none; border-color: var(--accent-yellow); } 
+        
         .admin-only { display:none; } 
         body.is-admin .admin-only { display:flex; } 
         .admin-only-inline { display:none; } 
@@ -254,6 +293,7 @@
         body.is-admin .admin-only-block { display:block; } 
         .subtopic-select-checkbox { display:none; } 
         body.is-admin .subtopic-select-checkbox { display:inline-block; } 
+        
         /* Modals and Toasts */ 
         .modal-overlay { 
             position:fixed; top:0; left:0; width:100%; height:100%; 
@@ -280,7 +320,15 @@
     </style> 
 </head> 
 <body class="unblur-on-hover"> 
-    <canvas id="bgCanvas"></canvas> 
+    
+    <!-- Seamless Neon Background -->
+    <div class="neon-bg-container">
+        <div class="neon-wave neon-wave-1"></div>
+        <div class="neon-wave neon-wave-2"></div>
+        <div class="neon-orb orb-1"></div>
+        <div class="neon-orb orb-2"></div>
+    </div>
+
     <header class="dashboard-header"> 
         <div class="header-left"> 
             <div class="header-logo" id="headerLogo"> 
@@ -298,7 +346,6 @@
             <input type="range" class="progress-slider" id="progressSlider" min="0" max="100" value="0"> 
         </div> 
         <div style="display:flex;gap:8px;"> 
-            <button class="btn btn-outline btn-sm" id="toggleWave"><i class="fa-solid fa-wave-square"></i> Wave</button> 
             <button class="btn btn-outline btn-sm" id="btnResetAll"><i class="fa-solid fa-rotate-left"></i> Reset</button> 
             <button class="btn btn-admin" id="btnAdminToggle"><i class="fa-solid fa-lock"></i> <span id="btnAdminText">Admin Login</span></button> 
         </div> 
@@ -342,102 +389,7 @@
         </div> 
     </div> 
     <div class="toast-container" id="toastContainer"></div> 
-
     <script> 
-        // --- Particle Background System --- 
-        const canvas = document.getElementById('bgCanvas');
-        const ctx = canvas.getContext('2d');
-        const toggleWaveBtn = document.getElementById('toggleWave');
-
-        let particles = [];
-        let waveMode = true;
-        let width, height;
-
-        const config = {
-            particleCount: 60,
-            connectionDist: 180,
-        };
-
-        class Particle {
-            constructor() {
-                this.reset();
-            }
-            reset() {
-                this.x = Math.random() * width;
-                this.y = Math.random() * height;
-                this.vx = (Math.random() - 0.5) * 1.2;
-                this.vy = (Math.random() - 0.5) * 1.2;
-                this.size = Math.random() * 3 + 1;
-                this.angle = Math.random() * Math.PI * 2;
-            }
-            update() {
-                if (waveMode) {
-                    this.angle += 0.02;
-                    this.x += Math.cos(this.angle) * 1.2;
-                    this.y += Math.sin(this.angle) * 1.2;
-                } else {
-                    this.x += this.vx;
-                    this.y += this.vy;
-                }
-                if (this.x < 0 || this.x > width) this.vx *= -1;
-                if (this.y < 0 || this.y > height) this.vy *= -1;
-            }
-            draw() {
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fillStyle = '#D4AF37'; // Gold
-                ctx.fill();
-            }
-        }
-
-        function resizeCanvas() {
-            width = canvas.width = window.innerWidth;
-            height = canvas.height = window.innerHeight;
-        }
-
-        window.addEventListener('resize', resizeCanvas);
-        toggleWaveBtn.addEventListener('click', () => { 
-            waveMode = !waveMode; 
-            toggleWaveBtn.classList.toggle('active', waveMode); 
-        });
-
-        function initParticles() {
-            resizeCanvas();
-            for (let i = 0; i < config.particleCount; i++) {
-                particles.push(new Particle());
-            }
-        }
-
-        function animateParticles() {
-            ctx.clearRect(0, 0, width, height);
-            // Subtle white wash for better readability of text
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
-            ctx.fillRect(0, 0, width, height);
-
-            particles.forEach((p, i) => {
-                p.update();
-                p.draw();
-                for (let j = i + 1; j < particles.length; j++) {
-                    const p2 = particles[j];
-                    const dist = Math.hypot(p.x - p2.x, p.y - p2.y);
-                    if (dist < config.connectionDist) {
-                        ctx.beginPath();
-                        ctx.strokeStyle = `rgba(212, 175, 55, ${0.4 - dist / config.connectionDist})`;
-                        ctx.lineWidth = 1;
-                        ctx.moveTo(p.x, p.y);
-                        ctx.lineTo(p2.x, p2.y);
-                        ctx.stroke();
-                    }
-                }
-            });
-            requestAnimationFrame(animateParticles);
-        }
-
-        initParticles();
-        animateParticles();
-        // --- End Particle Background --- 
-
-        // Dashboard logic (unchanged except for minor tweaks to ensure compatibility)
         (function() { 
             const firebaseConfig = { 
                 apiKey: "YOUR_API_KEY", 
@@ -680,6 +632,7 @@
                 grid.innerHTML = ''; 
                 appData.panels.forEach((p, index) => { grid.appendChild(createPanelCard(p, index)); }); 
                
+                // Show panel accordion toggles only if more than one panel 
                 $$('.panel-accordion-toggle').forEach(toggle => { 
                     toggle.style.display = appData.panels.length > 1 ? 'block' : 'none'; 
                 }); 
@@ -705,6 +658,7 @@
                
                 const dragHandle = document.createElement('span'); dragHandle.className='panel-drag-handle'; dragHandle.innerHTML='<i class="fa-solid fa-grip-vertical"></i>'; 
                
+                // Panel Accordion Toggle 
                 const panelToggle = document.createElement('span'); panelToggle.className='panel-accordion-toggle'; 
                 panelToggle.innerHTML = '<i class="fa-solid fa-chevron-up"></i>'; 
                 panelToggle.addEventListener('click', (e)=>{  
@@ -790,6 +744,15 @@
                 const li = document.createElement('li'); li.className='subtopic-item'; li.dataset.subtopicId=sub.id; 
                
                 const topRow = document.createElement('div'); topRow.className='subtopic-item-top'; 
+                
+                // Allow accordion toggle by clicking the row, ignoring input elements
+                topRow.addEventListener('click', (e) => {
+                    if(['INPUT', 'BUTTON', 'I'].includes(e.target.tagName)) return;
+                    if(e.target.closest('.action-btn-mini')) return;
+                    if(sub.items && sub.items.length > 0) {
+                        li.classList.toggle('item-collapsed');
+                    }
+                });
                
                 const dragHandle = document.createElement('span'); dragHandle.className='subtopic-drag-handle admin-only-inline'; dragHandle.innerHTML='<i class="fa-solid fa-grip-vertical"></i>'; 
                 const selCheck = document.createElement('input'); selCheck.type='checkbox'; selCheck.className='subtopic-select-checkbox'; 
@@ -811,15 +774,20 @@
                     textSpan.innerHTML = `<span class="item-number">${subIndex+1}.</span> ${sub.text||'(empty)'}`;  
                     debounceSave();  
                 }); 
+                
+                // Visible Edit Icon for better UX in Admin mode
+                const editBtn = document.createElement('button'); editBtn.className = 'action-btn-mini edit-btn admin-only-inline'; 
+                editBtn.innerHTML = '<i class="fa-solid fa-pen"></i>'; editBtn.title = "Rename Subtopic";
+                editBtn.addEventListener('click', (e)=>{ 
+                    e.stopPropagation(); 
+                    textSpan.style.display='none'; inputEl.style.display='block'; inputEl.focus(); 
+                });
                
+                // Item Accordion Toggle 
                 const itemToggle = document.createElement('span'); itemToggle.className='item-accordion-toggle'; 
                 itemToggle.innerHTML = '<i class="fa-solid fa-chevron-down"></i>'; 
-                itemToggle.addEventListener('click', (e)=>{  
-                    e.stopPropagation();  
-                    li.classList.toggle('item-collapsed');  
-                }); 
                
-                const deleteBtn = document.createElement('button'); deleteBtn.className='subtopic-delete-btn admin-only-inline'; deleteBtn.innerHTML='<i class="fa-solid fa-xmark"></i>'; 
+                const deleteBtn = document.createElement('button'); deleteBtn.className='action-btn-mini delete-btn admin-only-inline'; deleteBtn.innerHTML='<i class="fa-solid fa-xmark"></i>'; 
                 deleteBtn.addEventListener('click', (e)=>{ e.stopPropagation(); li.remove(); panel.subtopics=panel.subtopics.filter(s=>s.id!==sub.id); checkPanelCompletion(panel.id); debounceSave(); }); 
                
                 textSpan.addEventListener('dblclick', ()=>{ if(isAdmin){ textSpan.style.display='none'; inputEl.style.display='block'; inputEl.focus(); } }); 
@@ -828,7 +796,7 @@
                 if(sub.completed) li.classList.add('completed'); 
                
                 topRow.appendChild(dragHandle); topRow.appendChild(selCheck); topRow.appendChild(checkbox); 
-                topRow.appendChild(textSpan); topRow.appendChild(inputEl); topRow.appendChild(itemToggle); topRow.appendChild(deleteBtn); 
+                topRow.appendChild(textSpan); topRow.appendChild(inputEl); topRow.appendChild(editBtn); topRow.appendChild(itemToggle); topRow.appendChild(deleteBtn); 
                 li.appendChild(topRow); 
                
                 const subSubWrapper = document.createElement('div'); subSubWrapper.className='sub-sub-wrapper'; 
@@ -867,11 +835,12 @@
                
                 li.appendChild(subSubWrapper); 
                
+                // Ensure visibility is managed independently from hover state
                 if(!sub.items || sub.items.length === 0) {
                     itemToggle.style.visibility = 'hidden'; 
                 } else {
                     itemToggle.style.visibility = 'visible';
-                    li.classList.add('item-collapsed'); // Start collapsed
+                    li.classList.add('item-collapsed'); // Start collapsed by default to keep things tidy
                 }
                 
                 return li; 
@@ -894,6 +863,14 @@
                         text.innerHTML = `<span class="item-number">${parentIndex+1}.${idx+1}</span> ${item.text||'(empty)'}`;  
                         debounceSave();  
                     }); 
+                    
+                    const editBtn = document.createElement('button'); editBtn.className = 'action-btn-mini edit-btn admin-only-inline'; 
+                    editBtn.innerHTML = '<i class="fa-solid fa-pen"></i>'; editBtn.title = "Rename Item";
+                    editBtn.addEventListener('click', (e)=>{ 
+                        e.stopPropagation(); 
+                        text.style.display='none'; inputEl.style.display='block'; inputEl.focus(); 
+                    });
+
                     text.addEventListener('dblclick', ()=>{ if(isAdmin){ text.style.display='none'; inputEl.style.display='block'; inputEl.focus(); } }); 
                     inputEl.addEventListener('blur', ()=>{ text.style.display='block'; inputEl.style.display='none'; }); 
                     if(item.completed) li.classList.add('completed'); 
@@ -903,7 +880,7 @@
                         debounceSave();  
                     }); 
                      
-                    const del = document.createElement('button'); del.className='sub-sub-delete'; del.innerHTML='<i class="fa-solid fa-xmark"></i>'; 
+                    const del = document.createElement('button'); del.className='action-btn-mini delete-btn admin-only-inline'; del.innerHTML='<i class="fa-solid fa-xmark"></i>'; 
                     del.addEventListener('click', (e)=>{ 
                         e.stopPropagation(); 
                         li.remove(); 
@@ -913,7 +890,7 @@
                         if(isAdmin && typeof Sortable !== 'undefined') initSubSubSortable(listEl); 
                     }); 
                      
-                    li.appendChild(drag); li.appendChild(sel); li.appendChild(cb); li.appendChild(text); li.appendChild(inputEl); li.appendChild(del); 
+                    li.appendChild(drag); li.appendChild(sel); li.appendChild(cb); li.appendChild(text); li.appendChild(inputEl); li.appendChild(editBtn); li.appendChild(del); 
                     listEl.appendChild(li); 
                 }); 
             } 
